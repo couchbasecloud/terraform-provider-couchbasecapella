@@ -1,2 +1,2 @@
-# terraform-provider-couchbase
-Terraform provider for couchbase
+# terraform-provider-couchbasecloud
+Terraform provider for couchbase cloud
