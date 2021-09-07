@@ -1,4 +1,4 @@
-package couchbasecloud
+package provider
 
 import (
 	"regexp"
@@ -7,26 +7,26 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccResourceTemplate(t *testing.T) {
+func TestAccResourceCouchbase(t *testing.T) {
 	t.Skip("resource not yet implemented, remove this once you add your own code")
 
 	resource.UnitTest(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
-		ProviderFactories: testAccProviderFactories,
+		ProviderFactories: providerFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccResourceTemplate,
+				Config: testAccResourceCouchbase,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestMatchResourceAttr(
-						"template_resource.foo", "sample_attribute", regexp.MustCompile("^ba")),
+						"couchbase_resource.foo", "sample_attribute", regexp.MustCompile("^ba")),
 				),
 			},
 		},
 	})
 }
 
-const testAccResourceTemplate = `
-resource "template_resource" "foo" {
+const testAccResourceCouchbase = `
+resource "couchbase_resource" "foo" {
   sample_attribute = "bar"
 }
 `

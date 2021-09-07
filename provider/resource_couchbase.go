@@ -1,4 +1,4 @@
-package couchbasecloud
+package provider
 
 import (
 	"context"
@@ -7,15 +7,15 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func resourceTemplate() *schema.Resource {
+func resourceCouchbase() *schema.Resource {
 	return &schema.Resource{
 		// This description is used by the documentation generator and the language server.
-		Description: "Template for resource",
+		Description: "Sample resource in the Terraform provider couchbase.",
 
-		CreateContext: resourceTemplateCreate,
-		ReadContext:   resourceTemplateRead,
-		UpdateContext: resourceTemplateUpdate,
-		DeleteContext: resourceTemplateDelete,
+		CreateContext: resourceCouchbaseCreate,
+		ReadContext:   resourceCouchbaseRead,
+		UpdateContext: resourceCouchbaseUpdate,
+		DeleteContext: resourceCouchbaseDelete,
 
 		Schema: map[string]*schema.Schema{
 			"sample_attribute": {
@@ -28,7 +28,7 @@ func resourceTemplate() *schema.Resource {
 	}
 }
 
-func resourceTemplateCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceCouchbaseCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	// use the meta value to retrieve your client from the provider configure method
 	// client := meta.(*apiClient)
 
@@ -38,21 +38,21 @@ func resourceTemplateCreate(ctx context.Context, d *schema.ResourceData, meta in
 	return diag.Errorf("not implemented")
 }
 
-func resourceTemplateRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceCouchbaseRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	// use the meta value to retrieve your client from the provider configure method
 	// client := meta.(*apiClient)
 
 	return diag.Errorf("not implemented")
 }
 
-func resourceTemplateUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceCouchbaseUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	// use the meta value to retrieve your client from the provider configure method
 	// client := meta.(*apiClient)
 
 	return diag.Errorf("not implemented")
 }
 
-func resourceTemplateDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourcCouchbaseDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	// use the meta value to retrieve your client from the provider configure method
 	// client := meta.(*apiClient)
 

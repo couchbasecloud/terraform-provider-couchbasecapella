@@ -1,4 +1,4 @@
-package couchbasecloud
+package provider
 
 import (
 	"context"
@@ -7,12 +7,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func dataSourceTemplate() *schema.Resource {
+func dataSourceCouchbase() *schema.Resource {
 	return &schema.Resource{
 		// This description is used by the documentation generator and the language server.
-		Description: "Template for data source.",
+		Description: "Sample data source in the Terraform provider couchbase.",
 
-		ReadContext: dataSourceTemplateRead,
+		ReadContext: dataSourceCouchbaseRead,
 
 		Schema: map[string]*schema.Schema{
 			"sample_attribute": {
@@ -25,7 +25,7 @@ func dataSourceTemplate() *schema.Resource {
 	}
 }
 
-func dataSourceTemplateRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceCouchbaseRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	// use the meta value to retrieve your client from the provider configure method
 	// client := meta.(*apiClient)
 
