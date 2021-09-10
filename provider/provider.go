@@ -2,6 +2,7 @@ package provider
 
 import (
 	"context"
+	"net/http"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -23,35 +24,64 @@ func init() {
 	// }
 }
 
-func New(version string) func() *schema.Provider {
-	return func() *schema.Provider {
-		p := &schema.Provider{
-			DataSourcesMap: map[string]*schema.Resource{
-				"couchbase_data_source": dataSourceCouchbase(),
+// Provider returns the provider to be use by the code.
+func Provider() *schema.Provider {
+	return &schema.Provider{
+		Schema: map[string]*schema.Schema{
+			"base_url": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "",
+				Description: "Couchbase Cloud Base URL",
 			},
-			ResourcesMap: map[string]*schema.Resource{
-				"couchbase_resource": resourceCouchbase(),
+			"acesss_key": {
+				Type:        schema.TypeString,
+				Required:    true,
+				Default:     "",
+				Description: "Couchbase Cloud API Access Key",
 			},
-		}
+			"secret_key": {
+				Type:        schema.TypeString,
+				Required:    true,
+				Default:     "",
+				Description: "Couchbase Cloud API Secret Key",
+				Sensitive:   true,
+			},
+		},
 
-		p.ConfigureContextFunc = configure(version, p)
+		DataSourcesMap: map[string]*schema.Resource{
+			"couchbase_data_source": dataSourceCouchbase(),
+		},
 
-		return p
+		ResourcesMap: map[string]*schema.Resource{
+			"couchbase_resource": resourceCouchbase(),
+		},
+
+		ConfigureContextFunc: providerConfigure,
 	}
 }
 
-type apiClient struct {
-	// Add whatever fields, client or connection info, etc. here
-	// you would need to setup to communicate with the upstream
-	// API.
+func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
+	client := Client{
+		accessKey: d.Get("access_key").(string),
+		secretKey: d.Get("secret_key").(string),
+		baseURL:   d.Get("base_url").(string),
+	}
+	return NewClient(baseURL, accessKey, secretKey), nil
 }
 
-func configure(version string, p *schema.Provider) func(context.Context, *schema.ResourceData) (interface{}, diag.Diagnostics) {
-	return func(context.Context, *schema.ResourceData) (interface{}, diag.Diagnostics) {
-		// Setup a User-Agent for your API client (replace the provider name for yours):
-		// userAgent := p.UserAgent("terraform-provider-scaffolding", version)
-		// TODO: myClient.UserAgent = userAgent
+type Client struct {
+	baseURL    string
+	accessKey  string
+	secretKey  string
+	httpClient *http.Client
+}
 
-		return &apiClient{}, nil
+func NewClient(baseURL, access, secret string) *Client {
+	return &Client{
+		baseURL:    baseURL,
+		accessKey:  access,
+		secretKey:  secret,
+		httpClient: http.DefaultClient,
 	}
 }
