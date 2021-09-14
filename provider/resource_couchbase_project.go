@@ -50,7 +50,7 @@ func resourceCouchbaseProjectUpdate(ctx context.Context, d *schema.ResourceData,
 	return diag.Errorf("not implemented")
 }
 
-func resourcCouchbaseProjectDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceCouchbaseProjectDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	// use the meta value to retrieve your client from the provider configure method
 	// client := meta.(*apiClient)
 
