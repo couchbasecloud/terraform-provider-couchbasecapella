@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 
+	"github.com/couchbaselabs/couchbase-cloud-go-client/couchbasecloud"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -28,12 +29,6 @@ func init() {
 func Provider() *schema.Provider {
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
-			"base_url": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Default:     "",
-				Description: "Couchbase Cloud Base URL",
-			},
 			"acesss_key": {
 				Type:        schema.TypeString,
 				Required:    true,
@@ -54,7 +49,8 @@ func Provider() *schema.Provider {
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
-			"couchbase_resource": resourceCouchbase(),
+			"couchbase_cluster": resourceCouchbaseCluster(),
+			"couchbase_project": resourceCouchbaseProject(),
 		},
 
 		ConfigureContextFunc: providerConfigure,
@@ -62,12 +58,10 @@ func Provider() *schema.Provider {
 }
 
 func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
-	client := Client{
-		accessKey: d.Get("access_key").(string),
-		secretKey: d.Get("secret_key").(string),
-		baseURL:   d.Get("base_url").(string),
-	}
-	return NewClient(baseURL, accessKey, secretKey), nil
+
+	// client := couchbasecloud.NewClient(d.Get("access_key").(string), d.Get("secret_key").(string))
+	client := couchbasecloud.NewClient("1jSX7XQRMN5qu4YZaB4SN5N4J0l497sz", "647Q982Dv589XpMhWAafBM0EGcMWvN04TviBBIDzsPOlCo8qz8pTtlPHCcRkIuVd")
+	return client, nil
 }
 
 type Client struct {

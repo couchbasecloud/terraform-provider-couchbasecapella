@@ -23,15 +23,15 @@ func resourceCouchbaseCluster() *schema.Resource {
 				Optional:    false,
 			},
 			"cloudId": {
-                Description: "Cloud's Id.",
-                Type:        schema.TypeString,
-                Optional:    false,
-            },
-            "projectId": {
-                Description: "Project's Id.",
-                Type:        schema.TypeString,
-                Optional:    false,
-            },
+				Description: "Cloud's Id.",
+				Type:        schema.TypeString,
+				Optional:    false,
+			},
+			"projectId": {
+				Description: "Project's Id.",
+				Type:        schema.TypeString,
+				Optional:    false,
+			},
 		},
 	}
 }
@@ -60,7 +60,7 @@ func resourceCouchbaseClusterUpdate(ctx context.Context, d *schema.ResourceData,
 	return diag.Errorf("not implemented")
 }
 
-func resourcCouchbaseClusterDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceCouchbaseClusterDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	// use the meta value to retrieve your client from the provider configure method
 	// client := meta.(*apiClient)
 
