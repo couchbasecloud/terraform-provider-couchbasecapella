@@ -13,6 +13,7 @@ require (
 	github.com/aws/aws-sdk-go v1.25.3 // indirect
 	github.com/bgentry/go-netrc v0.0.0-20140422174119-9fd32a8b3d3d // indirect
 	github.com/couchbaselabs/couchbase-cloud-go-client v0.0.0-20210621141719-ea7f529d1d92 // indirect
+	github.com/d-asmaa/couchbase-cloud-go-client v0.0.0-20210914092656-aa3f30e7b384 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/fatih/color v1.7.0 // indirect
 	github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e // indirect

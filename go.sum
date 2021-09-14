@@ -76,6 +76,8 @@ github.com/cncf/udpa/go v0.0.0-20191209042840-269d4d468f6f/go.mod h1:M8M6+tZqaGX
 github.com/couchbaselabs/couchbase-cloud-go-client v0.0.0-20210621141719-ea7f529d1d92 h1:uD3d1v/rNFIwNHuslKhP1SjqSUaUVkxvguG9UV0kxKY=
 github.com/couchbaselabs/couchbase-cloud-go-client v0.0.0-20210621141719-ea7f529d1d92/go.mod h1:kWLbzr/LQ7/Lor8/l4oig3lVvrn0OrIasae0/W4PjtM=
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
+github.com/d-asmaa/couchbase-cloud-go-client v0.0.0-20210914092656-aa3f30e7b384 h1:+GVggOpndME3gyZbQEVwmMZsW8ApLrh2/RnjT5DgN/0=
+github.com/d-asmaa/couchbase-cloud-go-client v0.0.0-20210914092656-aa3f30e7b384/go.mod h1:ZLBpYZ3+CsJByOi/leW3EWllT48du/mQSKKooyB+Agw=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=

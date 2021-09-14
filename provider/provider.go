@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/couchbaselabs/couchbase-cloud-go-client/couchbasecloud"
+	"github.com/d-asmaa/couchbase-cloud-go-client/couchbasecloud"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
