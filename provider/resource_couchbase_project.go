@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 
+	couchbasecloud "github.com/d-asmaa/couchbase-cloud-go-client/couchbasecloud"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -13,10 +14,14 @@ func resourceCouchbaseProject() *schema.Resource {
 
 		CreateContext: resourceCouchbaseProjectCreate,
 		ReadContext:   resourceCouchbaseProjectRead,
-		UpdateContext: resourceCouchbaseProjectUpdate,
 		DeleteContext: resourceCouchbaseProjectDelete,
 
 		Schema: map[string]*schema.Schema{
+			"id": {
+				Description: "Project's id.",
+				Type:        schema.TypeString,
+				Optional:    true,
+			},
 			"name": {
 				Description: "Project's name.",
 				Type:        schema.TypeString,
@@ -27,32 +32,55 @@ func resourceCouchbaseProject() *schema.Resource {
 }
 
 func resourceCouchbaseProjectCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	// use the meta value to retrieve your client from the provider configure method
-	// client := meta.(*apiClient)
+	client := meta.(*couchbasecloud.CouchbaseCloudClient)
 
-	idFromAPI := "my-id"
-	d.SetId(idFromAPI)
+	payload := &couchbasecloud.CreateProjectPayload{
+		Name: d.Get("name").(string),
+	}
 
-	return diag.Errorf("not implemented")
+	// Warning or errors can be collected in a slice type
+	var diags diag.Diagnostics
+
+	err := client.CreateProject(payload)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	d.SetId("")
+
+	resourceCouchbaseProjectRead(ctx, d, meta)
+
+	return diags
 }
 
 func resourceCouchbaseProjectRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	// use the meta value to retrieve your client from the provider configure method
-	// client := meta.(*apiClient)
+	client := meta.(*couchbasecloud.CouchbaseCloudClient)
 
-	return diag.Errorf("not implemented")
-}
+	projectId := d.Id()
 
-func resourceCouchbaseProjectUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	// use the meta value to retrieve your client from the provider configure method
-	// client := meta.(*apiClient)
+	// Warning or errors can be collected in a slice type
+	var diags diag.Diagnostics
 
-	return diag.Errorf("not implemented")
+	err := client.GetProject(projectId)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	return diags
 }
 
 func resourceCouchbaseProjectDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	// use the meta value to retrieve your client from the provider configure method
-	// client := meta.(*apiClient)
+	client := meta.(*couchbasecloud.CouchbaseCloudClient)
 
-	return diag.Errorf("not implemented")
+	projectId := d.Id()
+
+	// Warning or errors can be collected in a slice type
+	var diags diag.Diagnostics
+
+	err := client.DeleteProject(projectId)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	return diags
 }
