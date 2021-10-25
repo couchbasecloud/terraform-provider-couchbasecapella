@@ -8,6 +8,8 @@ terraform {
 }
 
 provider "couchbasecloud" {
+  access_key  = var.access_key
+  secret_key = var.secret_key
 }
 
 resource "couchbasecloud_project" "test" {

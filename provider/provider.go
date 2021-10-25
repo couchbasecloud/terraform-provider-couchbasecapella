@@ -29,7 +29,7 @@ func init() {
 func Provider() *schema.Provider {
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
-			"acesss_key": {
+			"access_key": {
 				Type:        schema.TypeString,
 				Required:    true,
 				DefaultFunc: schema.EnvDefaultFunc("CBC_ACCESS_KEY", nil),
@@ -57,4 +57,22 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 	configuration := couchbasecloud.NewConfiguration()
 	apiClient := couchbasecloud.NewAPIClient(configuration)
 	return apiClient, nil
+}
+
+// Check if there is a better way
+
+func getAuth(ctx context.Context, d *schema.ResourceData) context.Context {
+	auth := context.WithValue(
+		context.Background(),
+		couchbasecloud.ContextAPIKeys,
+		map[string]couchbasecloud.APIKey{
+			"accessKey": {
+				Key: d.Get("access_key").(string),
+			},
+			"secretKey": {
+				Key: d.Get("secret_key").(string),
+			},
+		},
+	)
+	return auth
 }
