@@ -1,28 +1,37 @@
 package provider
 
 import (
+	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-// providerFactories are used to instantiate a provider during acceptance testing.
-// The factory function will be invoked for every Terraform CLI command executed
-// to create a provider server to which the CLI can reattach.
-var providerFactories = map[string]func() (*schema.Provider, error){
-	"couchbase": func() (*schema.Provider, error) {
-		return New("dev")(), nil
-	},
+var testAccProviders map[string]*schema.Provider
+var testAccProvider *schema.Provider
+
+func init() {
+	testAccProvider = Provider()
+	testAccProviders = map[string]*schema.Provider{
+		"couchbasecapella": testAccProvider,
+	}
 }
 
 func TestProvider(t *testing.T) {
-	if err := New("dev")().InternalValidate(); err != nil {
+	if err := Provider().InternalValidate(); err != nil {
 		t.Fatalf("err: %s", err)
 	}
 }
 
+func TestProvider_impl(t *testing.T) {
+	var _ *schema.Provider = Provider()
+}
+
 func testAccPreCheck(t *testing.T) {
-	// You can add code here to run prior to any test case execution, for example assertions
-	// about the appropriate environment variables being set are common to see in a pre-check
-	// function.
+	if err := os.Getenv("CBC_ACCESS_KEY"); err == "" {
+		t.Fatal("CBC_ACCESS_KEY must be set for acceptance tests")
+	}
+	if err := os.Getenv("CBC_SECRET_KEY"); err == "" {
+		t.Fatal("CBC_SECRET_KEY must be set for acceptance tests")
+	}
 }
