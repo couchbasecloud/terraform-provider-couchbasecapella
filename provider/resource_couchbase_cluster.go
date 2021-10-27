@@ -35,7 +35,65 @@ func resourceCouchbaseCluster() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    true,
 			},
-			"services"
+			"servers": {
+				Description: "Cluster servers configuration",
+				Type:        schema.TypeSet,
+				Required:    true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"size": {
+							Type:        schema.TypeInt,
+							Description: "Number of nodes",
+							Required:    true,
+						},
+						"services": {
+							Type:        schema.TypeList,
+							Description: "Services",
+							Required:    true,
+							MinItems:    1,
+							Default:     []couchbasecloud.CouchbaseServices{"data"},
+						},
+						"aws": {
+							Description: "Aws configuration.",
+							Type:        schema.TypeSet,
+							Required:    false,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"instance_size": {
+										Description: "Aws instance.",
+										Type:        schema.TypeString,
+										Required:    true,
+									},
+									"ebs_size_gib": {
+										Description: "Aws size(Gb).",
+										Type:        schema.TypeInt,
+										Required:    true,
+									},
+								},
+							},
+						},
+						"Azure": {
+							Description: "Azure configuration.",
+							Type:        schema.TypeSet,
+							Required:    false,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"instance_size": {
+										Description: "Azure instance.",
+										Type:        schema.TypeString,
+										Required:    true,
+									},
+									"ebs_size_gib": {
+										Description: "Aws size(Gb).",
+										Type:        schema.TypeInt,
+										Required:    true,
+									},
+								},
+							},
+						},
+					},
+				},
+			},
 		},
 	}
 }
