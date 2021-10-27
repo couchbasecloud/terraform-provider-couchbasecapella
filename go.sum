@@ -79,6 +79,8 @@ github.com/couchbaselabs/couchbase-cloud-go-client v0.0.0-20210621141719-ea7f529
 github.com/couchbaselabs/couchbase-cloud-go-client v0.0.0-20210621141719-ea7f529d1d92/go.mod h1:kWLbzr/LQ7/Lor8/l4oig3lVvrn0OrIasae0/W4PjtM=
 github.com/couchbaselabs/couchbase-cloud-go-client v1.0.0 h1:8eV2bZpuuHj5/Da8nK3OD7OVPJZV1Wsd680pNxTSuMQ=
 github.com/couchbaselabs/couchbase-cloud-go-client v1.0.0/go.mod h1:7BNRWBnJJpY+jkPsHSkV4+OGSDOWN5lxnQdPOYitmN8=
+github.com/couchbaselabs/couchbase-cloud-go-client v1.0.1 h1:/xPU4yn59AuH9Ap6UI8jr76KVQX9Y9sKcAGZxW4zZaA=
+github.com/couchbaselabs/couchbase-cloud-go-client v1.0.1/go.mod h1:7BNRWBnJJpY+jkPsHSkV4+OGSDOWN5lxnQdPOYitmN8=
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
 github.com/d-asmaa/couchbase-cloud-go-client v0.0.0-20210914092656-aa3f30e7b384 h1:+GVggOpndME3gyZbQEVwmMZsW8ApLrh2/RnjT5DgN/0=
 github.com/d-asmaa/couchbase-cloud-go-client v0.0.0-20210914092656-aa3f30e7b384/go.mod h1:ZLBpYZ3+CsJByOi/leW3EWllT48du/mQSKKooyB+Agw=

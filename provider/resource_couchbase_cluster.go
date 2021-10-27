@@ -23,23 +23,19 @@ func resourceCouchbaseCluster() *schema.Resource {
 			"name": {
 				Description: "Cluster's name.",
 				Type:        schema.TypeString,
-				Optional:    false,
+				Required:    true,
 			},
-			"cloudId": {
+			"cloud_id": {
 				Description: "Cloud's Id.",
 				Type:        schema.TypeString,
-				Optional:    false,
+				Required:    true,
 			},
-			"tenantId": {
-				Description: "Tenant's Id.",
-				Type:        schema.TypeString,
-				Optional:    true,
-			},
-			"projectId": {
+			"project_id": {
 				Description: "Project's Id.",
 				Type:        schema.TypeString,
-				Optional:    false,
+				Required:    true,
 			},
+			"services"
 		},
 	}
 }
@@ -48,7 +44,11 @@ func resourceCouchbaseClusterCreate(ctx context.Context, d *schema.ResourceData,
 	client := meta.(*couchbasecloud.APIClient)
 	auth := getAuth(ctx)
 
-	newClusterRequest := *couchbasecloud.NewCreateClusterRequest(d.Get("name").(string), d.Get("cloudId").(string), d.Get("projectId").(string))
+	clusterName := d.Get("name").(string)
+	cloudId := d.Get("cloud_id").(string)
+	projectId := d.Get("project_id").(string)
+
+	newClusterRequest := *couchbasecloud.NewCreateClusterRequest(clusterName, cloudId, projectId)
 
 	cluster, _, err := client.ClustersApi.ClustersCreate(auth).CreateClusterRequest(newClusterRequest).Execute()
 	if err != nil {
@@ -57,7 +57,7 @@ func resourceCouchbaseClusterCreate(ctx context.Context, d *schema.ResourceData,
 
 	d.SetId(cluster.Id)
 
-	return resourceCouchbaseClusterCreate(ctx, d, meta)
+	return resourceCouchbaseClusterRead(ctx, d, meta)
 }
 
 func resourceCouchbaseClusterRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {

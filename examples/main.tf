@@ -13,10 +13,16 @@ provider "couchbasecloud" {
 }
 
 resource "couchbasecloud_project" "test" {
-  name = "test_project1"
+  name = "terraform_project"
 }
 
 
 resource "couchbasecloud_project" "test2" {
-  name = "test_project2"
+  name = "terraform_project2"
+}
+
+resource "couchbasecloud_cluster" "terraform_cluster" {
+  name = "terraform_cluster"
+  cloud_id = var.cloud_id
+  project_id = "949d63c9-490e-468d-af03-601cf632574f"
 }

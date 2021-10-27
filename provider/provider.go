@@ -49,6 +49,7 @@ func Provider() *schema.Provider {
 
 		ResourcesMap: map[string]*schema.Resource{
 			"couchbasecloud_project": resourceCouchbaseCloudProject(),
+			"couchbasecloud_cluster": resourceCouchbaseCluster(),
 		},
 		ConfigureContextFunc: providerConfigure,
 	}
