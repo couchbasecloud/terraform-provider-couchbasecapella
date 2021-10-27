@@ -8,3 +8,8 @@ variable "access_key" {
   description = "Access API key to authenticate to Capella"
   default = ""
 }
+variable "cloud_id" {
+  type = string
+  description = "Capella Id"
+  default = ""
+}

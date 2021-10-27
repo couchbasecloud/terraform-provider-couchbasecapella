@@ -37,7 +37,7 @@ func resourceCouchbaseCloudProject() *schema.Resource {
 
 func resourceCouchbaseCloudProjectCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*couchbasecloud.APIClient)
-	auth := getAuth(ctx, d)
+	auth := getAuth(ctx)
 
 	createProjectRequest := *couchbasecloud.NewCreateProjectRequest(d.Get("name").(string))
 
@@ -54,7 +54,7 @@ func resourceCouchbaseCloudProjectCreate(ctx context.Context, d *schema.Resource
 func resourceCouchbaseCloudProjectRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*couchbasecloud.APIClient)
 	projectId := d.Get("id").(string)
-	auth := getAuth(ctx, d)
+	auth := getAuth(ctx)
 	project, resp, err := client.ProjectsApi.ProjectsShow(auth, projectId).Execute()
 
 	if err != nil {
@@ -73,7 +73,7 @@ func resourceCouchbaseCloudProjectRead(ctx context.Context, d *schema.ResourceDa
 
 func resourceCouchbaseCloudProjectDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
-	auth := getAuth(ctx, d)
+	auth := getAuth(ctx)
 
 	client := meta.(*couchbasecloud.APIClient)
 	projectId := d.Get("id").(string)

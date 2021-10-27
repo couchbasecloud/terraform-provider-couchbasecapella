@@ -2,6 +2,7 @@ package provider
 
 import (
 	"context"
+	"os"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -53,24 +54,24 @@ func Provider() *schema.Provider {
 	}
 }
 
+// TODO: create a client with access/secret keys
 func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 	configuration := couchbasecloud.NewConfiguration()
 	apiClient := couchbasecloud.NewAPIClient(configuration)
 	return apiClient, nil
 }
 
-// Check if there is a better way
-
-func getAuth(ctx context.Context, d *schema.ResourceData) context.Context {
+// TODO: Get Auth with both env variable and terraform ones
+func getAuth(ctx context.Context) context.Context {
 	auth := context.WithValue(
 		context.Background(),
 		couchbasecloud.ContextAPIKeys,
 		map[string]couchbasecloud.APIKey{
 			"accessKey": {
-				Key: d.Get("access_key").(string),
+				Key: os.Getenv("CBC_ACCESS_KEY"),
 			},
 			"secretKey": {
-				Key: d.Get("secret_key").(string),
+				Key: os.Getenv("CBC_SECRET_KEY"),
 			},
 		},
 	)
