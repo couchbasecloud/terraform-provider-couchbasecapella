@@ -15,32 +15,28 @@ func resourceCouchbaseCloudDatabaseUser() *schema.Resource {
 
 		CreateContext: resourceCouchbaseCloudDatabaseUserCreate,
 		ReadContext:   resourceCouchbaseCloudDatabaseUserRead,
-		// UpdateContext: resourceCouchbaseCloudDatabaseUserUpdate,
+		UpdateContext: resourceCouchbaseCloudDatabaseUserUpdate,
 		DeleteContext: resourceCouchbaseCloudDatabaseUserDelete,
 
 		Schema: map[string]*schema.Schema{
 			"cluster_id": {
 				Description: "Cluster ID",
 				Type:        schema.TypeString,
-				ForceNew:    true,
 				Required:    true,
 			},
 			"username": {
 				Description: "Database user username",
 				Type:        schema.TypeString,
-				ForceNew:    true,
 				Required:    true,
 			},
 			"password": {
 				Description: "Database user password",
 				Type:        schema.TypeString,
-				ForceNew:    true,
 				Required:    true,
 			},
 			"buckets": {
 				Description: "Database user bucket access",
 				Type:        schema.TypeSet,
-				ForceNew:    true,
 				Optional:    true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -61,7 +57,6 @@ func resourceCouchbaseCloudDatabaseUser() *schema.Resource {
 			"all_bucket_access": {
 				Description: "Database user all bucket access",
 				Type:        schema.TypeString,
-				ForceNew:    true,
 				Optional:    true,
 			},
 		},
@@ -75,21 +70,35 @@ func resourceCouchbaseCloudDatabaseUserCreate(ctx context.Context, d *schema.Res
 	clusterId := d.Get("cluster_id").(string)
 	username := d.Get("username").(string)
 	password := d.Get("password").(string)
-	buckets := expandBuckets(d)
-
-	// need to add logic to check for value
-	// allBucketAccess := couchbasecloud.BucketRoleTypes(d.Get("all_bucket_access").(string))
 
 	createDatabaseUserRequest := *couchbasecloud.NewCreateDatabaseUserRequest(username, password)
-	createDatabaseUserRequest.SetBuckets(buckets)
-	// createDatabaseUserRequest.SetAllBucketsAccess(allBucketAccess)
+	_, allBucketAccessOk := d.GetOk("all_bucket_access")
+	_, bucketsOk := d.GetOk("buckets")
+
+	if !allBucketAccessOk && !bucketsOk {
+		return diag.Errorf("No bucket roles specified")
+	}
+
+	if allBucketAccessOk && !bucketsOk {
+		allBucketAccess := couchbasecloud.BucketRoleTypes(d.Get("all_bucket_access").(string))
+		createDatabaseUserRequest.SetAllBucketsAccess(allBucketAccess)
+	}
+
+	if !allBucketAccessOk && bucketsOk {
+		buckets := expandBuckets(d)
+		createDatabaseUserRequest.SetBuckets(buckets)
+	}
+
+	if allBucketAccessOk && bucketsOk {
+		return diag.Errorf("Please specify only specific buckets or all buckets")
+	}
 
 	_, err := client.ClustersApi.ClustersCreateUser(auth, clusterId).CreateDatabaseUserRequest(createDatabaseUserRequest).Execute()
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	d.SetId(clusterId)
+	d.SetId(username)
 
 	return nil
 }
@@ -111,32 +120,29 @@ func resourceCouchbaseCloudDatabaseUserRead(ctx context.Context, d *schema.Resou
 	return diag.FromErr(err)
 }
 
-// func resourceCouchbaseCloudUserUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-// 	auth := context.WithValue(
-// 		context.Background(),
-// 		couchbasecloud.ContextAPIKeys,
-// 		map[string]couchbasecloud.APIKey{
-// 			"accessKey": {
-// 				Key: os.Getenv("CBC_ACCESS_KEY"),
-// 			},
-// 			"secretKey": {
-// 				Key: os.Getenv("CBC_SECRET_KEY"),
-// 			},
-// 		},
-// 	)
-// 	client := meta.(*couchbasecloud.APIClient)
-// 	clusterId := d.Get("cluster_id").(string)
-// 	username := d.Get("username").(string)
+func resourceCouchbaseCloudDatabaseUserUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client := meta.(*couchbasecloud.APIClient)
+	auth := getAuth(ctx)
+	clusterId := d.Get("cluster_id").(string)
+	username := d.Get("username").(string)
 
-// 	_, err := client.ClustersApi.ClustersUpdateUser(auth, clusterId, username).Execute()
-// 	if err != nil {
-// 		return diag.FromErr(err)
-// 	}
+	updateDatabaseUserRequest := *couchbasecloud.NewUpdateDatabaseUserRequest()
 
-// 	d.SetId(clusterId)
+	if d.HasChange("all_bucket_access") {
+		allBucketAccess := couchbasecloud.BucketRoleTypes(d.Get("all_bucket_access").(string))
+		updateDatabaseUserRequest.SetAllBucketsAccess(allBucketAccess)
+	} else if d.HasChange("buckets") {
+		buckets := expandBuckets(d)
+		updateDatabaseUserRequest.SetBuckets(buckets)
+	}
 
-// 	return resourceCouchbaseCloudUserRead(ctx, d, meta)
-// }
+	_, err := client.ClustersApi.ClustersUpdateUser(auth, clusterId, username).UpdateDatabaseUserRequest(updateDatabaseUserRequest).Execute()
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	return resourceCouchbaseCloudDatabaseUserRead(ctx, d, meta)
+}
 
 func resourceCouchbaseCloudDatabaseUserDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*couchbasecloud.APIClient)
