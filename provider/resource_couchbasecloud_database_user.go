@@ -51,12 +51,8 @@ func resourceCouchbaseCloudDatabaseUser() *schema.Resource {
 						"bucket_access": {
 							Type:     schema.TypeList,
 							Optional: true,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"bucket_role_type": {
-										Type: schema.TypeString,
-									},
-								},
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
 							},
 						},
 					},
@@ -82,11 +78,11 @@ func resourceCouchbaseCloudDatabaseUserCreate(ctx context.Context, d *schema.Res
 	buckets := expandBuckets(d)
 
 	// need to add logic to check for value
-	//allBucketAccess := couchbasecloud.BucketRoleTypes(d.Get("all_bucket_access").(string))
+	// allBucketAccess := couchbasecloud.BucketRoleTypes(d.Get("all_bucket_access").(string))
 
 	createDatabaseUserRequest := *couchbasecloud.NewCreateDatabaseUserRequest(username, password)
 	createDatabaseUserRequest.SetBuckets(buckets)
-	//createDatabaseUserRequest.SetAllBucketsAccess(allBucketAccess)
+	// createDatabaseUserRequest.SetAllBucketsAccess(allBucketAccess)
 
 	_, err := client.ClustersApi.ClustersCreateUser(auth, clusterId).CreateDatabaseUserRequest(createDatabaseUserRequest).Execute()
 	if err != nil {
@@ -158,39 +154,29 @@ func resourceCouchbaseCloudDatabaseUserDelete(ctx context.Context, d *schema.Res
 }
 
 func expandBuckets(d *schema.ResourceData) []couchbasecloud.BucketRole {
-	var buckets []couchbasecloud.BucketRole
+	buckets := make([]couchbasecloud.BucketRole, 0)
 
 	if v, ok := d.GetOk("buckets"); ok {
-		if rs := v.(*schema.Set); rs.Len() > 0 {
-			buckets = make([]couchbasecloud.BucketRole, rs.Len())
+		for _, s := range v.(*schema.Set).List() {
+			bucketMap := s.(map[string]interface{})
 
-			for k, r := range rs.List() {
-				bucketsMap := r.(map[string]interface{})
+			bucketAccess := expandBucketAccessList(bucketMap["bucket_access"].([]interface{}))
 
-				buckets[k] = couchbasecloud.BucketRole{
-					BucketName:   bucketsMap["bucket_name"].(string),
-					BucketAccess: expandBucketAccess(d),
-				}
+			bucket := couchbasecloud.BucketRole{
+				BucketName:   bucketMap["bucket_name"].(string),
+				BucketAccess: bucketAccess,
 			}
+			buckets = append(buckets, bucket)
 		}
 	}
 
 	return buckets
 }
 
-func expandBucketAccess(d *schema.ResourceData) []couchbasecloud.BucketRoleTypes {
-	var bucketAccess []couchbasecloud.BucketRoleTypes
-
-	if v, ok := d.GetOk("bucket_access"); ok {
-		if rs := v.(*schema.Set); rs.Len() > 0 {
-			bucketAccess = make([]couchbasecloud.BucketRoleTypes, rs.Len())
-
-			for k, r := range rs.List() {
-				rolesMap := r.(map[string]couchbasecloud.BucketRoleTypes)
-				bucketAccess[k] = couchbasecloud.BucketRoleTypes(rolesMap["bucket_role_type"])
-			}
-		}
+func expandBucketAccessList(bucketAccess []interface{}) (res []couchbasecloud.BucketRoleTypes) {
+	for _, v := range bucketAccess {
+		res = append(res, couchbasecloud.BucketRoleTypes(v.(string)))
 	}
 
-	return bucketAccess
+	return res
 }
