@@ -7,15 +7,15 @@ import (
 	"os"
 	"testing"
 
-	couchbasecloud "github.com/couchbaselabs/couchbase-cloud-go-client"
+	couchbasecapella "github.com/couchbaselabs/couchbase-cloud-go-client"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccCouchbaseCloudProject_basic(t *testing.T) {
+func TestAccCouchbaseCapellaProject_basic(t *testing.T) {
 	var (
-		project couchbasecloud.Project
+		project couchbasecapella.Project
 	)
 
 	projectName := fmt.Sprintf("testacc-project-%s", acctest.RandString(10))
@@ -23,24 +23,24 @@ func TestAccCouchbaseCloudProject_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckCouchbaseCloudProjectDestroy,
+		CheckDestroy: testAccCheckCouchbaseCapellaProjectDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCouchbaseCloudProjectConfig(projectName),
+				Config: testAccCouchbaseCapellaProjectConfig(projectName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCouchbaseCloudProjectExists("couchbasecloud_project.test", &project),
+					testAccCheckCouchbaseCapellaProjectExists("couchbasecapella_project.test", &project),
 				),
 			},
 		},
 	})
 }
 
-func testAccCheckCouchbaseCloudProjectDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*couchbasecloud.APIClient)
+func testAccCheckCouchbaseCapellaProjectDestroy(s *terraform.State) error {
+	client := testAccProvider.Meta().(*couchbasecapella.APIClient)
 	auth := context.WithValue(
 		context.Background(),
-		couchbasecloud.ContextAPIKeys,
-		map[string]couchbasecloud.APIKey{
+		couchbasecapella.ContextAPIKeys,
+		map[string]couchbasecapella.APIKey{
 			"accessKey": {
 				Key: os.Getenv("CBC_ACCESS_KEY"),
 			},
@@ -51,7 +51,7 @@ func testAccCheckCouchbaseCloudProjectDestroy(s *terraform.State) error {
 	)
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "couchbasecloud_project" {
+		if rs.Type != "couchbasecapella_project" {
 			continue
 		}
 
@@ -64,13 +64,13 @@ func testAccCheckCouchbaseCloudProjectDestroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccCheckCouchbaseCloudProjectExists(resourceName string, project *couchbasecloud.Project) resource.TestCheckFunc {
+func testAccCheckCouchbaseCapellaProjectExists(resourceName string, project *couchbasecapella.Project) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*couchbasecloud.APIClient)
+		client := testAccProvider.Meta().(*couchbasecapella.APIClient)
 		auth := context.WithValue(
 			context.Background(),
-			couchbasecloud.ContextAPIKeys,
-			map[string]couchbasecloud.APIKey{
+			couchbasecapella.ContextAPIKeys,
+			map[string]couchbasecapella.APIKey{
 				"accessKey": {
 					Key: os.Getenv("CBC_ACCESS_KEY"),
 				},
@@ -100,9 +100,9 @@ func testAccCheckCouchbaseCloudProjectExists(resourceName string, project *couch
 	}
 }
 
-func testAccCouchbaseCloudProjectConfig(projectName string) string {
+func testAccCouchbaseCapellaProjectConfig(projectName string) string {
 	return fmt.Sprintf(`
-		resource "couchbasecloud_project" "test" {
+		resource "couchbasecapella_project" "test" {
 			name   = "%s"
 		}
 	`, projectName)

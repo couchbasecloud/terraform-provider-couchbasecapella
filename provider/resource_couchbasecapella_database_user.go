@@ -6,17 +6,17 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	couchbasecloud "github.com/couchbaselabs/couchbase-cloud-go-client"
+	couchbasecapella "github.com/couchbaselabs/couchbase-cloud-go-client"
 )
 
-func resourceCouchbaseCloudDatabaseUser() *schema.Resource {
+func resourceCouchbaseCapellaDatabaseUser() *schema.Resource {
 	return &schema.Resource{
-		Description: "Manage Couchbase Cloud Users.",
+		Description: "Manage Couchbase Capella Users.",
 
-		CreateContext: resourceCouchbaseCloudDatabaseUserCreate,
-		ReadContext:   resourceCouchbaseCloudDatabaseUserRead,
-		UpdateContext: resourceCouchbaseCloudDatabaseUserUpdate,
-		DeleteContext: resourceCouchbaseCloudDatabaseUserDelete,
+		CreateContext: resourceCouchbaseCapellaDatabaseUserCreate,
+		ReadContext:   resourceCouchbaseCapellaDatabaseUserRead,
+		UpdateContext: resourceCouchbaseCapellaDatabaseUserUpdate,
+		DeleteContext: resourceCouchbaseCapellaDatabaseUserDelete,
 
 		Schema: map[string]*schema.Schema{
 			"cluster_id": {
@@ -63,15 +63,15 @@ func resourceCouchbaseCloudDatabaseUser() *schema.Resource {
 	}
 }
 
-func resourceCouchbaseCloudDatabaseUserCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*couchbasecloud.APIClient)
+func resourceCouchbaseCapellaDatabaseUserCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client := meta.(*couchbasecapella.APIClient)
 	auth := getAuth(ctx)
 
 	clusterId := d.Get("cluster_id").(string)
 	username := d.Get("username").(string)
 	password := d.Get("password").(string)
 
-	createDatabaseUserRequest := *couchbasecloud.NewCreateDatabaseUserRequest(username, password)
+	createDatabaseUserRequest := *couchbasecapella.NewCreateDatabaseUserRequest(username, password)
 	_, allBucketAccessOk := d.GetOk("all_bucket_access")
 	_, bucketsOk := d.GetOk("buckets")
 
@@ -80,7 +80,7 @@ func resourceCouchbaseCloudDatabaseUserCreate(ctx context.Context, d *schema.Res
 	}
 
 	if allBucketAccessOk && !bucketsOk {
-		allBucketAccess := couchbasecloud.BucketRoleTypes(d.Get("all_bucket_access").(string))
+		allBucketAccess := couchbasecapella.BucketRoleTypes(d.Get("all_bucket_access").(string))
 		createDatabaseUserRequest.SetAllBucketsAccess(allBucketAccess)
 	}
 
@@ -103,8 +103,8 @@ func resourceCouchbaseCloudDatabaseUserCreate(ctx context.Context, d *schema.Res
 	return nil
 }
 
-func resourceCouchbaseCloudDatabaseUserRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*couchbasecloud.APIClient)
+func resourceCouchbaseCapellaDatabaseUserRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client := meta.(*couchbasecapella.APIClient)
 	auth := getAuth(ctx)
 
 	clusterId := d.Get("cluster_id").(string)
@@ -120,16 +120,16 @@ func resourceCouchbaseCloudDatabaseUserRead(ctx context.Context, d *schema.Resou
 	return diag.FromErr(err)
 }
 
-func resourceCouchbaseCloudDatabaseUserUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*couchbasecloud.APIClient)
+func resourceCouchbaseCapellaDatabaseUserUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client := meta.(*couchbasecapella.APIClient)
 	auth := getAuth(ctx)
 	clusterId := d.Get("cluster_id").(string)
 	username := d.Get("username").(string)
 
-	updateDatabaseUserRequest := *couchbasecloud.NewUpdateDatabaseUserRequest()
+	updateDatabaseUserRequest := *couchbasecapella.NewUpdateDatabaseUserRequest()
 
 	if d.HasChange("all_bucket_access") {
-		allBucketAccess := couchbasecloud.BucketRoleTypes(d.Get("all_bucket_access").(string))
+		allBucketAccess := couchbasecapella.BucketRoleTypes(d.Get("all_bucket_access").(string))
 		updateDatabaseUserRequest.SetAllBucketsAccess(allBucketAccess)
 	} else if d.HasChange("buckets") {
 		buckets := expandBuckets(d)
@@ -141,11 +141,11 @@ func resourceCouchbaseCloudDatabaseUserUpdate(ctx context.Context, d *schema.Res
 		return diag.FromErr(err)
 	}
 
-	return resourceCouchbaseCloudDatabaseUserRead(ctx, d, meta)
+	return resourceCouchbaseCapellaDatabaseUserRead(ctx, d, meta)
 }
 
-func resourceCouchbaseCloudDatabaseUserDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*couchbasecloud.APIClient)
+func resourceCouchbaseCapellaDatabaseUserDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client := meta.(*couchbasecapella.APIClient)
 	auth := getAuth(ctx)
 
 	clusterId := d.Get("cluster_id").(string)
@@ -159,8 +159,8 @@ func resourceCouchbaseCloudDatabaseUserDelete(ctx context.Context, d *schema.Res
 	return nil
 }
 
-func expandBuckets(d *schema.ResourceData) []couchbasecloud.BucketRole {
-	buckets := make([]couchbasecloud.BucketRole, 0)
+func expandBuckets(d *schema.ResourceData) []couchbasecapella.BucketRole {
+	buckets := make([]couchbasecapella.BucketRole, 0)
 
 	if v, ok := d.GetOk("buckets"); ok {
 		for _, s := range v.(*schema.Set).List() {
@@ -168,7 +168,7 @@ func expandBuckets(d *schema.ResourceData) []couchbasecloud.BucketRole {
 
 			bucketAccess := expandBucketAccessList(bucketMap["bucket_access"].([]interface{}))
 
-			bucket := couchbasecloud.BucketRole{
+			bucket := couchbasecapella.BucketRole{
 				BucketName:   bucketMap["bucket_name"].(string),
 				BucketAccess: bucketAccess,
 			}
@@ -179,9 +179,9 @@ func expandBuckets(d *schema.ResourceData) []couchbasecloud.BucketRole {
 	return buckets
 }
 
-func expandBucketAccessList(bucketAccess []interface{}) (res []couchbasecloud.BucketRoleTypes) {
+func expandBucketAccessList(bucketAccess []interface{}) (res []couchbasecapella.BucketRoleTypes) {
 	for _, v := range bucketAccess {
-		res = append(res, couchbasecloud.BucketRoleTypes(v.(string)))
+		res = append(res, couchbasecapella.BucketRoleTypes(v.(string)))
 	}
 
 	return res

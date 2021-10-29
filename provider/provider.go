@@ -48,26 +48,24 @@ func Provider() *schema.Provider {
 		DataSourcesMap: map[string]*schema.Resource{},
 
 		ResourcesMap: map[string]*schema.Resource{
-			"couchbasecapella_project": resourceCouchbaseCloudProject(),
-			"couchbasecapella_cluster": resourceCouchbaseCapellaCluster(),
+			"couchbasecapella_project":       resourceCouchbaseCapellaProject(),
+			"couchbasecapella_database_user": resourceCouchbaseCapellaDatabaseUser(),
 		},
 		ConfigureContextFunc: providerConfigure,
 	}
 }
 
-// TODO: create a client with access/secret keys
 func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 	configuration := couchbasecapella.NewConfiguration()
 	apiClient := couchbasecapella.NewAPIClient(configuration)
 	return apiClient, nil
 }
 
-// TODO: Get Auth with both env variable and terraform ones
 func getAuth(ctx context.Context) context.Context {
 	auth := context.WithValue(
 		context.Background(),
-		couchbasecloud.ContextAPIKeys,
-		map[string]couchbasecloud.APIKey{
+		couchbasecapella.ContextAPIKeys,
+		map[string]couchbasecapella.APIKey{
 			"accessKey": {
 				Key: os.Getenv("CBC_ACCESS_KEY"),
 			},

@@ -7,15 +7,15 @@ import (
 	"os"
 	"testing"
 
-	couchbasecloud "github.com/couchbaselabs/couchbase-cloud-go-client"
+	couchbasecapella "github.com/couchbaselabs/couchbase-cloud-go-client"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccCouchbaseCloudDatabaseUser_basic(t *testing.T) {
+func TestAccCouchbaseCapellaDatabaseUser_basic(t *testing.T) {
 	var (
-		databaseUser couchbasecloud.CreateDatabaseUserRequest
+		databaseUser couchbasecapella.CreateDatabaseUserRequest
 	)
 
 	testClusterId := ""
@@ -25,24 +25,24 @@ func TestAccCouchbaseCloudDatabaseUser_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckCouchbaseCloudDatabaseUserDestroy,
+		CheckDestroy: testAccCheckCouchbaseCapellaDatabaseUserDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCouchbaseCloudDatabaseUserConfig(testClusterId, username, password),
+				Config: testAccCouchbaseCapellaDatabaseUserConfig(testClusterId, username, password),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCouchbaseCloudDatabaseUserExists("couchbasecloud_database_user.test", &databaseUser),
+					testAccCheckCouchbaseCapellaDatabaseUserExists("couchbasecapella_database_user.test", &databaseUser),
 				),
 			},
 		},
 	})
 }
 
-func testAccCheckCouchbaseCloudDatabaseUserDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*couchbasecloud.APIClient)
+func testAccCheckCouchbaseCapellaDatabaseUserDestroy(s *terraform.State) error {
+	client := testAccProvider.Meta().(*couchbasecapella.APIClient)
 	auth := context.WithValue(
 		context.Background(),
-		couchbasecloud.ContextAPIKeys,
-		map[string]couchbasecloud.APIKey{
+		couchbasecapella.ContextAPIKeys,
+		map[string]couchbasecapella.APIKey{
 			"accessKey": {
 				Key: os.Getenv("CBC_ACCESS_KEY"),
 			},
@@ -53,7 +53,7 @@ func testAccCheckCouchbaseCloudDatabaseUserDestroy(s *terraform.State) error {
 	)
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "couchbasecloud_database_user" {
+		if rs.Type != "couchbasecapella_database_user" {
 			continue
 		}
 
@@ -76,13 +76,13 @@ func testAccCheckCouchbaseCloudDatabaseUserDestroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccCheckCouchbaseCloudDatabaseUserExists(resourceName string, databaseUser *couchbasecloud.CreateDatabaseUserRequest) resource.TestCheckFunc {
+func testAccCheckCouchbaseCapellaDatabaseUserExists(resourceName string, databaseUser *couchbasecapella.CreateDatabaseUserRequest) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*couchbasecloud.APIClient)
+		client := testAccProvider.Meta().(*couchbasecapella.APIClient)
 		auth := context.WithValue(
 			context.Background(),
-			couchbasecloud.ContextAPIKeys,
-			map[string]couchbasecloud.APIKey{
+			couchbasecapella.ContextAPIKeys,
+			map[string]couchbasecapella.APIKey{
 				"accessKey": {
 					Key: os.Getenv("CBC_ACCESS_KEY"),
 				},
@@ -117,9 +117,9 @@ func testAccCheckCouchbaseCloudDatabaseUserExists(resourceName string, databaseU
 	}
 }
 
-func testAccCouchbaseCloudDatabaseUserConfig(clusterId, username, password string) string {
+func testAccCouchbaseCapellaDatabaseUserConfig(clusterId, username, password string) string {
 	return fmt.Sprintf(`
-		resource "couchbasecloud_database_user" "test" {
+		resource "couchbasecapella_database_user" "test" {
 			cluster_id   = "%s"
 			username = "%s"
 			password = "%s"
