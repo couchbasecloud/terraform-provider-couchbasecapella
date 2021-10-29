@@ -7,14 +7,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func resourceCouchbaseBucket() *schema.Resource {
+func resourceCouchbaseCapellaBucket() *schema.Resource {
 	return &schema.Resource{
 		Description: "Manage Couchbase Buckets.",
 
-		CreateContext: resourceCouchbaseBucketCreate,
-		ReadContext:   resourceCouchbaseBucketRead,
-		UpdateContext: resourceCouchbaseBucketUpdate,
-		DeleteContext: resourceCouchbaseBucketDelete,
+		CreateContext: resourceCouchbaseCapellaBucketCreate,
+		ReadContext:   resourceCouchbaseCapellaBucketRead,
+		UpdateContext: resourceCouchbaseCapellaBucketUpdate,
+		DeleteContext: resourceCouchbaseCapellaBucketDelete,
 
 		Schema: map[string]*schema.Schema{
 			"id": {
@@ -28,7 +28,7 @@ func resourceCouchbaseBucket() *schema.Resource {
 				Optional:    false,
 			},
 			"memoryQuota": {
-				Description: "Memory's quote.",
+				Description: "Bucket Memory quota.",
 				Type:        schema.TypeInt,
 				Optional:    false,
 			},
@@ -37,11 +37,16 @@ func resourceCouchbaseBucket() *schema.Resource {
 				Type:        schema.TypeInt,
 				Optional:    false,
 			},
+			"conflict_resolution": {
+				Description: "replicas.",
+				Type:        schema.TypeString,
+				Optional:    false,
+			},
 		},
 	}
 }
 
-func resourceCouchbaseBucketCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceCouchbaseCapellaBucketCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	// use the meta value to retrieve your client from the provider configure method
 	// client := meta.(*apiClient)
 
@@ -51,21 +56,21 @@ func resourceCouchbaseBucketCreate(ctx context.Context, d *schema.ResourceData, 
 	return diag.Errorf("not implemented")
 }
 
-func resourceCouchbaseBucketRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceCouchbaseCapellaBucketRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	// use the meta value to retrieve your client from the provider configure method
 	// client := meta.(*apiClient)
 
 	return diag.Errorf("not implemented")
 }
 
-func resourceCouchbaseBucketUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceCouchbaseCapellaBucketUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	// use the meta value to retrieve your client from the provider configure method
 	// client := meta.(*apiClient)
 
 	return diag.Errorf("not implemented")
 }
 
-func resourceCouchbaseBucketDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceCouchbaseCapellaBucketDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	// use the meta value to retrieve your client from the provider configure method
 	// client := meta.(*apiClient)
 
