@@ -2,6 +2,7 @@ package provider
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -110,28 +111,36 @@ func resourceCouchbaseClusterCreate(ctx context.Context, d *schema.ResourceData,
 	projectId := d.Get("project_id").(string)
 
 	newClusterRequest := *couchbasecloud.NewCreateClusterRequest(clusterName, cloudId, projectId)
-	// Check if teams were set, if so we need to add the teams into the project
+
+	// Get The cloud
+	cloud, resp, err := client.CloudsApi.CloudsShow(auth, cloudId).Execute()
+	if err != nil {
+		if resp != nil && resp.StatusCode == http.StatusNotFound {
+			return diag.FromErr(fmt.Errorf("404: the cloud doesn't exist. Please verify your cloud_id"))
+			return nil
+		}
+		return diag.FromErr(err)
+	}
+	providerName := string(cloud.Provider)
+	// add Servers + Check servers Vs Cloud provider
 	if servers, ok := d.GetOk("servers"); ok {
+		// check server providers
+		providers := getServersProvider(servers.(*schema.Set))
+		if len(providers) > 1 {
+			return diag.FromErr(fmt.Errorf("cluster's server should be the same as the cloud provider"))
+		}
+		if len(providers) == 1 && !Has(providers, providerName) {
+			return diag.FromErr(fmt.Errorf("cluster's server should be the same as the cloud provider"))
+		}
 		newClusterRequest.SetServers(expandServersSet(servers.(*schema.Set)))
 	}
 
-	// Get The cloud
-	// cloud, resp, err := client.CloudsApi.CloudsShow(auth, cloudId).Execute()
-	// if err != nil {
-	// 	if resp != nil && resp.StatusCode == http.StatusNotFound {
-	// 		return diag.FromErr(fmt.Errorf("404: the cloud doesn't exist. Please verify your cloud_id"))
-	// 		return nil
-	// 	}
-	// 	return diag.FromErr(err)
-	// }
-	//TODO check provider
-
-	_, err := client.ClustersApi.ClustersCreate(auth).CreateClusterRequest(newClusterRequest).Execute()
+	cluster, err := client.ClustersApi.ClustersCreate(auth).CreateClusterRequest(newClusterRequest).Execute()
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	//d.SetId(cluster.Id)
+	//d.SetId(cluster)
 
 	return nil
 }
@@ -184,34 +193,59 @@ func expandServersSet(servers *schema.Set) []couchbasecloud.Server {
 
 func expandServiceList(services []interface{}) (res []couchbasecloud.CouchbaseServices) {
 	for _, v := range services {
-		res = append(res, v.(couchbasecloud.CouchbaseServices))
+		res = append(res, couchbasecloud.CouchbaseServices(v.(string)))
 	}
 
 	return res
 }
 
-func createServer(v map[string]interface{}) couchbasecloud.Server {
-	var server couchbasecloud.Server
-	if res, ok := v["aws"]; ok {
-		aws := res.(*schema.Set)
-		server = couchbasecloud.Server{
-			Size:     v["size"].(int32),
-			Services: expandServiceList(v["services"].(*schema.Set).List()),
-			Aws: &couchbasecloud.ServerAws{
-				InstanceSize: aws["instance_size"].(couchbasecloud.AwsInstances),
-				EbsSizeGib:   aws["ebs_size_gib"].(int32),
-			},
+func getServersProvider(servers *schema.Set) []string {
+	providers := make([]string, 0)
+
+	for _, value := range servers.List() {
+		server := value.(map[string]interface{})
+		for k, _ := range server {
+			if k == "aws" {
+				if !Has(providers, "aws") {
+					providers = append(providers, "aws")
+				}
+			}
+			if k == "azure" {
+				if !Has(providers, "azure") {
+					providers = append(providers, "azure")
+				}
+			}
 		}
 	}
-	if res, ok := v["azure"]; ok {
-		azure := res.(map[string]interface{})
-		server = couchbasecloud.Server{
-			Size:     v["size"].(int32),
-			Services: expandServiceList(v["services"].(*schema.Set).List()),
-			Azure: &couchbasecloud.ServerAzure{
-				InstanceSize: azure["instance_size"].(couchbasecloud.AzureInstances),
-				VolumeType:   azure["volume_type"].(couchbasecloud.AzureVolumeTypes),
-			},
+	return providers
+}
+
+func createServer(v map[string]interface{}) couchbasecloud.Server {
+	var server couchbasecloud.Server
+	for _, awss := range v["aws"].(*schema.Set).List() {
+		aws, ok := awss.(map[string]interface{})
+		if ok {
+			server = couchbasecloud.Server{
+				Size:     int32(v["size"].(int)),
+				Services: expandServiceList(v["services"].([]interface{})),
+				Aws: &couchbasecloud.ServerAws{
+					InstanceSize: couchbasecloud.AwsInstances(aws["instance_size"].(string)),
+					EbsSizeGib:   int32(aws["ebs_size_gib"].(int)),
+				},
+			}
+		}
+	}
+	for _, azures := range v["azure"].(*schema.Set).List() {
+		azure, ok := azures.(map[string]interface{})
+		if ok {
+			server = couchbasecloud.Server{
+				Size:     int32(v["size"].(int)),
+				Services: expandServiceList(v["services"].([]interface{})),
+				Azure: &couchbasecloud.ServerAzure{
+					InstanceSize: couchbasecloud.AzureInstances(azure["instance_size"].(string)),
+					VolumeType:   couchbasecloud.AzureVolumeTypes(azure["volume_type"].(string)),
+				},
+			}
 		}
 	}
 
