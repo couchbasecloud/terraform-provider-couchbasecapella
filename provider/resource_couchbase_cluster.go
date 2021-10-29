@@ -2,9 +2,10 @@ package provider
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -22,6 +23,11 @@ func resourceCouchbaseCluster() *schema.Resource {
 		DeleteContext: resourceCouchbaseClusterDelete,
 
 		Schema: map[string]*schema.Schema{
+			"id": {
+				Description: "Cluster's id.",
+				Type:        schema.TypeString,
+				Computed:    true,
+			},
 			"name": {
 				Description: "Cluster's name.",
 				Type:        schema.TypeString,
@@ -134,21 +140,23 @@ func resourceCouchbaseClusterCreate(ctx context.Context, d *schema.ResourceData,
 		newClusterRequest.SetServers(expandServersSet(servers.(*schema.Set)))
 	}
 
-	response, err := client.ClustersApi.ClustersCreate(auth).CreateClusterRequest(newClusterRequest).Execute()
-	if err != nil {
-		return diag.FromErr(err)
+	response, error := client.ClustersApi.ClustersCreate(auth).CreateClusterRequest(newClusterRequest).Execute()
+	if error != nil {
+		return diag.FromErr(error)
 	}
 	defer response.Body.Close()
 
-	cluster := new(couchbasecloud.Cluster)
-	json.NewDecoder(response.Body).Decode(cluster)
-
-	d.SetId(cluster.Id)
+	// TODO: need to be changed after cloud api fix!
+	location := string(response.Header.Get("Location"))
+	urlparts := strings.Split(location, "/")
+	clusterId := urlparts[len(urlparts)-1]
+	d.SetId(clusterId)
 
 	return resourceCouchbaseClusterRead(ctx, d, meta)
 }
 
 func resourceCouchbaseClusterRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	log.Print("[INFO] READ CLUSTER ID : ", d.Get("id").(string))
 	client := meta.(*couchbasecloud.APIClient)
 	auth := getAuth(ctx)
 	clusterId := d.Get("id").(string)
@@ -211,13 +219,13 @@ func getServersProvider(servers *schema.Set) []string {
 
 	for _, value := range servers.List() {
 		server := value.(map[string]interface{})
-		for k, _ := range server {
-			if k == "aws" {
+		for k, v := range server {
+			if k == "aws" && len(v.(*schema.Set).List()) > 0 {
 				if !Has(providers, "aws") {
 					providers = append(providers, "aws")
 				}
 			}
-			if k == "azure" {
+			if k == "azure" && len(v.(*schema.Set).List()) > 0 {
 				if !Has(providers, "azure") {
 					providers = append(providers, "azure")
 				}
