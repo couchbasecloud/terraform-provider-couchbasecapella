@@ -2,6 +2,7 @@ package provider
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -55,7 +56,6 @@ func resourceCouchbaseCluster() *schema.Resource {
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
 							},
-							//Default:     []couchbasecloud.CouchbaseServices{"data"},
 						},
 						"aws": {
 							Description: "Aws configuration.",
@@ -117,7 +117,6 @@ func resourceCouchbaseClusterCreate(ctx context.Context, d *schema.ResourceData,
 	if err != nil {
 		if resp != nil && resp.StatusCode == http.StatusNotFound {
 			return diag.FromErr(fmt.Errorf("404: the cloud doesn't exist. Please verify your cloud_id"))
-			return nil
 		}
 		return diag.FromErr(err)
 	}
@@ -135,14 +134,18 @@ func resourceCouchbaseClusterCreate(ctx context.Context, d *schema.ResourceData,
 		newClusterRequest.SetServers(expandServersSet(servers.(*schema.Set)))
 	}
 
-	cluster, err := client.ClustersApi.ClustersCreate(auth).CreateClusterRequest(newClusterRequest).Execute()
+	response, err := client.ClustersApi.ClustersCreate(auth).CreateClusterRequest(newClusterRequest).Execute()
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	defer response.Body.Close()
 
-	//d.SetId(cluster)
+	cluster := new(couchbasecloud.Cluster)
+	json.NewDecoder(response.Body).Decode(cluster)
 
-	return nil
+	d.SetId(cluster.Id)
+
+	return resourceCouchbaseClusterRead(ctx, d, meta)
 }
 
 func resourceCouchbaseClusterRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -174,10 +177,14 @@ func resourceCouchbaseClusterUpdate(ctx context.Context, d *schema.ResourceData,
 }
 
 func resourceCouchbaseClusterDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	// use the meta value to retrieve your client from the provider configure method
-	// client := meta.(*apiClient)
-
-	return diag.Errorf("not implemented")
+	client := meta.(*couchbasecloud.APIClient)
+	auth := getAuth(ctx)
+	clusterId := d.Get("id").(string)
+	_, err := client.ClustersApi.ClustersDelete(auth, clusterId).Execute()
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	return nil
 }
 
 func expandServersSet(servers *schema.Set) []couchbasecloud.Server {
