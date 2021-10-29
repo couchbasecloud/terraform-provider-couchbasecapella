@@ -10,17 +10,17 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	couchbasecloud "github.com/couchbaselabs/couchbase-cloud-go-client"
+	couchbasecapella "github.com/couchbaselabs/couchbase-cloud-go-client"
 )
 
-func resourceCouchbaseCluster() *schema.Resource {
+func resourceCouchbaseCapellaCluster() *schema.Resource {
 	return &schema.Resource{
-		Description: "Manage Couchbase clusters.",
+		Description: "Manage Couchbase Capella clusters.",
 
-		CreateContext: resourceCouchbaseClusterCreate,
-		ReadContext:   resourceCouchbaseClusterRead,
-		UpdateContext: resourceCouchbaseClusterUpdate,
-		DeleteContext: resourceCouchbaseClusterDelete,
+		CreateContext: resourceCouchbaseCapellaClusterCreate,
+		ReadContext:   resourceCouchbaseCapellaClusterRead,
+		UpdateContext: resourceCouchbaseCapellaClusterUpdate,
+		DeleteContext: resourceCouchbaseCapellaClusterDelete,
 
 		Schema: map[string]*schema.Schema{
 			"id": {
@@ -108,15 +108,15 @@ func resourceCouchbaseCluster() *schema.Resource {
 	}
 }
 
-func resourceCouchbaseClusterCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*couchbasecloud.APIClient)
+func resourceCouchbaseCapellaClusterCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client := meta.(*couchbasecapella.APIClient)
 	auth := getAuth(ctx)
 
 	clusterName := d.Get("name").(string)
 	cloudId := d.Get("cloud_id").(string)
 	projectId := d.Get("project_id").(string)
 
-	newClusterRequest := *couchbasecloud.NewCreateClusterRequest(clusterName, cloudId, projectId)
+	newClusterRequest := *couchbasecapella.NewCreateClusterRequest(clusterName, cloudId, projectId)
 
 	// Get The cloud
 	cloud, resp, err := client.CloudsApi.CloudsShow(auth, cloudId).Execute()
@@ -152,12 +152,12 @@ func resourceCouchbaseClusterCreate(ctx context.Context, d *schema.ResourceData,
 	clusterId := urlparts[len(urlparts)-1]
 	d.SetId(clusterId)
 
-	return resourceCouchbaseClusterRead(ctx, d, meta)
+	return resourceCouchbaseCapellaClusterRead(ctx, d, meta)
 }
 
-func resourceCouchbaseClusterRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceCouchbaseCapellaClusterRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	log.Print("[INFO] READ CLUSTER ID : ", d.Get("id").(string))
-	client := meta.(*couchbasecloud.APIClient)
+	client := meta.(*couchbasecapella.APIClient)
 	auth := getAuth(ctx)
 	clusterId := d.Get("id").(string)
 
@@ -177,15 +177,15 @@ func resourceCouchbaseClusterRead(ctx context.Context, d *schema.ResourceData, m
 	return nil
 }
 
-func resourceCouchbaseClusterUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceCouchbaseCapellaClusterUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	// use the meta value to retrieve your client from the provider configure method
 	// client := meta.(*apiClient)
 
 	return diag.Errorf("not implemented")
 }
 
-func resourceCouchbaseClusterDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*couchbasecloud.APIClient)
+func resourceCouchbaseCapellaClusterDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client := meta.(*couchbasecapella.APIClient)
 	auth := getAuth(ctx)
 	clusterId := d.Get("id").(string)
 	_, err := client.ClustersApi.ClustersDelete(auth, clusterId).Execute()
@@ -195,8 +195,8 @@ func resourceCouchbaseClusterDelete(ctx context.Context, d *schema.ResourceData,
 	return nil
 }
 
-func expandServersSet(servers *schema.Set) []couchbasecloud.Server {
-	result := make([]couchbasecloud.Server, servers.Len())
+func expandServersSet(servers *schema.Set) []couchbasecapella.Server {
+	result := make([]couchbasecapella.Server, servers.Len())
 
 	for i, value := range servers.List() {
 		v := value.(map[string]interface{})
@@ -206,9 +206,9 @@ func expandServersSet(servers *schema.Set) []couchbasecloud.Server {
 	return result
 }
 
-func expandServiceList(services []interface{}) (res []couchbasecloud.CouchbaseServices) {
+func expandServiceList(services []interface{}) (res []couchbasecapella.CouchbaseServices) {
 	for _, v := range services {
-		res = append(res, couchbasecloud.CouchbaseServices(v.(string)))
+		res = append(res, couchbasecapella.CouchbaseServices(v.(string)))
 	}
 
 	return res
@@ -235,16 +235,16 @@ func getServersProvider(servers *schema.Set) []string {
 	return providers
 }
 
-func createServer(v map[string]interface{}) couchbasecloud.Server {
-	var server couchbasecloud.Server
+func createServer(v map[string]interface{}) couchbasecapella.Server {
+	var server couchbasecapella.Server
 	for _, awss := range v["aws"].(*schema.Set).List() {
 		aws, ok := awss.(map[string]interface{})
 		if ok {
-			server = couchbasecloud.Server{
+			server = couchbasecapella.Server{
 				Size:     int32(v["size"].(int)),
 				Services: expandServiceList(v["services"].([]interface{})),
-				Aws: &couchbasecloud.ServerAws{
-					InstanceSize: couchbasecloud.AwsInstances(aws["instance_size"].(string)),
+				Aws: &couchbasecapella.ServerAws{
+					InstanceSize: couchbasecapella.AwsInstances(aws["instance_size"].(string)),
 					EbsSizeGib:   int32(aws["ebs_size_gib"].(int)),
 				},
 			}
@@ -253,12 +253,12 @@ func createServer(v map[string]interface{}) couchbasecloud.Server {
 	for _, azures := range v["azure"].(*schema.Set).List() {
 		azure, ok := azures.(map[string]interface{})
 		if ok {
-			server = couchbasecloud.Server{
+			server = couchbasecapella.Server{
 				Size:     int32(v["size"].(int)),
 				Services: expandServiceList(v["services"].([]interface{})),
-				Azure: &couchbasecloud.ServerAzure{
-					InstanceSize: couchbasecloud.AzureInstances(azure["instance_size"].(string)),
-					VolumeType:   couchbasecloud.AzureVolumeTypes(azure["volume_type"].(string)),
+				Azure: &couchbasecapella.ServerAzure{
+					InstanceSize: couchbasecapella.AzureInstances(azure["instance_size"].(string)),
+					VolumeType:   couchbasecapella.AzureVolumeTypes(azure["volume_type"].(string)),
 				},
 			}
 		}

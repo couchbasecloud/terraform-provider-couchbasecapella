@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	couchbasecloud "github.com/couchbaselabs/couchbase-cloud-go-client"
+	couchbasecapella "github.com/couchbaselabs/couchbase-cloud-go-client"
 )
 
 func init() {
@@ -34,13 +34,13 @@ func Provider() *schema.Provider {
 				Type:        schema.TypeString,
 				Required:    true,
 				DefaultFunc: schema.EnvDefaultFunc("CBC_ACCESS_KEY", nil),
-				Description: "Couchbase Cloud API Access Key",
+				Description: "Couchbase Capella API Access Key",
 			},
 			"secret_key": {
 				Type:        schema.TypeString,
 				Required:    true,
 				DefaultFunc: schema.EnvDefaultFunc("CBC_SECRET_KEY", nil),
-				Description: "Couchbase Cloud API Secret Key",
+				Description: "Couchbase Capella API Secret Key",
 				Sensitive:   true,
 			},
 		},
@@ -48,8 +48,8 @@ func Provider() *schema.Provider {
 		DataSourcesMap: map[string]*schema.Resource{},
 
 		ResourcesMap: map[string]*schema.Resource{
-			"couchbasecloud_project": resourceCouchbaseCloudProject(),
-			"couchbasecloud_cluster": resourceCouchbaseCluster(),
+			"couchbasecapella_project": resourceCouchbaseCloudProject(),
+			"couchbasecapella_cluster": resourceCouchbaseCapellaCluster(),
 		},
 		ConfigureContextFunc: providerConfigure,
 	}
@@ -57,8 +57,8 @@ func Provider() *schema.Provider {
 
 // TODO: create a client with access/secret keys
 func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
-	configuration := couchbasecloud.NewConfiguration()
-	apiClient := couchbasecloud.NewAPIClient(configuration)
+	configuration := couchbasecapella.NewConfiguration()
+	apiClient := couchbasecapella.NewAPIClient(configuration)
 	return apiClient, nil
 }
 

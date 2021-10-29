@@ -4,16 +4,16 @@ import (
 	"context"
 	"net/http"
 
-	couchbasecloud "github.com/couchbaselabs/couchbase-cloud-go-client"
+	couchbasecapella "github.com/couchbaselabs/couchbase-cloud-go-client"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func resourceCouchbaseCloud() *schema.Resource {
+func resourceCouchbaseCapellaCloud() *schema.Resource {
 	return &schema.Resource{
-		Description: "Manage Couchbase Clouds.",
+		Description: "Manage Couchbase Capella Clouds.",
 
-		ReadContext: resourceCouchbaseCloudRead,
+		ReadContext: resourceCouchbaseCapellaCloudRead,
 
 		Schema: map[string]*schema.Schema{
 			"cloud_id": {
@@ -25,8 +25,8 @@ func resourceCouchbaseCloud() *schema.Resource {
 	}
 }
 
-func resourceCouchbaseCloudRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*couchbasecloud.APIClient)
+func resourceCouchbaseCapellaCloudRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client := meta.(*couchbasecapella.APIClient)
 	auth := getAuth(ctx)
 
 	cloudId := d.Get("cloud_id").(string)
