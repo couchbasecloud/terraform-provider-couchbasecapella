@@ -55,8 +55,8 @@ func testAccCheckCouchbaseCapellaProjectDestroy(s *terraform.State) error {
 			continue
 		}
 
-		_, resp, _ := client.ProjectsApi.ProjectsShow(auth, rs.Primary.ID).Execute()
-		if resp != nil {
+		_, _, err := client.ProjectsApi.ProjectsShow(auth, rs.Primary.ID).Execute()
+		if err == nil {
 			return fmt.Errorf("project (%s) still exists", rs.Primary.ID)
 		}
 	}
@@ -93,10 +93,10 @@ func testAccCheckCouchbaseCapellaProjectExists(resourceName string, project *cou
 
 		_, _, err := client.ProjectsApi.ProjectsShow(auth, rs.Primary.ID).Execute()
 		if err == nil {
-			return fmt.Errorf("project (%s) still exists", rs.Primary.ID)
+			return nil
 		}
 
-		return nil
+		return fmt.Errorf("project (%s) does not exist", rs.Primary.ID)
 	}
 }
 

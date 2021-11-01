@@ -3,7 +3,6 @@ package provider
 import (
 	"context"
 	"fmt"
-	"log"
 	"os"
 	"testing"
 
@@ -18,9 +17,9 @@ func TestAccCouchbaseCapellaDatabaseUser_basic(t *testing.T) {
 		databaseUser couchbasecapella.CreateDatabaseUserRequest
 	)
 
-	testClusterId := ""
+	testClusterId := "9e34b47b-c14d-4a10-b398-e65a405a68bc"
 	username := fmt.Sprintf("testacc-user-%s", acctest.RandString(10))
-	password := fmt.Sprintf("%s", acctest.RandString(10))
+	password := "Password123!"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -57,18 +56,13 @@ func testAccCheckCouchbaseCapellaDatabaseUserDestroy(s *terraform.State) error {
 			continue
 		}
 
-		_, resp, _ := client.ProjectsApi.ProjectsShow(auth, rs.Primary.ID).Execute()
-		if resp != nil {
-			return fmt.Errorf("database user (%s) still exists", rs.Primary.ID)
-		}
-
-		users, _, err := client.ClustersApi.ClustersListUsers(auth, rs.Primary.ID).Execute()
-		if err == nil {
-			return fmt.Errorf("database user still exists")
+		users, _, err := client.ClustersApi.ClustersListUsers(auth, rs.Primary.Attributes["cluster_id"]).Execute()
+		if err != nil {
+			return fmt.Errorf("%v", err)
 		}
 		for _, user := range users {
-			if user.Username == rs.Primary.Attributes["username"] {
-				return nil
+			if user.Username == rs.Primary.ID {
+				return fmt.Errorf("database user still exists")
 			}
 		}
 	}
@@ -101,11 +95,9 @@ func testAccCheckCouchbaseCapellaDatabaseUserExists(resourceName string, databas
 			return fmt.Errorf("no username is set")
 		}
 
-		log.Printf("[DEBUG] Database User: %s", rs.Primary.ID)
-
-		users, _, err := client.ClustersApi.ClustersListUsers(auth, rs.Primary.ID).Execute()
-		if err == nil {
-			return fmt.Errorf("database user still exists")
+		users, _, err := client.ClustersApi.ClustersListUsers(auth, rs.Primary.Attributes["cluster_id"]).Execute()
+		if err != nil {
+			return fmt.Errorf("%v", err)
 		}
 		for _, user := range users {
 			if user.Username == rs.Primary.Attributes["username"] {
@@ -113,7 +105,7 @@ func testAccCheckCouchbaseCapellaDatabaseUserExists(resourceName string, databas
 			}
 		}
 
-		return nil
+		return fmt.Errorf("database user does not exist")
 	}
 }
 
