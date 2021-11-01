@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 
+	couchbasecapella "github.com/couchbaselabs/couchbase-cloud-go-client"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -17,62 +18,109 @@ func resourceCouchbaseCapellaBucket() *schema.Resource {
 		DeleteContext: resourceCouchbaseCapellaBucketDelete,
 
 		Schema: map[string]*schema.Schema{
-			"id": {
+			"cluster_id": {
 				Description: "Cluster's id.",
 				Type:        schema.TypeString,
-				Optional:    false,
+				Required:    true,
 			},
 			"name": {
 				Description: "Bucket's name.",
 				Type:        schema.TypeString,
-				Optional:    false,
+				Required:    true,
 			},
-			"memoryQuota": {
+			"memory_quota": {
 				Description: "Bucket Memory quota.",
 				Type:        schema.TypeInt,
-				Optional:    false,
+				Required:    true,
 			},
 			"replicas": {
 				Description: "replicas.",
 				Type:        schema.TypeInt,
-				Optional:    false,
+				Required:    true,
 			},
 			"conflict_resolution": {
 				Description: "replicas.",
 				Type:        schema.TypeString,
-				Optional:    false,
+				Required:    true,
 			},
 		},
 	}
 }
 
 func resourceCouchbaseCapellaBucketCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	// use the meta value to retrieve your client from the provider configure method
-	// client := meta.(*apiClient)
+	client := meta.(*couchbasecapella.APIClient)
+	auth := getAuth(ctx)
 
-	idFromAPI := "my-id"
-	d.SetId(idFromAPI)
+	clusterId := d.Get("cluster_id").(string)
+	bucketName := d.Get("name").(string)
+	memoryQuota := int32(d.Get("memory_quota").(int))
+	replicas := int32(d.Get("replicas").(int))
+	conflictResolution := couchbasecapella.ConflictResolution(d.Get("conflict_resolution").(string))
 
-	return diag.Errorf("not implemented")
+	couchbaseBucketSpec := *couchbasecapella.NewCouchbaseBucketSpec(bucketName, memoryQuota)
+	couchbaseBucketSpec.SetReplicas(replicas)
+	couchbaseBucketSpec.SetConflictResolution(conflictResolution)
+
+	_, _, err := client.ClustersApi.ClustersCreateBucket(auth, clusterId).CouchbaseBucketSpec(couchbaseBucketSpec).Execute()
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	d.SetId(bucketName)
+
+	return nil
 }
 
 func resourceCouchbaseCapellaBucketRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	// use the meta value to retrieve your client from the provider configure method
-	// client := meta.(*apiClient)
+	client := meta.(*couchbasecapella.APIClient)
+	auth := getAuth(ctx)
 
-	return diag.Errorf("not implemented")
+	clusterId := d.Get("cluster_id").(string)
+	buckets, _, err := client.ClustersApi.ClustersListBuckets(auth, clusterId).Execute()
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	for _, bucket := range buckets {
+		if bucket.Name == d.Get("name") {
+			return nil
+		}
+	}
+	return diag.FromErr(err)
 }
 
 func resourceCouchbaseCapellaBucketUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	// use the meta value to retrieve your client from the provider configure method
-	// client := meta.(*apiClient)
+	client := meta.(*couchbasecapella.APIClient)
+	auth := getAuth(ctx)
 
-	return diag.Errorf("not implemented")
+	clusterId := d.Get("cluster_id").(string)
+	bucketName := d.Get("name").(string)
+	memoryQuota := int32(d.Get("memory_quota").(int))
+
+	updateBucket := *couchbasecapella.NewCouchbaseBucketSpec(bucketName, memoryQuota)
+
+	couchbaseBucketSpec := []couchbasecapella.CouchbaseBucketSpec{updateBucket}
+
+	// updates bucket in capella but returns error for json: cannot unmarshal array into Go value of type couchbasecloud.CouchbaseBucketSpec
+	_, _, err := client.ClustersApi.ClustersUpdateBucket(auth, clusterId).CouchbaseBucketSpec(couchbaseBucketSpec).Execute()
+	if err != nil {
+		return nil
+	}
+
+	return nil
 }
 
 func resourceCouchbaseCapellaBucketDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	// use the meta value to retrieve your client from the provider configure method
-	// client := meta.(*apiClient)
+	client := meta.(*couchbasecapella.APIClient)
+	auth := getAuth(ctx)
 
-	return diag.Errorf("not implemented")
+	clusterId := d.Get("cluster_id").(string)
+	bucketName := d.Get("name").(string)
+
+	deleteBucketRequest := *couchbasecapella.NewDeleteBucketRequest(bucketName)
+
+	_, err := client.ClustersApi.ClustersDeleteBucket(auth, clusterId).DeleteBucketRequest(deleteBucketRequest).Execute()
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	return nil
 }

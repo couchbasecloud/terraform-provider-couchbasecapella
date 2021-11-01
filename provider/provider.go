@@ -50,6 +50,7 @@ func Provider() *schema.Provider {
 		ResourcesMap: map[string]*schema.Resource{
 			"couchbasecapella_project":       resourceCouchbaseCapellaProject(),
 			"couchbasecapella_database_user": resourceCouchbaseCapellaDatabaseUser(),
+			"couchbasecapella_bucket":        resourceCouchbaseCapellaBucket(),
 		},
 		ConfigureContextFunc: providerConfigure,
 	}
