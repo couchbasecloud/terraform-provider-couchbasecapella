@@ -68,7 +68,7 @@ func resourceCouchbaseCapellaBucketCreate(ctx context.Context, d *schema.Resourc
 
 	d.SetId(bucketName)
 
-	return nil
+	return resourceCouchbaseCapellaBucketRead(ctx, d, meta)
 }
 
 func resourceCouchbaseCapellaBucketRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
