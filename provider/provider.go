@@ -2,7 +2,6 @@ package provider
 
 import (
 	"context"
-	"os"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -49,6 +48,7 @@ func Provider() *schema.Provider {
 
 		ResourcesMap: map[string]*schema.Resource{
 			"couchbasecapella_project":       resourceCouchbaseCapellaProject(),
+			"couchbasecapella_cluster":       resourceCouchbaseCapellaCluster(),
 			"couchbasecapella_database_user": resourceCouchbaseCapellaDatabaseUser(),
 			"couchbasecapella_bucket":        resourceCouchbaseCapellaBucket(),
 		},
@@ -56,6 +56,7 @@ func Provider() *schema.Provider {
 	}
 }
 
+// TODO: create a client with access/secret keys
 func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 	configuration := couchbasecapella.NewConfiguration()
 	apiClient := couchbasecapella.NewAPIClient(configuration)
