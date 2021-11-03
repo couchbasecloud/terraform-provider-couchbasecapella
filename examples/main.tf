@@ -22,7 +22,7 @@ provider "couchbasecapella" {
 # }
 
 resource "couchbasecapella_cluster" "terraform_cluster" {
-  name       = "this_capella_cluster_was_created_by_terraform"
+  name       = "capella_terraform"
   cloud_id   = var.cloud_id
   project_id = "949d63c9-490e-468d-af03-601cf632574f"
   servers {

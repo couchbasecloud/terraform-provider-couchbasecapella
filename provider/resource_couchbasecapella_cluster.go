@@ -26,11 +26,13 @@ func resourceCouchbaseCapellaCluster() *schema.Resource {
 			"id": {
 				Description: "Cluster's id.",
 				Type:        schema.TypeString,
+				ForceNew:    true,
 				Computed:    true,
 			},
 			"name": {
 				Description: "Cluster's name.",
 				Type:        schema.TypeString,
+				ForceNew:    true,
 				Required:    true,
 			},
 			"cloud_id": {
@@ -47,6 +49,7 @@ func resourceCouchbaseCapellaCluster() *schema.Resource {
 				Description: "Cluster servers configuration",
 				Type:        schema.TypeSet,
 				Required:    true,
+				ForceNew:    true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"size": {
