@@ -190,10 +190,20 @@ func resourceCouchbaseCapellaClusterUpdate(ctx context.Context, d *schema.Resour
 func resourceCouchbaseCapellaClusterDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*couchbasecapella.APIClient)
 	auth := getAuth(ctx)
+
 	clusterId := d.Get("id").(string)
-	_, err := client.ClustersApi.ClustersDelete(auth, clusterId).Execute()
+
+	statusResp, _, err := client.ClustersApi.ClustersStatus(auth, clusterId).Execute()
 	if err != nil {
 		return diag.FromErr(err)
+	}
+	if statusResp.Status != "ready" {
+		return diag.Errorf("Cluster is not ready to be deleted. Cluster Status: %s", statusResp.Status)
+	}
+
+	_, err2 := client.ClustersApi.ClustersDelete(auth, clusterId).Execute()
+	if err2 != nil {
+		return diag.FromErr(err2)
 	}
 	return nil
 }
