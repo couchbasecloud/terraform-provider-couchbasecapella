@@ -197,7 +197,7 @@ func resourceCouchbaseCapellaClusterDelete(ctx context.Context, d *schema.Resour
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	if statusResp.Status != "ready" {
+	if statusResp.Status != couchbasecapella.CLUSTER_READY {
 		return diag.Errorf("Cluster is not ready to be deleted. Cluster Status: %s", statusResp.Status)
 	}
 
