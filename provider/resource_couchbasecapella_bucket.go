@@ -2,6 +2,8 @@ package provider
 
 import (
 	"context"
+	"log"
+	"time"
 
 	couchbasecapella "github.com/couchbaselabs/couchbase-cloud-go-client"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -60,6 +62,15 @@ func resourceCouchbaseCapellaBucketCreate(ctx context.Context, d *schema.Resourc
 	couchbaseBucketSpec := *couchbasecapella.NewCouchbaseBucketSpec(bucketName, memoryQuota)
 	couchbaseBucketSpec.SetReplicas(replicas)
 	couchbaseBucketSpec.SetConflictResolution(conflictResolution)
+
+	// Check that Cluster has deployed and is ready
+	statusResp, _, _ := client.ClustersApi.ClustersStatus(auth, clusterId).Execute()
+	for statusResp.Status != "ready" {
+		log.Printf("Current Cluster Status: %s", statusResp.Status)
+		time.Sleep(2 * time.Minute)
+		statusResp, _, _ = client.ClustersApi.ClustersStatus(auth, clusterId).Execute()
+	}
+	log.Printf("Cluster Ready: %s", statusResp.Status)
 
 	_, _, err := client.ClustersApi.ClustersCreateBucket(auth, clusterId).CouchbaseBucketSpec(couchbaseBucketSpec).Execute()
 	if err != nil {

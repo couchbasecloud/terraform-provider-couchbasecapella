@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -108,6 +109,9 @@ func resourceCouchbaseCapellaCluster() *schema.Resource {
 				},
 			},
 		},
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(25 * time.Minute),
+		},
 	}
 }
 
@@ -202,6 +206,16 @@ func resourceCouchbaseCapellaClusterDelete(ctx context.Context, d *schema.Resour
 	if err2 != nil {
 		return diag.FromErr(err2)
 	}
+
+	// Wait until Cluster is destroyed
+	statusRespDel, _, _ := client.ClustersApi.ClustersStatus(auth, clusterId).Execute()
+	for statusRespDel.Status != "" {
+		log.Printf("Current Cluster Status: %s", statusRespDel.Status)
+		time.Sleep(2 * time.Minute)
+		statusRespDel, _, _ = client.ClustersApi.ClustersStatus(auth, clusterId).Execute()
+	}
+	log.Printf("Cluster Destory Success")
+
 	return nil
 }
 

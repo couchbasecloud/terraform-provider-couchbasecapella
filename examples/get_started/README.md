@@ -4,9 +4,9 @@ This example will cover setting up Terraform with Couchbase Capella. This will c
 
 - Project
 - Couchbase Cluster - m5.xlarge
-<!-- - Bucket
+- Bucket
 - Database User
-- IP Allowlist -->
+<!-- - IP Allowlist -->
 
 <!-- ## Dependencies
 
@@ -36,9 +36,9 @@ This project currently creates the below deployments:
 
 - Project
 - Couchbase Cluster - m5.xlarge
-<!-- - Bucket
+- Bucket
 - Database User
-- IP Allowlist -->
+<!-- - IP Allowlist -->
 
 **3\. Execute the Terraform apply**
 
