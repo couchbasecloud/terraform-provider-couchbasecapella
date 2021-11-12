@@ -2,9 +2,11 @@ package provider
 
 import (
 	"context"
+	"net/http"
 	"os"
 
 	couchbasecloud "github.com/couchbaselabs/couchbase-cloud-go-client"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 )
 
 func Has(list []string, a string) bool {
@@ -31,4 +33,18 @@ func getAuth(ctx context.Context) context.Context {
 		},
 	)
 	return auth
+}
+
+func manageErrors(err error, r http.Response, functionality string) diag.Diagnostics {
+	if err != nil {
+		switch r.StatusCode {
+		case 403:
+			return diag.Errorf("You don't have the required access to apply this function " + functionality)
+		case 401:
+			return diag.Errorf("Please verify the validity of your Access key and Secret key")
+		default:
+			return diag.FromErr(err)
+		}
+	}
+	return nil
 }
