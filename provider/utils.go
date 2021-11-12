@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+
 	couchbasecloud "github.com/couchbaselabs/couchbase-cloud-go-client"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 )

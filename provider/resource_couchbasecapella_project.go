@@ -53,9 +53,9 @@ func resourceCouchbaseCapellaProjectCreate(ctx context.Context, d *schema.Resour
 
 	createProjectRequest := *couchbasecapella.NewCreateProjectRequest(d.Get("name").(string))
 
-	project, _, err := client.ProjectsApi.ProjectsCreate(auth).CreateProjectRequest(createProjectRequest).Execute()
+	project, r, err := client.ProjectsApi.ProjectsCreate(auth).CreateProjectRequest(createProjectRequest).Execute()
 	if err != nil {
-		return diag.FromErr(err)
+		return manageErrors(err, *r, "Create Project")
 	}
 
 	d.SetId(project.Id)
@@ -112,9 +112,9 @@ func resourceCouchbaseCapellaProjectDelete(ctx context.Context, d *schema.Resour
 	)
 	projectId := d.Get("id").(string)
 
-	_, err := client.ProjectsApi.ProjectsDelete(auth, projectId).Execute()
+	r, err := client.ProjectsApi.ProjectsDelete(auth, projectId).Execute()
 	if err != nil {
-		return diag.FromErr(err)
+		return manageErrors(err, *r, "Delete Project")
 	}
 
 	return nil

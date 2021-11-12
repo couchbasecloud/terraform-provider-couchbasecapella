@@ -97,9 +97,9 @@ func resourceCouchbaseCapellaDatabaseUserCreate(ctx context.Context, d *schema.R
 		return diag.Errorf("Please specify only specific buckets or all buckets")
 	}
 
-	_, err := client.ClustersApi.ClustersCreateUser(auth, clusterId).CreateDatabaseUserRequest(createDatabaseUserRequest).Execute()
+	r, err := client.ClustersApi.ClustersCreateUser(auth, clusterId).CreateDatabaseUserRequest(createDatabaseUserRequest).Execute()
 	if err != nil {
-		return diag.FromErr(err)
+		return manageErrors(err, *r, "Create Database User")
 	}
 
 	d.SetId(username)
@@ -140,9 +140,9 @@ func resourceCouchbaseCapellaDatabaseUserUpdate(ctx context.Context, d *schema.R
 		updateDatabaseUserRequest.SetBuckets(buckets)
 	}
 
-	_, err := client.ClustersApi.ClustersUpdateUser(auth, clusterId, username).UpdateDatabaseUserRequest(updateDatabaseUserRequest).Execute()
+	r, err := client.ClustersApi.ClustersUpdateUser(auth, clusterId, username).UpdateDatabaseUserRequest(updateDatabaseUserRequest).Execute()
 	if err != nil {
-		return diag.FromErr(err)
+		return manageErrors(err, *r, "Update Database User")
 	}
 
 	return resourceCouchbaseCapellaDatabaseUserRead(ctx, d, meta)
@@ -155,9 +155,9 @@ func resourceCouchbaseCapellaDatabaseUserDelete(ctx context.Context, d *schema.R
 	clusterId := d.Get("cluster_id").(string)
 	username := d.Get("username").(string)
 
-	_, err := client.ClustersApi.ClustersDeleteUser(auth, clusterId, username).Execute()
+	r, err := client.ClustersApi.ClustersDeleteUser(auth, clusterId, username).Execute()
 	if err != nil {
-		return diag.FromErr(err)
+		return manageErrors(err, *r, "Delete Database User")
 	}
 
 	return nil

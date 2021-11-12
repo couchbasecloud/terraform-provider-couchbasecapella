@@ -152,7 +152,7 @@ func resourceCouchbaseCapellaClusterCreate(ctx context.Context, d *schema.Resour
 	// Create the cluster
 	response, err := client.ClustersApi.ClustersCreate(auth).CreateClusterRequest(newClusterRequest).Execute()
 	if err != nil {
-		return diag.FromErr(err)
+		return manageErrors(err, *response, "Create Cluster")
 	}
 
 	// TODO: need to be changed after cloud api fix!
@@ -227,9 +227,9 @@ func resourceCouchbaseCapellaClusterDelete(ctx context.Context, d *schema.Resour
 		return diag.Errorf("Cluster is not ready to be deleted. Cluster Status: %s", statusResp.Status)
 	}
 
-	_, err2 := client.ClustersApi.ClustersDelete(auth, clusterId).Execute()
+	r, err2 := client.ClustersApi.ClustersDelete(auth, clusterId).Execute()
 	if err2 != nil {
-		return diag.FromErr(err2)
+		return manageErrors(err2, *r, "Cluster Delete")
 	}
 
 	// Wait for the cluster to be destroyed
