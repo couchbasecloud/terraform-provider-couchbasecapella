@@ -2,7 +2,8 @@
 
 `couchbasecapella_cluster` provides a Cluster resource. The resource lets you create, edit and delete clusters. The resource requires your Project ID.
 
-~> **IMPORTANT:** You can only delete a cluster if it has already been deployed. Trying to delete a cluster whilst it is deploying will result in an error.
+~> **WARNING:** This current release of terraform provider doesn't support updating the cluster, Please log to your Capella UI account
+
 
 ## Example Usage
 

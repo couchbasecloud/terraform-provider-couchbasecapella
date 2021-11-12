@@ -181,10 +181,7 @@ func resourceCouchbaseCapellaClusterRead(ctx context.Context, d *schema.Resource
 }
 
 func resourceCouchbaseCapellaClusterUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	// use the meta value to retrieve your client from the provider configure method
-	// client := meta.(*apiClient)
-
-	return diag.Errorf("not implemented")
+	return diag.Errorf("This current release of terraform provider doesn't support updating the cluster, Please log to your Capella UI account")
 }
 
 func resourceCouchbaseCapellaClusterDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {

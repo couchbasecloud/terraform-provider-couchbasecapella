@@ -2,6 +2,8 @@
 
 `couchbasecapella_buckets` provides a Bucket resource. This resource allows buckets to be created, edited and deleted inside a cluster.
 
+~> **WARNING:** This current release of terraform provider doesn't support updating the bucket, Please log to your Capella UI account
+
 ## Example Usage
 
 ```hcl

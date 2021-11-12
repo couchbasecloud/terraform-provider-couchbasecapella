@@ -89,24 +89,7 @@ func resourceCouchbaseCapellaBucketRead(ctx context.Context, d *schema.ResourceD
 }
 
 func resourceCouchbaseCapellaBucketUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*couchbasecapella.APIClient)
-	auth := getAuth(ctx)
-
-	clusterId := d.Get("cluster_id").(string)
-	bucketName := d.Get("name").(string)
-	memoryQuota := int32(d.Get("memory_quota").(int))
-
-	updateBucket := *couchbasecapella.NewCouchbaseBucketSpec(bucketName, memoryQuota)
-
-	couchbaseBucketSpec := []couchbasecapella.CouchbaseBucketSpec{updateBucket}
-
-	// updates bucket in capella but returns error for json: cannot unmarshal array into Go value of type couchbasecloud.CouchbaseBucketSpec
-	_, _, err := client.ClustersApi.ClustersUpdateBucket(auth, clusterId).CouchbaseBucketSpec(couchbaseBucketSpec).Execute()
-	if err != nil {
-		return nil
-	}
-
-	return nil
+	return diag.Errorf("This current release of terraform provider doesn't support updating the bucket, Please log to your Capella UI account")
 }
 
 func resourceCouchbaseCapellaBucketDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
