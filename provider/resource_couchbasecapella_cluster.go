@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	couchbasecapella "github.com/couchbaselabs/couchbase-cloud-go-client"
@@ -111,6 +112,7 @@ func resourceCouchbaseCapellaCluster() *schema.Resource {
 		},
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(25 * time.Minute),
+			Delete: schema.DefaultTimeout(25 * time.Minute),
 		},
 	}
 }
@@ -147,17 +149,39 @@ func resourceCouchbaseCapellaClusterCreate(ctx context.Context, d *schema.Resour
 		newClusterRequest.SetServers(expandServersSet(servers.(*schema.Set)))
 	}
 
-	response, error := client.ClustersApi.ClustersCreate(auth).CreateClusterRequest(newClusterRequest).Execute()
-	if error != nil {
-		return diag.FromErr(error)
+	// Create the cluster
+	response, err := client.ClustersApi.ClustersCreate(auth).CreateClusterRequest(newClusterRequest).Execute()
+	if err != nil {
+		return diag.FromErr(err)
 	}
-	defer response.Body.Close()
 
 	// TODO: need to be changed after cloud api fix!
 	location := string(response.Header.Get("Location"))
 	urlparts := strings.Split(location, "/")
 	clusterId := urlparts[len(urlparts)-1]
 	d.SetId(clusterId)
+
+	defer response.Body.Close()
+
+	// Wait for the cluster to deploy
+	createStateConf := &resource.StateChangeConf{
+		Pending: []string{"deploying", "deploy_succeeded"},
+		Target:  []string{"ready"},
+		Refresh: func() (interface{}, string, error) {
+			statusResp, _, err := client.ClustersApi.ClustersStatus(auth, clusterId).Execute()
+			if err != nil {
+				return 0, "Error", err
+			}
+			return statusResp, string(statusResp.Status), nil
+		},
+		Timeout:    d.Timeout(schema.TimeoutCreate),
+		Delay:      5 * time.Minute,
+		MinTimeout: 30 * time.Second,
+	}
+	_, err = createStateConf.WaitForStateContext(ctx)
+	if err != nil {
+		return diag.Errorf("Error waiting for cluster (%s) to be created: %s", d.Id(), err)
+	}
 
 	return resourceCouchbaseCapellaClusterRead(ctx, d, meta)
 }
@@ -194,6 +218,7 @@ func resourceCouchbaseCapellaClusterDelete(ctx context.Context, d *schema.Resour
 
 	clusterId := d.Get("id").(string)
 
+	// Check that Cluster is ready to be destroyed
 	statusResp, _, err := client.ClustersApi.ClustersStatus(auth, clusterId).Execute()
 	if err != nil {
 		return diag.FromErr(err)
@@ -207,14 +232,22 @@ func resourceCouchbaseCapellaClusterDelete(ctx context.Context, d *schema.Resour
 		return diag.FromErr(err2)
 	}
 
-	// Wait until Cluster is destroyed
-	statusRespDel, _, _ := client.ClustersApi.ClustersStatus(auth, clusterId).Execute()
-	for statusRespDel.Status != "" {
-		log.Printf("Current Cluster Status: %s", statusRespDel.Status)
-		time.Sleep(2 * time.Minute)
-		statusRespDel, _, _ = client.ClustersApi.ClustersStatus(auth, clusterId).Execute()
+	// Wait for the cluster to be destroyed
+	deleteStateConf := &resource.StateChangeConf{
+		Pending: []string{"destroying", "destroy_succeeded"},
+		Target:  []string{""},
+		Refresh: func() (interface{}, string, error) {
+			statusResp, _, _ := client.ClustersApi.ClustersStatus(auth, clusterId).Execute()
+			return statusResp, string(statusResp.Status), nil
+		},
+		Timeout:    d.Timeout(schema.TimeoutDelete),
+		Delay:      5 * time.Minute,
+		MinTimeout: 5 * time.Second,
 	}
-	log.Printf("Cluster Destory Success")
+	_, err = deleteStateConf.WaitForStateContext(ctx)
+	if err != nil {
+		return diag.Errorf("Error waiting for cluster (%s) to be deleted: %s", d.Id(), err)
+	}
 
 	return nil
 }

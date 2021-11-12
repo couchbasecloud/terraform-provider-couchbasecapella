@@ -2,7 +2,6 @@ package provider
 
 import (
 	"context"
-	"log"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -97,15 +96,6 @@ func resourceCouchbaseCapellaDatabaseUserCreate(ctx context.Context, d *schema.R
 	if allBucketAccessOk && bucketsOk {
 		return diag.Errorf("Please specify only specific buckets or all buckets")
 	}
-
-	// Check that Cluster has deployed and is ready
-	statusResp, _, _ := client.ClustersApi.ClustersStatus(auth, clusterId).Execute()
-	for statusResp.Status != "ready" {
-		log.Printf("Current Cluster Status: %s", statusResp.Status)
-		time.Sleep(2 * time.Minute)
-		statusResp, _, _ = client.ClustersApi.ClustersStatus(auth, clusterId).Execute()
-	}
-	log.Printf("Cluster Ready: %s", statusResp.Status)
 
 	_, err := client.ClustersApi.ClustersCreateUser(auth, clusterId).CreateDatabaseUserRequest(createDatabaseUserRequest).Execute()
 	if err != nil {
