@@ -8,7 +8,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 
 	couchbasecloud "github.com/couchbaselabs/couchbase-cloud-go-client"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 )
 
 func Has(list []string, a string) bool {

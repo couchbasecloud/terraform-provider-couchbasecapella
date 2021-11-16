@@ -18,8 +18,8 @@ func TestAccCouchbaseCapellaBucket_basic(t *testing.T) {
 		bucket couchbasecapella.CouchbaseBucketSpec
 	)
 
-	testClusterId := "9e34b47b-c14d-4a10-b398-e65a405a68bc"
-	bucketName := fmt.Sprintf("testacc-bucket-%s", acctest.RandString(10))
+	testClusterId := os.Getenv("CBC_CLUSTER_ID")
+	bucketName := fmt.Sprintf("testacc-bucket-%s", acctest.RandString(5))
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -103,13 +103,6 @@ func testAccCheckCouchbaseCapellaBucketExists(resourceName string, bucket *couch
 			return fmt.Errorf("%s", err)
 		}
 		for _, bucket := range buckets {
-			// debugging
-			// fmt.Printf(bucket.Name)
-			// fmt.Println()
-			// fmt.Printf(rs.Primary.ID)
-			// fmt.Println()
-			// fmt.Printf(rs.Primary.Attributes["name"])
-			// fmt.Println()
 			if bucket.Name == rs.Primary.Attributes["name"] {
 				return nil
 			}

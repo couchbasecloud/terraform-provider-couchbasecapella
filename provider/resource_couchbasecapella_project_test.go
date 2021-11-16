@@ -18,7 +18,7 @@ func TestAccCouchbaseCapellaProject_basic(t *testing.T) {
 		project couchbasecapella.Project
 	)
 
-	projectName := fmt.Sprintf("testacc-project-%s", acctest.RandString(10))
+	projectName := fmt.Sprintf("testacc-project-%s", acctest.RandString(5))
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },

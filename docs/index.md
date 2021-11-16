@@ -24,10 +24,6 @@ You will need to provide your credentials for authentication via the environment
 `CBC_ACCESS_KEY` and `CBC_SECRET_KEY`,
 for your access and secret API Key Pair respectively.
 
-```hcl
-provider "couchbasecapella" {}
-```
-
 Usage (prefix the export commands with a space to avoid the keys being recorded in OS history):
 
 ```shell

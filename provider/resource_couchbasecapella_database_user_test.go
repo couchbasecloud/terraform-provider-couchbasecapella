@@ -17,8 +17,8 @@ func TestAccCouchbaseCapellaDatabaseUser_basic(t *testing.T) {
 		databaseUser couchbasecapella.CreateDatabaseUserRequest
 	)
 
-	testClusterId := "9e34b47b-c14d-4a10-b398-e65a405a68bc"
-	username := fmt.Sprintf("testacc-user-%s", acctest.RandString(10))
+	testClusterId := os.Getenv("CBC_CLUSTER_ID")
+	username := fmt.Sprintf("testacc-user-%s", acctest.RandString(5))
 	password := "Password123!"
 
 	resource.Test(t, resource.TestCase{

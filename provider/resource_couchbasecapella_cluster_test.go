@@ -18,9 +18,9 @@ func TestAccCouchbaseCapellaCluster_basic(t *testing.T) {
 		cluster couchbasecapella.Cluster
 	)
 
-	projectName := fmt.Sprintf("testacc-cluster-%s", acctest.RandString(10))
-	cloudId := "5da1481d-5884-486a-ba24-a7b6410c9637"
-	projectId := "8b0d5bb1-1ea3-4474-b0ad-3775fe9bfe2e"
+	clusterName := fmt.Sprintf("testacc-cluster-%s", acctest.RandString(5))
+	cloudId := os.Getenv("CBC_CLOUD_ID")
+	projectId := os.Getenv("CBC_PROJECT_ID")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -28,7 +28,7 @@ func TestAccCouchbaseCapellaCluster_basic(t *testing.T) {
 		CheckDestroy: testAccCheckCouchbaseCapellaClusterDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCouchbaseCapellaClusterConfig(projectName, cloudId, projectId),
+				Config: testAccCouchbaseCapellaClusterConfig(clusterName, cloudId, projectId),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCouchbaseCapellaClusterExists("couchbasecapella_cluster.test", &cluster),
 				),
@@ -37,8 +37,6 @@ func TestAccCouchbaseCapellaCluster_basic(t *testing.T) {
 	})
 }
 
-// This currently doesn't work as the cluster must have `Healthy` status before it can be destroyed
-// It cannot be destroyed whilst it is still `Deploying`
 func testAccCheckCouchbaseCapellaClusterDestroy(s *terraform.State) error {
 	client := testAccProvider.Meta().(*couchbasecapella.APIClient)
 	auth := context.WithValue(
