@@ -2,7 +2,7 @@
 
 `couchbasecapella_buckets` provides a Bucket resource. This resource allows buckets to be created, edited and deleted inside a cluster.
 
-~> **WARNING:** This current release of terraform provider doesn't support updating the bucket, Please log to your Capella UI account
+~> **WARNING:** This current release of Terraform Couchbase Capella Provider doesn't support updating the bucket. Please log in to the Couchbase Capella UI where you'll be able to edit the memory quota and bucket access for each bucket.
 
 ## Example Usage
 
@@ -19,8 +19,8 @@ resource "couchbasecapella_bucket" "bucket_test" {
 ## Argument Reference
 
 - `cluster_id` - (Required) The id of the cluster where your bucket will be created. (Cannot be changed via this Provider after creation.)
-- `name` - (Required) The name of the bucket you want to create.
-- `memory_quota` - (Required) The amount of memory that the bucket will be allocated in megabytes. Buckets require a minimum of 100 MiB of memory per node.
+- `name` - (Required) The name of the bucket you want to create. (Cannot be changed via this Provider after creation.)
+- `memory_quota` - (Required) The amount of memory that the bucket will be allocated in megabytes. Buckets require a minimum of 100 MiB of memory per node. (Cannot be changed via this Provider after creation.)
 - `replicas` - (Required) The number of replicas this bucket will have. (Cannot be changed via this Provider after creation.)
 - `conflict_resolution` - (Required) The type of conflict resolution. You can select `seqno`, sequence number, or `lww`, last write wins. (Cannot be changed via this Provider after creation.)
 

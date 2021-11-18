@@ -2,8 +2,7 @@
 
 `couchbasecapella_cluster` provides a Cluster resource. The resource lets you create, edit and delete clusters. The resource requires your Project ID.
 
-~> **WARNING:** This current release of terraform provider doesn't support updating the cluster, Please log to your Capella UI account
-
+~> **WARNING:** This current release of Terraform Couchbase Capella provider doesn't support updating the cluster. Please log in to the Couchbase Capella UI where you'll be able to update the name of your cluster.
 
 ## Example Usage
 
@@ -51,7 +50,7 @@ resource "couchbasecapella_cluster" "test" {
 
 ### Servers
 
-- `size` - (Required) The number of nodes in your cluster.
+- `size` - (Required) The number of nodes in your cluster. (Cannot be changed via this Provider after creation.)
 - `services` - (Required) A list of Couchbase services that you want in your cluster. `Data`, `Query`, `Index`, `Search`,`eventing`, `analytics` are the available services that you can specify. (Cannot be changed via this Provider after creation.)
 
 #### AWS

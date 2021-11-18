@@ -41,11 +41,11 @@ resource "couchbasecapella_database_user" "test" {
 
 #### All Bucket Access
 
-- `all_bucket_access` - (Required) The bucket level access you want the database user to have for all buckets. You can either specify `data_reader`, which will give read access, or `data_writer`, which will give read/write access.
+- `all_bucket_access` - (Required) The bucket level access you want the database user to have for all buckets. You can either specify `data_reader`, which will give read access, or `data_writer`, which will give read/write access. (Cannot be changed via this Provider after creation.)
 
 #### Specific Bucket Access
 
-- `bucket_name` - (Required) The name of the bucket that you want to specify access levels for.
-- `bucket_access` - (Required) The bucket level access you want the database user to have for the named bucket. You can either specify `data_reader`, which will give read access, or `data_writer`, which will give read/write access.
+- `bucket_name` - (Required) The name of the bucket that you want to specify access levels for. (Cannot be changed via this Provider after creation.)
+- `bucket_access` - (Required) The bucket level access you want the database user to have for the named bucket. You can either specify `data_reader`, which will give read access, or `data_writer`, which will give read/write access. (Cannot be changed via this Provider after creation.)
 
 For more information see: [Couchbase Capella Public API Reference](https://docs.couchbase.com/cloud/reference/rest-endpoints-all.html#clusters).

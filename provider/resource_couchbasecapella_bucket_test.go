@@ -27,7 +27,7 @@ func TestAccCouchbaseCapellaBucket_basic(t *testing.T) {
 		CheckDestroy: testAccCheckCouchbaseCapellaBucketDestroy,
 		Steps: []resource.TestStep{
 			{
-				// Seems to be an issue with bucket config - test bucket is not created - or is not returned when buckets listed
+				// TODO: Seems to be an issue with bucket config - test bucket is not created - or is not returned when buckets listed
 				Config: testAccCouchbaseCapellaBucketConfig(testClusterId, bucketName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCouchbaseCapellaBucketExists("couchbasecapella_bucket.test", &bucket),

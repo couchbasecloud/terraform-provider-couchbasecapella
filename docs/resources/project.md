@@ -2,7 +2,7 @@
 
 `couchbasecapella_project` provides a Project resource. This resource allows projects to be created or deleted.
 
-~> **WARNING:** Changing the name of an existing Project in your Terraform configuration will result in the destruction of that Project and the re-creation of the Project with the new name. Projects that contain clusters cannot be destroyed without the associated clusters being destroyed first. Terraform will inform you of the destroyed/created resources before applying so be sure to verify any change to your environment before applying.
+~> **WARNING:** Changing the name of an existing Project in your Terraform configuration will result in the destruction of that Project and the creation of a new Project with the new name. Projects that contain clusters cannot be destroyed without the associated clusters being destroyed first. Terraform will inform you of the destroyed/created resources before applying so be sure to verify any change to your environment before applying.
 
 ## Example Usage
 
