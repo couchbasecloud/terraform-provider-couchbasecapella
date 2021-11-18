@@ -7,7 +7,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 
-	couchbasecloud "github.com/couchbaselabs/couchbase-cloud-go-client"
+	couchbasecapella "github.com/couchbaselabs/couchbase-cloud-go-client"
 )
 
 func Has(list []string, a string) bool {
@@ -23,8 +23,8 @@ func Has(list []string, a string) bool {
 func getAuth(ctx context.Context) context.Context {
 	auth := context.WithValue(
 		context.Background(),
-		couchbasecloud.ContextAPIKeys,
-		map[string]couchbasecloud.APIKey{
+		couchbasecapella.ContextAPIKeys,
+		map[string]couchbasecapella.APIKey{
 			"accessKey": {
 				Key: os.Getenv("CBC_ACCESS_KEY"),
 			},

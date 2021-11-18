@@ -21,7 +21,7 @@ After the provider has been built locally it must be placed in the user plugins 
 Terraform CLI. Please execute the following command to move the provider binary to this directory:
 
 ```sh
-$ mv terraform-provider-couchbasecloud ~/.terraform.d/plugins/terraform.couchbase.com/local/couchbasecloud/1.0.0/<OS_ARCH>
+$ mv terraform-provider-couchbasecapella ~/.terraform.d/plugins/terraform.couchbase.com/local/couchbasecapella/1.0.0/<OS_ARCH>
 ```
 
 The terraform provider is installed and can now be discovered by Terraform through the following HCL block.
@@ -30,7 +30,7 @@ The terraform provider is installed and can now be discovered by Terraform throu
 terraform {
   required_providers {
     couchbasecapella = {
-      source  = "terraform.couchbase.com/local/couchbasecloud"
+      source  = "terraform.couchbase.com/local/couchbasecapella"
       version = "1.0.0"
     }
   }
