@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"testing"
+	"time"
 
 	couchbasecapella "github.com/couchbaselabs/couchbase-cloud-go-client"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
@@ -27,7 +28,6 @@ func TestAccCouchbaseCapellaBucket_basic(t *testing.T) {
 		CheckDestroy: testAccCheckCouchbaseCapellaBucketDestroy,
 		Steps: []resource.TestStep{
 			{
-				// TODO: Seems to be an issue with bucket config - test bucket is not created - or is not returned when buckets listed
 				Config: testAccCouchbaseCapellaBucketConfig(testClusterId, bucketName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCouchbaseCapellaBucketExists("couchbasecapella_bucket.test", &bucket),
@@ -98,12 +98,16 @@ func testAccCheckCouchbaseCapellaBucketExists(resourceName string, bucket *couch
 
 		log.Printf("[DEBUG] bucketID: %s", rs.Primary.ID)
 
+		// WARNING: This is a quick fix for a Capella issue related to how the list of buckets is retrieved.
+		// Sleeping for 30 seconds allows enough time for the newly created bucket to appear in Capella's list of buckets.
+		time.Sleep(30 * time.Second)
+
 		buckets, _, err := client.ClustersApi.ClustersListBuckets(auth, rs.Primary.Attributes["cluster_id"]).Execute()
 		if err != nil {
 			return fmt.Errorf("%s", err)
 		}
 		for _, bucket := range buckets {
-			if bucket.Name == rs.Primary.Attributes["name"] {
+			if bucket.Name == rs.Primary.ID {
 				return nil
 			}
 		}
