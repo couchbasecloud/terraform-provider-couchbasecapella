@@ -1,6 +1,6 @@
 # Couchbase Capella Provider
 
-You can use the Couchbase Capella provider to interact with Projects, Clusters, Buckets, Database Users and IP Allowlists within your Couchbase Capella tenant.
+You can use the Couchbase Capella provider to interact with Projects, Clusters, Buckets and Database Users within your Couchbase Capella tenant.
 
 The provider needs to be configured with the proper credentials before it can be used.
 
@@ -31,7 +31,3 @@ $  export CBC_ACCESS_KEY="xxxx"
 $  export CBC_SECRET_KEY="xxxx"
 $ terraform plan
 ```
-
-<!-- ## Argument Reference
-
-- List any arguments for the provider block. -->

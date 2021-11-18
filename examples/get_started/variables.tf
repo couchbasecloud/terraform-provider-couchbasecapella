@@ -22,7 +22,3 @@ variable "dbuser_password" {
   type        = string
   description = "Database User Password"
 }
-# variable "ip_address" {
-#   type        = string
-#   description = "IP Address to add to cluster allowlist"
-# }
