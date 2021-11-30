@@ -11,7 +11,6 @@ package provider
 import (
 	"context"
 	"net/http"
-	"os"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -46,18 +45,7 @@ func resourceCouchbaseCapellaProject() *schema.Resource {
 
 func resourceCouchbaseCapellaProjectCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*couchbasecapella.APIClient)
-	auth := context.WithValue(
-		context.Background(),
-		couchbasecapella.ContextAPIKeys,
-		map[string]couchbasecapella.APIKey{
-			"accessKey": {
-				Key: os.Getenv("CBC_ACCESS_KEY"),
-			},
-			"secretKey": {
-				Key: os.Getenv("CBC_SECRET_KEY"),
-			},
-		},
-	)
+	auth := getAuth(ctx)
 
 	createProjectRequest := *couchbasecapella.NewCreateProjectRequest(d.Get("name").(string))
 
@@ -73,19 +61,7 @@ func resourceCouchbaseCapellaProjectCreate(ctx context.Context, d *schema.Resour
 
 func resourceCouchbaseCapellaProjectRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*couchbasecapella.APIClient)
-	auth := context.WithValue(
-		context.Background(),
-		couchbasecapella.ContextAPIKeys,
-		map[string]couchbasecapella.APIKey{
-			"accessKey": {
-				Key: os.Getenv("CBC_ACCESS_KEY"),
-			},
-			"secretKey": {
-				Key: os.Getenv("CBC_SECRET_KEY"),
-			},
-		},
-	)
-
+	auth := getAuth(ctx)
 	projectId := d.Get("id").(string)
 
 	project, resp, err := client.ProjectsApi.ProjectsShow(auth, projectId).Execute()
@@ -106,18 +82,8 @@ func resourceCouchbaseCapellaProjectRead(ctx context.Context, d *schema.Resource
 
 func resourceCouchbaseCapellaProjectDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*couchbasecapella.APIClient)
-	auth := context.WithValue(
-		context.Background(),
-		couchbasecapella.ContextAPIKeys,
-		map[string]couchbasecapella.APIKey{
-			"accessKey": {
-				Key: os.Getenv("CBC_ACCESS_KEY"),
-			},
-			"secretKey": {
-				Key: os.Getenv("CBC_SECRET_KEY"),
-			},
-		},
-	)
+	auth := getAuth(ctx)
+
 	projectId := d.Get("id").(string)
 
 	r, err := client.ProjectsApi.ProjectsDelete(auth, projectId).Execute()

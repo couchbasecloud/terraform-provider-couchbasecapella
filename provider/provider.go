@@ -11,10 +11,9 @@ package provider
 import (
 	"context"
 
+	couchbasecapella "github.com/couchbaselabs/couchbase-cloud-go-client"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
-	couchbasecapella "github.com/couchbaselabs/couchbase-cloud-go-client"
 )
 
 func init() {
@@ -56,20 +55,4 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 	configuration := couchbasecapella.NewConfiguration()
 	apiClient := couchbasecapella.NewAPIClient(configuration)
 	return apiClient, nil
-}
-
-func getAuth(ctx context.Context) context.Context {
-	auth := context.WithValue(
-		context.Background(),
-		couchbasecapella.ContextAPIKeys,
-		map[string]couchbasecapella.APIKey{
-			"accessKey": {
-				Key: os.Getenv("CBC_ACCESS_KEY"),
-			},
-			"secretKey": {
-				Key: os.Getenv("CBC_SECRET_KEY"),
-			},
-		},
-	)
-	return auth
 }
