@@ -3,7 +3,6 @@ package provider
 import (
 	"context"
 	"fmt"
-	"log"
 	"os"
 	"testing"
 
@@ -13,7 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccCouchbaseCapellaProject_basic(t *testing.T) {
+func TestAccCouchbaseCapellaProject(t *testing.T) {
 	var (
 		project couchbasecapella.Project
 	)
@@ -88,8 +87,6 @@ func testAccCheckCouchbaseCapellaProjectExists(resourceName string, project *cou
 		if rs.Primary.ID == "" {
 			return fmt.Errorf("no project name is set")
 		}
-
-		log.Printf("[DEBUG] projectID: %s", rs.Primary.ID)
 
 		_, _, err := client.ProjectsApi.ProjectsShow(auth, rs.Primary.ID).Execute()
 		if err == nil {

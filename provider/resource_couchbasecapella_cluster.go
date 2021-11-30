@@ -3,7 +3,6 @@ package provider
 import (
 	"context"
 	"fmt"
-	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -187,7 +186,6 @@ func resourceCouchbaseCapellaClusterCreate(ctx context.Context, d *schema.Resour
 }
 
 func resourceCouchbaseCapellaClusterRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	log.Print("[INFO] READ CLUSTER ID : ", d.Get("id").(string))
 	client := meta.(*couchbasecapella.APIClient)
 	auth := getAuth(ctx)
 	clusterId := d.Get("id").(string)

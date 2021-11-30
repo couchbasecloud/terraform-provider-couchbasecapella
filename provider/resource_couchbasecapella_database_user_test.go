@@ -12,7 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccCouchbaseCapellaDatabaseUser_basic(t *testing.T) {
+func TestAccCouchbaseCapellaDatabaseUser(t *testing.T) {
 	var (
 		databaseUser couchbasecapella.CreateDatabaseUserRequest
 	)

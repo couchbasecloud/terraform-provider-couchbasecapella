@@ -3,7 +3,6 @@ package provider
 import (
 	"context"
 	"fmt"
-	"log"
 	"os"
 	"testing"
 
@@ -13,7 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccCouchbaseCapellaCluster_basic(t *testing.T) {
+func TestAccCouchbaseCapellaCluster(t *testing.T) {
 	var (
 		cluster couchbasecapella.Cluster
 	)
@@ -90,8 +89,6 @@ func testAccCheckCouchbaseCapellaClusterExists(resourceName string, cluster *cou
 		if rs.Primary.ID == "" {
 			return fmt.Errorf("no cluster id is set")
 		}
-
-		log.Printf("[DEBUG] clusterID: %s", rs.Primary.ID)
 
 		_, _, err := client.ClustersApi.ClustersShow(auth, rs.Primary.ID).Execute()
 		if err == nil {

@@ -3,7 +3,6 @@ package provider
 import (
 	"context"
 	"fmt"
-	"log"
 	"os"
 	"testing"
 	"time"
@@ -14,7 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccCouchbaseCapellaBucket_basic(t *testing.T) {
+func TestAccCouchbaseCapellaBucket(t *testing.T) {
 	var (
 		bucket couchbasecapella.CouchbaseBucketSpec
 	)
@@ -95,8 +94,6 @@ func testAccCheckCouchbaseCapellaBucketExists(resourceName string, bucket *couch
 		if rs.Primary.ID == "" {
 			return fmt.Errorf("no bucket id is set")
 		}
-
-		log.Printf("[DEBUG] bucketID: %s", rs.Primary.ID)
 
 		// WARNING: This is a quick fix for a Capella issue related to how the list of buckets is retrieved.
 		// Sleeping for 30 seconds allows enough time for the newly created bucket to appear in Capella's list of buckets.
