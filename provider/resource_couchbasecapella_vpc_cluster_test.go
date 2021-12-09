@@ -20,31 +20,31 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccCouchbaseCapellaCluster(t *testing.T) {
+func TestAccCouchbaseCapellaVpcCluster(t *testing.T) {
 	var (
 		cluster couchbasecapella.Cluster
 	)
 
-	clusterName := fmt.Sprintf("testacc-cluster-%s", acctest.RandString(5))
+	clusterName := fmt.Sprintf("testacc-vpc-%s", acctest.RandString(5))
 	cloudId := os.Getenv("CBC_CLOUD_ID")
 	projectId := os.Getenv("CBC_PROJECT_ID")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckCouchbaseCapellaClusterDestroy,
+		CheckDestroy: testAccCheckCouchbaseCapellaVpcClusterDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCouchbaseCapellaClusterConfig(clusterName, cloudId, projectId),
+				Config: testAccCouchbaseCapellaVpcClusterConfig(clusterName, cloudId, projectId),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCouchbaseCapellaClusterExists("couchbasecapella_cluster.test", &cluster),
+					testAccCheckCouchbaseCapellaVpcClusterExists("couchbasecapella_vpc_cluster.test", &cluster),
 				),
 			},
 		},
 	})
 }
 
-func testAccCheckCouchbaseCapellaClusterDestroy(s *terraform.State) error {
+func testAccCheckCouchbaseCapellaVpcClusterDestroy(s *terraform.State) error {
 	client := testAccProvider.Meta().(*couchbasecapella.APIClient)
 	auth := context.WithValue(
 		context.Background(),
@@ -60,20 +60,20 @@ func testAccCheckCouchbaseCapellaClusterDestroy(s *terraform.State) error {
 	)
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "couchbasecapella_cluster" {
+		if rs.Type != "couchbasecapella_vpc_cluster" {
 			continue
 		}
 
 		_, _, err := client.ClustersApi.ClustersShow(auth, rs.Primary.ID).Execute()
 		if err == nil {
-			return fmt.Errorf("cluster (%s) still exists", rs.Primary.ID)
+			return fmt.Errorf("vpc cluster (%s) still exists", rs.Primary.ID)
 		}
 	}
 
 	return nil
 }
 
-func testAccCheckCouchbaseCapellaClusterExists(resourceName string, cluster *couchbasecapella.Cluster) resource.TestCheckFunc {
+func testAccCheckCouchbaseCapellaVpcClusterExists(resourceName string, cluster *couchbasecapella.Cluster) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		client := testAccProvider.Meta().(*couchbasecapella.APIClient)
 		auth := context.WithValue(
@@ -95,7 +95,7 @@ func testAccCheckCouchbaseCapellaClusterExists(resourceName string, cluster *cou
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("no cluster id is set")
+			return fmt.Errorf("no vpc cluster id is set")
 		}
 
 		_, _, err := client.ClustersApi.ClustersShow(auth, rs.Primary.ID).Execute()
@@ -103,13 +103,13 @@ func testAccCheckCouchbaseCapellaClusterExists(resourceName string, cluster *cou
 			return nil
 		}
 
-		return fmt.Errorf("cluster (%s) does not exist", rs.Primary.ID)
+		return fmt.Errorf("vpc cluster (%s) does not exist", rs.Primary.ID)
 	}
 }
 
-func testAccCouchbaseCapellaClusterConfig(clusterName, cloudId, projectId string) string {
+func testAccCouchbaseCapellaVpcClusterConfig(clusterName, cloudId, projectId string) string {
 	return fmt.Sprintf(`
-		resource "couchbasecapella_cluster" "test" {
+		resource "couchbasecapella_vpc_cluster" "test" {
 			name   = "%s"
 			cloud_id = "%s"
 			project_id = "%s"

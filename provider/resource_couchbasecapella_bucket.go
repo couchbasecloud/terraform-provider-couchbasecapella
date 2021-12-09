@@ -97,7 +97,33 @@ func resourceCouchbaseCapellaBucketRead(ctx context.Context, d *schema.ResourceD
 }
 
 func resourceCouchbaseCapellaBucketUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	return diag.Errorf("This current release of terraform provider doesn't support updating the bucket, Please log to your Capella UI account")
+	client := meta.(*couchbasecapella.APIClient)
+	auth := getAuth(ctx)
+
+	clusterId := d.Get("cluster_id").(string)
+	bucketName := d.Get("name").(string)
+	memoryQuota := int32(d.Get("memory_quota").(int))
+
+	// List buckets and iterate through to find bucket ID
+	buckets, _, err := client.ClustersApi.ClustersListBuckets(auth, clusterId).Execute()
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	for _, bucket := range buckets {
+		if bucket.Name == bucketName {
+			bucketId := string(bucket.Id)
+
+			updateBucketRequest := *couchbasecapella.NewUpdateBucketRequest(memoryQuota)
+
+			// Update bucket with bucket ID
+			_, err := client.ClustersApi.ClustersUpdateSingleBucket(auth, clusterId, bucketId).UpdateBucketRequest(updateBucketRequest).Execute()
+			if err != nil {
+				return diag.FromErr(err)
+			}
+		}
+	}
+
+	return resourceCouchbaseCapellaBucketRead(ctx, d, meta)
 }
 
 func resourceCouchbaseCapellaBucketDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {

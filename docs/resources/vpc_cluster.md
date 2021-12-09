@@ -1,15 +1,15 @@
-# couchbasecapella_cluster Resource
+# couchbasecapella_vpc_cluster Resource
 
-`couchbasecapella_cluster` provides a Cluster resource. The resource lets you create, edit and delete clusters. The resource requires your Project ID.
+`couchbasecapella_vpc_cluster` provides a VPC Cluster resource. The resource allows you to create, edit and delete VPC clusters. The resource requires your Project ID.
 
-~> **WARNING:** This current release of Terraform Couchbase Capella provider doesn't support updating the cluster. Please log in to the Couchbase Capella UI where you'll be able to update the name of your cluster.
+~> **WARNING:** This current release of Terraform Couchbase Capella provider doesn't support updating a VPC cluster. Please log in to the Couchbase Capella UI where you'll be able to update the name of your cluster.
 
 ## Example Usage
 
 ### Example AWS cluster
 
 ```hcl
-resource "couchbasecapella_cluster" "test" {
+resource "couchbasecapella_vpc_cluster" "test" {
   name       = "cluster_name"
   cloud_id   = "your_cloud_id"
   project_id = "your_project_id"
@@ -27,7 +27,7 @@ resource "couchbasecapella_cluster" "test" {
 ### Example Azure cluster.
 
 ```hcl
-resource "couchbasecapella_cluster" "test" {
+resource "couchbasecapella_vpc_cluster" "test" {
   name       = "cluster_name"
   cloud_id   = "your_cloud_id"
   project_id = "your_project_id"

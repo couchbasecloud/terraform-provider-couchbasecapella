@@ -2,9 +2,13 @@ variable "cloud_id" {
   type        = string
   description = "Capella Cloud Id"
 }
-variable "cluster_name" {
+variable "vpc_cluster_name" {
   type        = string
-  description = "Cluster Name"
+  description = "VPC Cluster Name"
+}
+variable "hosted_cluster_name" {
+  type        = string
+  description = "Hosted Cluster Name"
 }
 variable "project_name" {
   type        = string

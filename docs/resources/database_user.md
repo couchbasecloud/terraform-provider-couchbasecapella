@@ -1,6 +1,6 @@
 # couchbasecapella_database_user Resource
 
-`couchbasecapella_database_user` provides a Database User resource. This resource allows Database Users to be created, edited and deleted inside a cluster.
+`couchbasecapella_database_user` provides a Database User resource. The resource allows Database Users to be created, edited and deleted inside a cluster. This resource requires your VPC Cluster ID.
 
 ## Example Usage
 

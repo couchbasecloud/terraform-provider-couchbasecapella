@@ -1,6 +1,6 @@
 # couchbasecapella_bucket Resource
 
-`couchbasecapella_buckets` provides a Bucket resource. This resource allows buckets to be created, edited and deleted inside a cluster.
+`couchbasecapella_buckets` provides a Bucket resource. The resource allows buckets to be created, edited and deleted inside a cluster. This resource requires your VPC Cluster ID.
 
 ~> **WARNING:** This current release of Terraform Couchbase Capella Provider doesn't support updating the bucket. Please log in to the Couchbase Capella UI where you'll be able to edit the memory quota and bucket access for each bucket.
 
