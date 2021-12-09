@@ -41,10 +41,11 @@ func Provider() *schema.Provider {
 		DataSourcesMap: map[string]*schema.Resource{},
 
 		ResourcesMap: map[string]*schema.Resource{
-			"couchbasecapella_project":       resourceCouchbaseCapellaProject(),
-			"couchbasecapella_cluster":       resourceCouchbaseCapellaCluster(),
-			"couchbasecapella_database_user": resourceCouchbaseCapellaDatabaseUser(),
-			"couchbasecapella_bucket":        resourceCouchbaseCapellaBucket(),
+			"couchbasecapella_project":        resourceCouchbaseCapellaProject(),
+			"couchbasecapella_vpc_cluster":    resourceCouchbaseCapellaVpcCluster(),
+			"couchbasecapella_database_user":  resourceCouchbaseCapellaDatabaseUser(),
+			"couchbasecapella_bucket":         resourceCouchbaseCapellaBucket(),
+			"couchbasecapella_hosted_cluster": resourceCouchbaseCapellaHostedCluster(),
 		},
 		ConfigureContextFunc: providerConfigure,
 	}

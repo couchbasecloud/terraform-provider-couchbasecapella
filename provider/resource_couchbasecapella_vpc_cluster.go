@@ -22,14 +22,14 @@ import (
 	couchbasecapella "github.com/couchbaselabs/couchbase-cloud-go-client"
 )
 
-func resourceCouchbaseCapellaCluster() *schema.Resource {
+func resourceCouchbaseCapellaVpcCluster() *schema.Resource {
 	return &schema.Resource{
-		Description: "Manage Couchbase Capella clusters.",
+		Description: "Manage Couchbase Capella vpc clusters.",
 
-		CreateContext: resourceCouchbaseCapellaClusterCreate,
-		ReadContext:   resourceCouchbaseCapellaClusterRead,
-		UpdateContext: resourceCouchbaseCapellaClusterUpdate,
-		DeleteContext: resourceCouchbaseCapellaClusterDelete,
+		CreateContext: resourceCouchbaseCapellaVpcClusterCreate,
+		ReadContext:   resourceCouchbaseCapellaVpcClusterRead,
+		UpdateContext: resourceCouchbaseCapellaVpcClusterUpdate,
+		DeleteContext: resourceCouchbaseCapellaVpcClusterDelete,
 
 		Schema: map[string]*schema.Schema{
 			"id": {
@@ -124,7 +124,7 @@ func resourceCouchbaseCapellaCluster() *schema.Resource {
 	}
 }
 
-func resourceCouchbaseCapellaClusterCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceCouchbaseCapellaVpcClusterCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*couchbasecapella.APIClient)
 	auth := getAuth(ctx)
 
@@ -146,14 +146,14 @@ func resourceCouchbaseCapellaClusterCreate(ctx context.Context, d *schema.Resour
 	// add Servers + Check servers Vs Cloud provider
 	if servers, ok := d.GetOk("servers"); ok {
 		// check server providers
-		providers := getServersProvider(servers.(*schema.Set))
+		providers := getVpcServersProvider(servers.(*schema.Set))
 		if len(providers) > 1 {
 			return diag.FromErr(fmt.Errorf("cluster's server should be the same as the cloud provider"))
 		}
 		if len(providers) == 1 && !Has(providers, providerName) {
 			return diag.FromErr(fmt.Errorf("cluster's server should be the same as the cloud provider"))
 		}
-		newClusterRequest.SetServers(expandServersSet(servers.(*schema.Set)))
+		newClusterRequest.SetServers(expandVpcServersSet(servers.(*schema.Set)))
 	}
 
 	// Create the cluster
@@ -187,13 +187,13 @@ func resourceCouchbaseCapellaClusterCreate(ctx context.Context, d *schema.Resour
 	}
 	_, err = createStateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return diag.Errorf("Error waiting for cluster (%s) to be created: %s", d.Id(), err)
+		return diag.Errorf("Error waiting for vpc cluster (%s) to be created: %s", d.Id(), err)
 	}
 
-	return resourceCouchbaseCapellaClusterRead(ctx, d, meta)
+	return resourceCouchbaseCapellaVpcClusterRead(ctx, d, meta)
 }
 
-func resourceCouchbaseCapellaClusterRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceCouchbaseCapellaVpcClusterRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*couchbasecapella.APIClient)
 	auth := getAuth(ctx)
 	clusterId := d.Get("id").(string)
@@ -214,11 +214,11 @@ func resourceCouchbaseCapellaClusterRead(ctx context.Context, d *schema.Resource
 	return nil
 }
 
-func resourceCouchbaseCapellaClusterUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	return diag.Errorf("This current release of terraform provider doesn't support updating the cluster, Please log to your Capella UI account")
+func resourceCouchbaseCapellaVpcClusterUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	return diag.Errorf("This current release of terraform provider doesn't support updating vpc clusters, Please log to your Capella UI account")
 }
 
-func resourceCouchbaseCapellaClusterDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceCouchbaseCapellaVpcClusterDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*couchbasecapella.APIClient)
 	auth := getAuth(ctx)
 
@@ -230,12 +230,12 @@ func resourceCouchbaseCapellaClusterDelete(ctx context.Context, d *schema.Resour
 		return diag.FromErr(err)
 	}
 	if statusResp.Status != couchbasecapella.CLUSTER_READY {
-		return diag.Errorf("Cluster is not ready to be deleted. Cluster Status: %s", statusResp.Status)
+		return diag.Errorf("VPC Cluster is not ready to be deleted. Cluster Status: %s", statusResp.Status)
 	}
 
 	r, err2 := client.ClustersApi.ClustersDelete(auth, clusterId).Execute()
 	if err2 != nil {
-		return manageErrors(err2, *r, "Cluster Delete")
+		return manageErrors(err2, *r, "VPC Cluster Delete")
 	}
 
 	// Wait for the cluster to be destroyed
@@ -252,24 +252,24 @@ func resourceCouchbaseCapellaClusterDelete(ctx context.Context, d *schema.Resour
 	}
 	_, err = deleteStateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return diag.Errorf("Error waiting for cluster (%s) to be deleted: %s", d.Id(), err)
+		return diag.Errorf("Error waiting for vpc cluster (%s) to be deleted: %s", d.Id(), err)
 	}
 
 	return nil
 }
 
-func expandServersSet(servers *schema.Set) []couchbasecapella.Server {
+func expandVpcServersSet(servers *schema.Set) []couchbasecapella.Server {
 	result := make([]couchbasecapella.Server, servers.Len())
 
 	for i, value := range servers.List() {
 		v := value.(map[string]interface{})
-		result[i] = createServer(v)
+		result[i] = createVpcServer(v)
 	}
 
 	return result
 }
 
-func expandServiceList(services []interface{}) (res []couchbasecapella.CouchbaseServices) {
+func expandVpcServiceList(services []interface{}) (res []couchbasecapella.CouchbaseServices) {
 	for _, v := range services {
 		res = append(res, couchbasecapella.CouchbaseServices(v.(string)))
 	}
@@ -277,7 +277,7 @@ func expandServiceList(services []interface{}) (res []couchbasecapella.Couchbase
 	return res
 }
 
-func getServersProvider(servers *schema.Set) []string {
+func getVpcServersProvider(servers *schema.Set) []string {
 	providers := make([]string, 0)
 
 	for _, value := range servers.List() {
@@ -298,14 +298,14 @@ func getServersProvider(servers *schema.Set) []string {
 	return providers
 }
 
-func createServer(v map[string]interface{}) couchbasecapella.Server {
+func createVpcServer(v map[string]interface{}) couchbasecapella.Server {
 	var server couchbasecapella.Server
 	for _, awss := range v["aws"].(*schema.Set).List() {
 		aws, ok := awss.(map[string]interface{})
 		if ok {
 			server = couchbasecapella.Server{
 				Size:     int32(v["size"].(int)),
-				Services: expandServiceList(v["services"].([]interface{})),
+				Services: expandVpcServiceList(v["services"].([]interface{})),
 				Aws: &couchbasecapella.ServerAws{
 					InstanceSize: couchbasecapella.AwsInstances(aws["instance_size"].(string)),
 					EbsSizeGib:   int32(aws["ebs_size_gib"].(int)),
@@ -318,7 +318,7 @@ func createServer(v map[string]interface{}) couchbasecapella.Server {
 		if ok {
 			server = couchbasecapella.Server{
 				Size:     int32(v["size"].(int)),
-				Services: expandServiceList(v["services"].([]interface{})),
+				Services: expandVpcServiceList(v["services"].([]interface{})),
 				Azure: &couchbasecapella.ServerAzure{
 					InstanceSize: couchbasecapella.AzureInstances(azure["instance_size"].(string)),
 					VolumeType:   couchbasecapella.AzureVolumeTypes(azure["volume_type"].(string)),

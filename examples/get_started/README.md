@@ -3,7 +3,8 @@
 This example will cover setting up Terraform with Couchbase Capella. This will create the following resources in Couchbase Capella:
 
 - Project
-- Couchbase Cluster - 3 Nodes, m5.xlarge, Data Service
+- Hosted Couchbase Cluster - 3 Nodes, m5.xlarge, Data Service
+- InVPC Couchbase Cluster - 3 Nodes, m5.xlarge, Data Service
 - Bucket - 1 Replica, 256 MB Memory Quota, Sequence Number Conflict Resolution
 - Database User - All Bucket Read/Write Access
 
@@ -34,7 +35,8 @@ $ terraform plan
 This project currently creates the below deployments:
 
 - Project
-- Couchbase Cluster - 3 Nodes, m5.xlarge, Data Service
+- InVPC Couchbase Cluster - 3 Nodes, m5.xlarge, Data Service
+- Hosted Couchbase Cluster - 3 Nodes, m5.xlarge, Data Service
 - Bucket - 1 Replica, 256 MB Memory Quota, Sequence Number Conflict Resolution
 - Database User - All Bucket Read/Write Access
 

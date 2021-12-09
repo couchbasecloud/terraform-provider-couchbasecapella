@@ -1,5 +1,6 @@
 cloud_id        = "CLOUD_ID"
-cluster_name    = "CLUSTER_NAME"
+vpc_cluster_name    = "VPC_CLUSTER_NAME"
+hosted_cluster_name    = "HOSTED_CLUSTER_NAME"
 project_name    = "PROJECT_NAME"
 bucket_name     = "BUCKET_NAME"
 dbuser          = "USERNAME"
