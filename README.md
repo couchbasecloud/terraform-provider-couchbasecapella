@@ -121,7 +121,7 @@ export CBC_PROJECT_ID=<YOUR_PROJECT_ID>
 export CBC_CLUSTER_ID=<YOUR_CLUSTER_ID>
 ```
 
-In order to run the full suite of Acceptance tests, run `make testacc`.
+In order to run the full suite of Acceptance tests, you will need to have a deployed cluster available so that you can configure a cluster ID in the environment variables. To run the tests, run `make testacc`.
 
 _Note:_ Acceptance tests create real resources, and often cost money to run.
 

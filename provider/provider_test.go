@@ -42,4 +42,13 @@ func testAccPreCheck(t *testing.T) {
 	if err := os.Getenv("CBC_SECRET_KEY"); err == "" {
 		t.Fatal("CBC_SECRET_KEY must be set for acceptance tests")
 	}
+	if err := os.Getenv("CBC_CLOUD_ID"); err == "" {
+		t.Fatal("CBC_CLOUD_ID must be set for acceptance tests")
+	}
+	if err := os.Getenv("CBC_PROJECT_ID"); err == "" {
+		t.Fatal("CBC_PROJECT_ID must be set for acceptance tests")
+	}
+	if err := os.Getenv("CBC_CLUSTER_ID"); err == "" {
+		t.Fatal("CBC_CLUSTER_ID must be set for acceptance tests")
+	}
 }
