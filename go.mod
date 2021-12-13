@@ -1,4 +1,4 @@
-module github.com/JamesWilkinsonCB/terraform-provider-couchbasecapella
+module github.com/couchbasecloud/terraform-provider-couchbasecapella
 
 go 1.15
 
