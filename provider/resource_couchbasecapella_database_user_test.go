@@ -44,6 +44,7 @@ func TestAccCouchbaseCapellaDatabaseUser(t *testing.T) {
 	})
 }
 
+// Test to see if database user has been destroyed after Terraform Destory has been executed
 func testAccCheckCouchbaseCapellaDatabaseUserDestroy(s *terraform.State) error {
 	client := testAccProvider.Meta().(*couchbasecapella.APIClient)
 	auth := context.WithValue(
@@ -78,6 +79,7 @@ func testAccCheckCouchbaseCapellaDatabaseUserDestroy(s *terraform.State) error {
 	return nil
 }
 
+// Test to see if database user exists after Terraform Apply has been executed
 func testAccCheckCouchbaseCapellaDatabaseUserExists(resourceName string, databaseUser *couchbasecapella.CreateDatabaseUserRequest) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		client := testAccProvider.Meta().(*couchbasecapella.APIClient)
@@ -117,6 +119,7 @@ func testAccCheckCouchbaseCapellaDatabaseUserExists(resourceName string, databas
 	}
 }
 
+// This is the Terraform Configuration that will be applied for the tests
 func testAccCouchbaseCapellaDatabaseUserConfig(clusterId, username, password string) string {
 	return fmt.Sprintf(`
 		resource "couchbasecapella_database_user" "test" {

@@ -42,6 +42,7 @@ func TestAccCouchbaseCapellaProject(t *testing.T) {
 	})
 }
 
+// Test to see if project has been destroyed after Terraform Destory has been executed
 func testAccCheckCouchbaseCapellaProjectDestroy(s *terraform.State) error {
 	client := testAccProvider.Meta().(*couchbasecapella.APIClient)
 	auth := context.WithValue(
@@ -71,6 +72,7 @@ func testAccCheckCouchbaseCapellaProjectDestroy(s *terraform.State) error {
 	return nil
 }
 
+// Test to see if project exists after Terraform Apply has been executed
 func testAccCheckCouchbaseCapellaProjectExists(resourceName string, project *couchbasecapella.Project) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		client := testAccProvider.Meta().(*couchbasecapella.APIClient)
@@ -105,6 +107,7 @@ func testAccCheckCouchbaseCapellaProjectExists(resourceName string, project *cou
 	}
 }
 
+// This is the Terraform Configuration that will be applied for the tests
 func testAccCouchbaseCapellaProjectConfig(projectName string) string {
 	return fmt.Sprintf(`
 		resource "couchbasecapella_project" "test" {

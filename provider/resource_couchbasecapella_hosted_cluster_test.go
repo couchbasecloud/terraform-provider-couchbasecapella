@@ -43,6 +43,7 @@ func TestAccCouchbaseCapellaHostedCluster(t *testing.T) {
 	})
 }
 
+// Test to see if hosted cluster has been destroyed after Terraform Destory has been executed
 func testAccCheckCouchbaseCapellaHostedClusterDestroy(s *terraform.State) error {
 	client := testAccProvider.Meta().(*couchbasecapella.APIClient)
 	auth := context.WithValue(
@@ -72,6 +73,7 @@ func testAccCheckCouchbaseCapellaHostedClusterDestroy(s *terraform.State) error 
 	return nil
 }
 
+// Test to see if hosted cluster exists after Terraform Apply has been executed
 func testAccCheckCouchbaseCapellaHostedClusterExists(resourceName string, cluster *couchbasecapella.V3Cluster) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		client := testAccProvider.Meta().(*couchbasecapella.APIClient)
@@ -106,6 +108,7 @@ func testAccCheckCouchbaseCapellaHostedClusterExists(resourceName string, cluste
 	}
 }
 
+// This is the Terraform Configuration that will be applied for the tests
 func testAccCouchbaseCapellaHostedClusterConfig(clusterName, projectId string) string {
 	return fmt.Sprintf(`
 	resource "couchbasecapella_hosted_cluster" "test" {

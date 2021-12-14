@@ -44,6 +44,7 @@ func TestAccCouchbaseCapellaVpcCluster(t *testing.T) {
 	})
 }
 
+// Test to see if vpc cluster has been destroyed after Terraform Destory has been executed
 func testAccCheckCouchbaseCapellaVpcClusterDestroy(s *terraform.State) error {
 	client := testAccProvider.Meta().(*couchbasecapella.APIClient)
 	auth := context.WithValue(
@@ -73,6 +74,7 @@ func testAccCheckCouchbaseCapellaVpcClusterDestroy(s *terraform.State) error {
 	return nil
 }
 
+// Test to see if vpc cluster exists after Terraform Apply has been executed
 func testAccCheckCouchbaseCapellaVpcClusterExists(resourceName string, cluster *couchbasecapella.Cluster) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		client := testAccProvider.Meta().(*couchbasecapella.APIClient)
@@ -107,6 +109,7 @@ func testAccCheckCouchbaseCapellaVpcClusterExists(resourceName string, cluster *
 	}
 }
 
+// This is the Terraform Configuration that will be applied for the tests
 func testAccCouchbaseCapellaVpcClusterConfig(clusterName, cloudId, projectId string) string {
 	return fmt.Sprintf(`
 		resource "couchbasecapella_vpc_cluster" "test" {
