@@ -9,16 +9,47 @@
 package main
 
 import (
+	"fmt"
+	"log"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/plugin"
+	"go.uber.org/zap"
 
-	provider "github.com/JamesWilkinsonCB/terraform-provider-couchbasecapella/provider"
+	"github.com/JamesWilkinsonCB/terraform-provider-couchbasecapella/internal/buckets"
+	"github.com/JamesWilkinsonCB/terraform-provider-couchbasecapella/provider"
 )
 
 func main() {
+	logger, err := zap.NewProduction()
+	if err != nil {
+		log.Fatalf("unable to get logger: %v", err)
+	}
+
+	bGW, err := bucketGateway(logger)
+	if err != nil {
+		log.Fatalf("unable to get bucket gateway:%v", err)
+	}
+
+	p, err := provider.NewProvider(bGW)
+	if err != nil {
+		log.Fatalf("unable to get bucket resource: %v", err)
+	}
+
 	plugin.Serve(&plugin.ServeOpts{
 		ProviderFunc: func() *schema.Provider {
-			return provider.Provider()
+			return p.Provider(
+				p.WithCouchbaseCapellaBucketResource(),
+			)
 		},
 	})
+}
+
+func bucketGateway(logger *zap.Logger) (*buckets.Gateway, error) {
+	gw, err := buckets.NewGateway(logger)
+	if err != nil {
+		return nil, fmt.Errorf("unable to get bucket gateway: %w", err)
+	}
+
+	return gw, nil
 }

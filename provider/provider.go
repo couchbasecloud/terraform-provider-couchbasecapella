@@ -10,18 +10,72 @@ package provider
 
 import (
 	"context"
+	"fmt"
+	"strings"
 
 	couchbasecapella "github.com/couchbaselabs/couchbase-cloud-go-client"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
+	"github.com/JamesWilkinsonCB/terraform-provider-couchbasecapella/internal/buckets"
 )
 
-func init() {
-	schema.DescriptionKind = schema.StringMarkdown
+// Provider is responsible for configuring the TF resources and provider
+// NOTE: could do with a much better comment here
+type Provider struct {
+	bucketGW *buckets.Gateway
 }
 
-func Provider() *schema.Provider {
-	return &schema.Provider{
+// NewProvider returns an instantiated instance of a provider. A provides
+// manages the resource handlers for the TF provider. It has the following
+// dependencies:
+//
+// bucket gateway - for managing bucket resources
+func NewProvider(bucketGW *buckets.Gateway) (*Provider, error) {
+	p := Provider{
+		bucketGW: bucketGW,
+	}
+
+	if err := p.validate(); err != nil {
+		return nil, err
+	}
+
+	return &p, nil
+}
+
+func (p *Provider) validate() error {
+	var missingDeps []string
+
+	for _, tc := range []struct {
+		dep string
+		chk func() bool
+	}{
+		{
+			dep: "bucket gateway",
+			chk: func() bool { return p.bucketGW != nil },
+		},
+	} {
+		if !tc.chk() {
+			missingDeps = append(missingDeps, tc.dep)
+		}
+	}
+
+	if len(missingDeps) > 0 {
+		return fmt.Errorf(
+			"unable to initailize a provider due to (%d) missing dependencies: %s",
+			len(missingDeps),
+			strings.Join(missingDeps, ","),
+		)
+	}
+
+	return nil
+}
+
+// Provider returns a Terraform provider with the resources options provided
+// TODO: better comment here
+// TODO: figure out what to do with data resources
+func (p *Provider) Provider(resources ...ResourceOption) *schema.Provider {
+	tfProvider := &schema.Provider{
 		Schema: map[string]*schema.Schema{
 			"access_key": {
 				Type:        schema.TypeString,
@@ -37,17 +91,25 @@ func Provider() *schema.Provider {
 				Sensitive:   true,
 			},
 		},
-
-		DataSourcesMap: map[string]*schema.Resource{},
-
-		ResourcesMap: map[string]*schema.Resource{
-			"couchbasecapella_project":        resourceCouchbaseCapellaProject(),
-			"couchbasecapella_vpc_cluster":    resourceCouchbaseCapellaVpcCluster(),
-			"couchbasecapella_database_user":  resourceCouchbaseCapellaDatabaseUser(),
-			"couchbasecapella_bucket":         resourceCouchbaseCapellaBucket(),
-			"couchbasecapella_hosted_cluster": resourceCouchbaseCapellaHostedCluster(),
-		},
+		DataSourcesMap:       map[string]*schema.Resource{},
 		ConfigureContextFunc: providerConfigure,
+	}
+
+	for i := range resources {
+		resources[i](tfProvider)
+	}
+
+	return tfProvider
+}
+
+type ResourceOption func(p *schema.Provider)
+
+// WithCouchbaseCapellaBucketResource returns an option that sets the underlying
+// resources map to the Couchbase Capella bucket resource handled by the bucket
+// gateway
+func (p *Provider) WithCouchbaseCapellaBucketResource() ResourceOption {
+	return func(tfProvider *schema.Provider) {
+		tfProvider.ResourcesMap[buckets.Resource] = buckets.NewCouchbaseCapellaBucketResource(p.bucketGW)
 	}
 }
 
@@ -56,4 +118,8 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 	configuration := couchbasecapella.NewConfiguration()
 	apiClient := couchbasecapella.NewAPIClient(configuration)
 	return apiClient, nil
+}
+
+func init() {
+	schema.DescriptionKind = schema.StringMarkdown
 }
