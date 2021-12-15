@@ -11,6 +11,7 @@ package provider
 import (
 	"context"
 	"time"
+	"unicode"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -20,7 +21,7 @@ import (
 
 func resourceCouchbaseCapellaDatabaseUser() *schema.Resource {
 	return &schema.Resource{
-		Description: "Manage Couchbase Capella Users.",
+		Description: "Manage Couchbase Capella Database Users",
 
 		CreateContext: resourceCouchbaseCapellaDatabaseUserCreate,
 		ReadContext:   resourceCouchbaseCapellaDatabaseUserRead,
@@ -29,22 +30,24 @@ func resourceCouchbaseCapellaDatabaseUser() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"cluster_id": {
-				Description: "Cluster ID",
+				Description: "ID of the Cluster",
 				Type:        schema.TypeString,
 				Required:    true,
 			},
 			"username": {
-				Description: "Database user username",
+				Description: "Username for the Database User",
 				Type:        schema.TypeString,
 				Required:    true,
+				ForceNew:    true,
 			},
 			"password": {
-				Description: "Database user password",
+				Description: "Password for the Database User",
 				Type:        schema.TypeString,
 				Required:    true,
+				Sensitive:   true,
 			},
 			"buckets": {
-				Description: "Database user bucket access",
+				Description: "Define bucket access level for the Database User",
 				Type:        schema.TypeSet,
 				Optional:    true,
 				Elem: &schema.Resource{
@@ -64,7 +67,7 @@ func resourceCouchbaseCapellaDatabaseUser() *schema.Resource {
 				},
 			},
 			"all_bucket_access": {
-				Description: "Database user all bucket access",
+				Description: "Define all bucket access for the Database User",
 				Type:        schema.TypeString,
 				Optional:    true,
 			},
@@ -75,6 +78,10 @@ func resourceCouchbaseCapellaDatabaseUser() *schema.Resource {
 	}
 }
 
+// resourceCouchbaseCapellaDatabaseUserCreate is responsible for creating a
+// database user in a Couchbase Capella VPC Cluster using the Terraform resource data.
+// WARNING: Creating database users is only supported for VPC Clusters in this current
+// release.
 func resourceCouchbaseCapellaDatabaseUserCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*couchbasecapella.APIClient)
 	auth := getAuth(ctx)
@@ -83,29 +90,53 @@ func resourceCouchbaseCapellaDatabaseUserCreate(ctx context.Context, d *schema.R
 	username := d.Get("username").(string)
 	password := d.Get("password").(string)
 
-	createDatabaseUserRequest := *couchbasecapella.NewCreateDatabaseUserRequest(username, password)
-	_, allBucketAccessOk := d.GetOk("all_bucket_access")
-	_, bucketsOk := d.GetOk("buckets")
-
-	if !allBucketAccessOk && !bucketsOk {
-		return diag.Errorf("No bucket roles specified")
+	// Check to see if a user with the same name already exists in the cluster. If a user
+	// already has the name, an error is thrown. If not, then proceeds with creation.
+	users, _, err := client.ClustersApi.ClustersListUsers(auth, clusterId).Execute()
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	for _, user := range users {
+		if user.Username == username {
+			return diag.Errorf("Failed to create: A user already exists with that name")
+		}
 	}
 
-	if allBucketAccessOk && !bucketsOk {
+	// An error will return if the password doesn't match the required format
+	validateErr := validatePassword(password)
+	if validateErr != nil {
+		return diag.FromErr(validateErr)
+	}
+
+	createDatabaseUserRequest := *couchbasecapella.NewCreateDatabaseUserRequest(username, password)
+	_, allBucketAccessExists := d.GetOk("all_bucket_access")
+	_, bucketsExists := d.GetOk("buckets")
+
+	// Only one of `buckets` or `all_bucket_access` can be specified in the terraform configuration file.
+	// The follwing checks handle errors where none or both are specified. If only one of `buckets` or
+	// `all_bucket_access` is specified, the bucket access roles will be set accordingly.
+	if !allBucketAccessExists && !bucketsExists {
+		return diag.Errorf("No bucket access roles specified")
+	}
+
+	if allBucketAccessExists && !bucketsExists {
 		allBucketAccess := couchbasecapella.BucketRoleTypes(d.Get("all_bucket_access").(string))
 		createDatabaseUserRequest.SetAllBucketsAccess(allBucketAccess)
 	}
 
-	if !allBucketAccessOk && bucketsOk {
+	if !allBucketAccessExists && bucketsExists {
 		buckets := expandBuckets(d)
 		createDatabaseUserRequest.SetBuckets(buckets)
 	}
 
-	if allBucketAccessOk && bucketsOk {
-		return diag.Errorf("Please specify only specific buckets or all buckets")
+	if allBucketAccessExists && bucketsExists {
+		return diag.Errorf("Please specify only access for specific buckets or access for all buckets")
 	}
 
 	r, err := client.ClustersApi.ClustersCreateUser(auth, clusterId).CreateDatabaseUserRequest(createDatabaseUserRequest).Execute()
+	if r == nil {
+		return diag.Errorf("Pointer to database user create http.Response is nil")
+	}
 	if err != nil {
 		return manageErrors(err, *r, "Create Database User")
 	}
@@ -115,11 +146,18 @@ func resourceCouchbaseCapellaDatabaseUserCreate(ctx context.Context, d *schema.R
 	return resourceCouchbaseCapellaDatabaseUserRead(ctx, d, meta)
 }
 
+// resourceCouchbaseCapellaDatabaseUserRead is responsible for reading a Couchbase
+// Capella database user using the Terraform resource data.
 func resourceCouchbaseCapellaDatabaseUserRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*couchbasecapella.APIClient)
 	auth := getAuth(ctx)
 
 	clusterId := d.Get("cluster_id").(string)
+
+	// The current version of the Capella API doesn't support getting a singular
+	// database user. To obtain the database user, we need to iterate the trough
+	// the list of all database users and check if it exists. If the user
+	// is not present in the list of users and error is thrown.
 	users, _, err := client.ClustersApi.ClustersListUsers(auth, clusterId).Execute()
 	if err != nil {
 		return diag.FromErr(err)
@@ -132,6 +170,10 @@ func resourceCouchbaseCapellaDatabaseUserRead(ctx context.Context, d *schema.Res
 	return diag.FromErr(err)
 }
 
+// resourceCouchbaseCapellaDatabaseUserUpdate is responsible for updating a
+// database user in a Couchbase Capella VPC Cluster using the Terraform resource data.
+// WARNING: Updating database users is only supported for VPC Clusters in this current
+// release.
 func resourceCouchbaseCapellaDatabaseUserUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*couchbasecapella.APIClient)
 	auth := getAuth(ctx)
@@ -140,6 +182,8 @@ func resourceCouchbaseCapellaDatabaseUserUpdate(ctx context.Context, d *schema.R
 
 	updateDatabaseUserRequest := *couchbasecapella.NewUpdateDatabaseUserRequest()
 
+	// Check to see if either `all_bucket_access` or `buckets` has changed as only one should
+	// be present in the resource data. If there has been a change, then update accordingly.
 	if d.HasChange("all_bucket_access") {
 		allBucketAccess := couchbasecapella.BucketRoleTypes(d.Get("all_bucket_access").(string))
 		updateDatabaseUserRequest.SetAllBucketsAccess(allBucketAccess)
@@ -149,6 +193,9 @@ func resourceCouchbaseCapellaDatabaseUserUpdate(ctx context.Context, d *schema.R
 	}
 
 	r, err := client.ClustersApi.ClustersUpdateUser(auth, clusterId, username).UpdateDatabaseUserRequest(updateDatabaseUserRequest).Execute()
+	if r == nil {
+		return diag.Errorf("Pointer to database user update http.Response is nil")
+	}
 	if err != nil {
 		return manageErrors(err, *r, "Update Database User")
 	}
@@ -156,6 +203,10 @@ func resourceCouchbaseCapellaDatabaseUserUpdate(ctx context.Context, d *schema.R
 	return resourceCouchbaseCapellaDatabaseUserRead(ctx, d, meta)
 }
 
+// resourceCouchbaseCapellaDatabaseUserDelete is responsible for deleting a
+// database user in a Couchbase Capella VPC Cluster using the Terraform resource data.
+// WARNING: Deleting database users is only supported for VPC Clusters in this current
+// release.
 func resourceCouchbaseCapellaDatabaseUserDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*couchbasecapella.APIClient)
 	auth := getAuth(ctx)
@@ -163,14 +214,30 @@ func resourceCouchbaseCapellaDatabaseUserDelete(ctx context.Context, d *schema.R
 	clusterId := d.Get("cluster_id").(string)
 	username := d.Get("username").(string)
 
-	r, err := client.ClustersApi.ClustersDeleteUser(auth, clusterId, username).Execute()
+	// Check to see if database user exists in list of database users. If the database user
+	// exists, it will be delete from the Cluster. If the database user does not appear in the list of users,
+	// likely being deleted elsewhere, an error is thrown.
+	users, _, err := client.ClustersApi.ClustersListUsers(auth, clusterId).Execute()
 	if err != nil {
-		return manageErrors(err, *r, "Delete Database User")
+		return diag.FromErr(err)
 	}
-
-	return nil
+	for _, user := range users {
+		if user.Username == username {
+			r, err := client.ClustersApi.ClustersDeleteUser(auth, clusterId, username).Execute()
+			if r == nil {
+				return diag.Errorf("Pointer to database user delete http.Response is nil")
+			}
+			if err != nil {
+				return manageErrors(err, *r, "Delete Database User")
+			}
+			return nil
+		}
+	}
+	return diag.Errorf("Failed to delete: Database User doesn't exist in list of users")
 }
 
+// expandBuckets is responsible for converting the bucket interface into
+// a slice of type BucketRole
 func expandBuckets(d *schema.ResourceData) []couchbasecapella.BucketRole {
 	buckets := make([]couchbasecapella.BucketRole, 0)
 
@@ -191,10 +258,57 @@ func expandBuckets(d *schema.ResourceData) []couchbasecapella.BucketRole {
 	return buckets
 }
 
-func expandBucketAccessList(bucketAccess []interface{}) (res []couchbasecapella.BucketRoleTypes) {
+// expandBucketAccessList is responsible for converting the bucketAccess interface into
+// a slice of type BucketRoleTypes
+func expandBucketAccessList(bucketAccess []interface{}) (roles []couchbasecapella.BucketRoleTypes) {
 	for _, v := range bucketAccess {
-		res = append(res, couchbasecapella.BucketRoleTypes(v.(string)))
+		roles = append(roles, couchbasecapella.BucketRoleTypes(v.(string)))
 	}
 
-	return res
+	return roles
+}
+
+// validatePassword is responsbile for handling the error if the password fails to match
+// the required format.
+func validatePassword(password string) error {
+	verified := verifyPassword(password)
+	if verified {
+		return nil
+	}
+	return Error("Password must contain 8+ characters, 1+ lowercase, 1+ uppercase, 1+ symbols, 1+ numbers")
+}
+
+// verifyPassword is responsible for checking if a password string matches the required
+// format. A password must contain 8+ characters, 1+ lowercase, 1+ uppercase, 1+ symbols, 1+ numbers.
+// If the password matches the required format, the function will return true.
+// If the password fails to match the required format, the function will return false.
+func verifyPassword(password string) bool {
+	chars, lower, upper, symbol, number := false, false, false, false, false
+	letters := 0
+	for _, c := range password {
+		switch {
+		case unicode.IsNumber(c):
+			number = true
+		case unicode.IsUpper(c):
+			upper = true
+			letters++
+		case unicode.IsLower(c):
+			lower = true
+			letters++
+		case unicode.IsPunct(c) || unicode.IsSymbol(c):
+			symbol = true
+		case unicode.IsLetter(c):
+			letters++
+		case c == ' ':
+			return false
+		default:
+			return false
+		}
+	}
+	chars = letters >= 8
+	if chars && lower && upper && symbol && number {
+		return true
+	} else {
+		return false
+	}
 }
