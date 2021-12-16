@@ -215,7 +215,7 @@ func resourceCouchbaseCapellaDatabaseUserDelete(ctx context.Context, d *schema.R
 	username := d.Get("username").(string)
 
 	// Check to see if database user exists in list of database users. If the database user
-	// exists, it will be delete from the Cluster. If the database user does not appear in the list of users,
+	// exists, it will be deleted from the Cluster. If the database user does not appear in the list of users,
 	// likely being deleted elsewhere, an error is thrown.
 	users, _, err := client.ClustersApi.ClustersListUsers(auth, clusterId).Execute()
 	if err != nil {

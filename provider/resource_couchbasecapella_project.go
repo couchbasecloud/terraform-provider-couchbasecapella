@@ -43,13 +43,19 @@ func resourceCouchbaseCapellaProject() *schema.Resource {
 	}
 }
 
+// resourceCouchbaseCapellaProjectCreate is responsible for creating a
+// project in Couchbase Capella using the Terraform resource data.
 func resourceCouchbaseCapellaProjectCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*couchbasecapella.APIClient)
 	auth := getAuth(ctx)
+	projectName := d.Get("name").(string)
 
-	createProjectRequest := *couchbasecapella.NewCreateProjectRequest(d.Get("name").(string))
+	createProjectRequest := *couchbasecapella.NewCreateProjectRequest(projectName)
 
 	project, r, err := client.ProjectsApi.ProjectsCreate(auth).CreateProjectRequest(createProjectRequest).Execute()
+	if r == nil {
+		return diag.Errorf("Pointer to database project create http.Response is nil")
+	}
 	if err != nil {
 		return manageErrors(err, *r, "Create Project")
 	}
@@ -59,6 +65,8 @@ func resourceCouchbaseCapellaProjectCreate(ctx context.Context, d *schema.Resour
 	return resourceCouchbaseCapellaProjectRead(ctx, d, meta)
 }
 
+// resourceCouchbaseCapellaProjectRead is responsible for reading a
+// project in Couchbase Capella using the Terraform resource data.
 func resourceCouchbaseCapellaProjectRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*couchbasecapella.APIClient)
 	auth := getAuth(ctx)
@@ -80,16 +88,27 @@ func resourceCouchbaseCapellaProjectRead(ctx context.Context, d *schema.Resource
 	return nil
 }
 
+// resourceCouchbaseCapellaProjectDelete is responsible for deleting a
+// project in Couchbase Capella using the Terraform resource data.
 func resourceCouchbaseCapellaProjectDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*couchbasecapella.APIClient)
 	auth := getAuth(ctx)
 
 	projectId := d.Get("id").(string)
 
+	// Check to see if project exists in Capella. If the project
+	// exists, it will be deleted. If the project does not exist in Capella,
+	// likely being deleted elsewhere, an error is thrown.
+	_, _, err := client.ProjectsApi.ProjectsShow(auth, projectId).Execute()
+	if err != nil {
+		return diag.Errorf("Failed to delete: Project doesn't exist Capella")
+	}
 	r, err := client.ProjectsApi.ProjectsDelete(auth, projectId).Execute()
+	if r == nil {
+		return diag.Errorf("Pointer to project delete http.Response is nil")
+	}
 	if err != nil {
 		return manageErrors(err, *r, "Delete Project")
 	}
-
 	return nil
 }

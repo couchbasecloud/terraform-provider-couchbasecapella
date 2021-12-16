@@ -26,6 +26,7 @@ func TestAccCouchbaseCapellaProject(t *testing.T) {
 	)
 
 	projectName := fmt.Sprintf("testacc-project-%s", acctest.RandString(5))
+	updateProjectName := fmt.Sprintf("testacc-project-%s", acctest.RandString(4))
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -36,6 +37,14 @@ func TestAccCouchbaseCapellaProject(t *testing.T) {
 				Config: testAccCouchbaseCapellaProjectConfig(projectName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCouchbaseCapellaProjectExists("couchbasecapella_project.test", &project),
+					resource.TestCheckResourceAttr("couchbasecapella_project.test", "name", projectName),
+				),
+			},
+			{
+				Config: testAccCouchbaseCapellaProjectConfig(updateProjectName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckCouchbaseCapellaProjectExists("couchbasecapella_project.test", &project),
+					resource.TestCheckResourceAttr("couchbasecapella_project.test", "name", updateProjectName),
 				),
 			},
 		},
