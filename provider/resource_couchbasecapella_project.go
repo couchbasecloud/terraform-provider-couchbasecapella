@@ -72,16 +72,13 @@ func resourceCouchbaseCapellaProjectRead(ctx context.Context, d *schema.Resource
 	auth := getAuth(ctx)
 	projectId := d.Get("id").(string)
 
-	project, resp, err := client.ProjectsApi.ProjectsShow(auth, projectId).Execute()
+	_, resp, err := client.ProjectsApi.ProjectsShow(auth, projectId).Execute()
 
 	if err != nil {
 		if resp != nil && resp.StatusCode == http.StatusNotFound {
 			d.SetId("")
 			return nil
 		}
-		return diag.FromErr(err)
-	}
-	if err := d.Set("name", project.Name); err != nil {
 		return diag.FromErr(err)
 	}
 

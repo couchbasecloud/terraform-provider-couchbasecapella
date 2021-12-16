@@ -198,16 +198,13 @@ func resourceCouchbaseCapellaVpcClusterRead(ctx context.Context, d *schema.Resou
 	auth := getAuth(ctx)
 	clusterId := d.Get("id").(string)
 
-	cluster, resp, err := client.ClustersApi.ClustersShow(auth, clusterId).Execute()
+	_, resp, err := client.ClustersApi.ClustersShow(auth, clusterId).Execute()
 
 	if err != nil {
 		if resp != nil && resp.StatusCode == http.StatusNotFound {
 			d.SetId("")
 			return nil
 		}
-		return diag.FromErr(err)
-	}
-	if err := d.Set("name", cluster.Name); err != nil {
 		return diag.FromErr(err)
 	}
 
