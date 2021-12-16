@@ -163,7 +163,7 @@ func resourceCouchbaseCapellaDatabaseUserRead(ctx context.Context, d *schema.Res
 		return diag.FromErr(err)
 	}
 	for _, user := range users {
-		if user.Username == d.Get("username") {
+		if user.Username == d.Id() {
 			return nil
 		}
 	}

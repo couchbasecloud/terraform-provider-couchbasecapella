@@ -21,23 +21,82 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccCouchbaseCapellaBucket(t *testing.T) {
+// Test to see if a bucket with sequential number conflict resolution can be created, updated and deleted
+// successfully
+func TestAccCouchbaseCapellaBucket_withSequentialNumberResolution(t *testing.T) {
 	var (
 		bucket couchbasecapella.CouchbaseBucketSpec
 	)
 
 	testClusterId := os.Getenv("CBC_CLUSTER_ID")
 	bucketName := fmt.Sprintf("testacc-bucket-%s", acctest.RandString(5))
+	memoryQuota := "128"
+	updatedMemoryQuota := "256"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckCouchbaseCapellaBucketDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCouchbaseCapellaBucketConfig(testClusterId, bucketName),
+				Config: testAccCouchbaseCapellaBucketConfig_withSequentialNumberResolution(testClusterId, bucketName, memoryQuota),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCouchbaseCapellaBucketExists("couchbasecapella_bucket.test", &bucket),
+					resource.TestCheckResourceAttr("couchbasecapella_bucket.test", "name", bucketName),
+					resource.TestCheckResourceAttr("couchbasecapella_bucket.test", "memory_quota", memoryQuota),
+					resource.TestCheckResourceAttr("couchbasecapella_bucket.test", "replicas", "1"),
+					resource.TestCheckResourceAttr("couchbasecapella_bucket.test", "conflict_resolution", "seqno"),
+				),
+			},
+			{
+				Config: testAccCouchbaseCapellaBucketConfig_withSequentialNumberResolution(testClusterId, bucketName, updatedMemoryQuota),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckCouchbaseCapellaBucketExists("couchbasecapella_bucket.test", &bucket),
+					resource.TestCheckResourceAttr("couchbasecapella_bucket.test", "name", bucketName),
+					resource.TestCheckResourceAttr("couchbasecapella_bucket.test", "memory_quota", updatedMemoryQuota),
+					resource.TestCheckResourceAttr("couchbasecapella_bucket.test", "replicas", "1"),
+					resource.TestCheckResourceAttr("couchbasecapella_bucket.test", "conflict_resolution", "seqno"),
+				),
+			},
+		},
+	})
+}
+
+// Test to see if a bucket with last write wins conflict resolution can be created, updated and deleted
+// successfully
+func TestAccCouchbaseCapellaBucket_withLastWriteWinsResolution(t *testing.T) {
+	var (
+		bucket couchbasecapella.CouchbaseBucketSpec
+	)
+
+	testClusterId := os.Getenv("CBC_CLUSTER_ID")
+	bucketName := fmt.Sprintf("testacc-bucket-%s", acctest.RandString(5))
+	memoryQuota := "128"
+	updatedMemoryQuota := "256"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckCouchbaseCapellaBucketDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCouchbaseCapellaBucketConfig_withLastWriteWinsResolution(testClusterId, bucketName, memoryQuota),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckCouchbaseCapellaBucketExists("couchbasecapella_bucket.test", &bucket),
+					resource.TestCheckResourceAttr("couchbasecapella_bucket.test", "name", bucketName),
+					resource.TestCheckResourceAttr("couchbasecapella_bucket.test", "memory_quota", memoryQuota),
+					resource.TestCheckResourceAttr("couchbasecapella_bucket.test", "replicas", "1"),
+					resource.TestCheckResourceAttr("couchbasecapella_bucket.test", "conflict_resolution", "lww"),
+				),
+			},
+			{
+				Config: testAccCouchbaseCapellaBucketConfig_withLastWriteWinsResolution(testClusterId, bucketName, updatedMemoryQuota),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckCouchbaseCapellaBucketExists("couchbasecapella_bucket.test", &bucket),
+					resource.TestCheckResourceAttr("couchbasecapella_bucket.test", "name", bucketName),
+					resource.TestCheckResourceAttr("couchbasecapella_bucket.test", "memory_quota", updatedMemoryQuota),
+					resource.TestCheckResourceAttr("couchbasecapella_bucket.test", "replicas", "1"),
+					resource.TestCheckResourceAttr("couchbasecapella_bucket.test", "conflict_resolution", "lww"),
 				),
 			},
 		},
@@ -129,15 +188,30 @@ func testAccCheckCouchbaseCapellaBucketExists(resourceName string, bucket *couch
 	}
 }
 
-// This is the Terraform Configuration that will be applied for the tests
-func testAccCouchbaseCapellaBucketConfig(clusterId, bucketName string) string {
+// This is the Terraform Configuration that will be applied for testing a bucket with sequential number
+// conflict resolution
+func testAccCouchbaseCapellaBucketConfig_withSequentialNumberResolution(clusterId, bucketName, memoryQuota string) string {
 	return fmt.Sprintf(`
 		resource "couchbasecapella_bucket" "test" {
 			cluster_id = "%s"
 			name   = "%s"
-			memory_quota = "128"
+			memory_quota = "%s"
 			replicas = "1"
 			conflict_resolution = "seqno"
 		}
-	`, clusterId, bucketName)
+	`, clusterId, bucketName, memoryQuota)
+}
+
+// This is the Terraform Configuration that will be applied for testing a bucket with last write wins
+// conflict resolution
+func testAccCouchbaseCapellaBucketConfig_withLastWriteWinsResolution(clusterId, bucketName, memoryQuota string) string {
+	return fmt.Sprintf(`
+		resource "couchbasecapella_bucket" "test" {
+			cluster_id = "%s"
+			name   = "%s"
+			memory_quota = "%s"
+			replicas = "1"
+			conflict_resolution = "lww"
+		}
+	`, clusterId, bucketName, memoryQuota)
 }

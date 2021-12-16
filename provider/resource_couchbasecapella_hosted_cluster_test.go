@@ -20,13 +20,20 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
+// Test to see if a hosted cluster is created, updated and deleted successfully.
+// Once the cluster has been deployed, there will be tests to check that
+// the name, support packages and server services have updated correctly.
 func TestAccCouchbaseCapellaHostedCluster(t *testing.T) {
 	var (
 		cluster couchbasecapella.V3Cluster
 	)
 
+	resourceName := "couchbasecapella_hosted_cluster.test"
 	clusterName := fmt.Sprintf("testacc-hosted-%s", acctest.RandString(5))
+	updatedClusterName := fmt.Sprintf("testacc-hosted-%s", acctest.RandString(4))
 	projectId := os.Getenv("CBC_PROJECT_ID")
+	supportPackageType := "Basic"
+	updatedSupportPackageType := "DeveloperPro"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -34,9 +41,43 @@ func TestAccCouchbaseCapellaHostedCluster(t *testing.T) {
 		CheckDestroy: testAccCheckCouchbaseCapellaHostedClusterDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCouchbaseCapellaHostedClusterConfig(clusterName, projectId),
+				Config: testAccCouchbaseCapellaHostedClusterConfig(clusterName, projectId, supportPackageType),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCouchbaseCapellaHostedClusterExists("couchbasecapella_hosted_cluster.test", &cluster),
+					testAccCheckCouchbaseCapellaHostedClusterExists(resourceName, &cluster),
+					resource.TestCheckResourceAttr(resourceName, "name", clusterName),
+					resource.TestCheckResourceAttr(resourceName, "support_package.0.support_package_type", supportPackageType),
+				),
+			},
+			{
+				Config: testAccCouchbaseCapellaHostedClusterConfig(updatedClusterName, projectId, supportPackageType),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckCouchbaseCapellaHostedClusterExists(resourceName, &cluster),
+					resource.TestCheckResourceAttr(resourceName, "name", updatedClusterName),
+					resource.TestCheckResourceAttr(resourceName, "support_package.0.support_package_type", supportPackageType),
+				),
+			},
+			{
+				Config: testAccCouchbaseCapellaHostedClusterConfig(updatedClusterName, projectId, updatedSupportPackageType),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckCouchbaseCapellaHostedClusterExists(resourceName, &cluster),
+					resource.TestCheckResourceAttr(resourceName, "name", updatedClusterName),
+					resource.TestCheckResourceAttr(resourceName, "support_package.0.support_package_type", updatedSupportPackageType),
+				),
+			},
+			{
+				Config: testAccCouchbaseCapellaHostedClusterConfig_withUpdatedServices(updatedClusterName, projectId, updatedSupportPackageType),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckCouchbaseCapellaHostedClusterExists(resourceName, &cluster),
+					resource.TestCheckResourceAttr(resourceName, "name", updatedClusterName),
+					resource.TestCheckResourceAttr(resourceName, "support_package.0.support_package_type", updatedSupportPackageType),
+				),
+			},
+			{
+				Config: testAccCouchbaseCapellaHostedClusterConfig(updatedClusterName, projectId, updatedSupportPackageType),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckCouchbaseCapellaHostedClusterExists(resourceName, &cluster),
+					resource.TestCheckResourceAttr(resourceName, "name", updatedClusterName),
+					resource.TestCheckResourceAttr(resourceName, "support_package.0.support_package_type", updatedSupportPackageType),
 				),
 			},
 		},
@@ -108,8 +149,8 @@ func testAccCheckCouchbaseCapellaHostedClusterExists(resourceName string, cluste
 	}
 }
 
-// This is the Terraform Configuration that will be applied for the tests
-func testAccCouchbaseCapellaHostedClusterConfig(clusterName, projectId string) string {
+// This is the Terraform Configuration that will be applied for testing a hosted cluster can be created and updated
+func testAccCouchbaseCapellaHostedClusterConfig(clusterName, projectId, supportPackageType string) string {
 	return fmt.Sprintf(`
 	resource "couchbasecapella_hosted_cluster" "test" {
 		name        = "%s"
@@ -124,18 +165,50 @@ func testAccCouchbaseCapellaHostedClusterConfig(clusterName, projectId string) s
 		}
 		support_package {
 			timezone = "GMT"
-			type     = "Basic"
+			support_package_type     = "%s"
 		}
 		servers {
 			size     = 3
 			compute  = "m5.xlarge"
 			services = ["data"]
 			storage {
-				type = "GP3"
+				storage_type = "GP3"
 				iops = "3000"
-				size = "50"
+				storage_size = "50"
 			}
 		}
 	}	
-	`, clusterName, projectId)
+	`, clusterName, projectId, supportPackageType)
+}
+
+// This is the Terraform Configuration that will be applied for testing updating a hosted cluster services
+func testAccCouchbaseCapellaHostedClusterConfig_withUpdatedServices(clusterName, projectId, supportPackageType string) string {
+	return fmt.Sprintf(`
+	resource "couchbasecapella_hosted_cluster" "test" {
+		name        = "%s"
+		project_id  = "%s"
+		place {
+			single_az = true
+			hosted {
+				provider = "aws"
+				region   = "us-west-2"
+				cidr     = "10.0.16.0/20"
+			}
+		}
+		support_package {
+			timezone = "GMT"
+			support_package_type     = "%s"
+		}
+		servers {
+			size     = 3
+			compute  = "m5.xlarge"
+			services = ["data", "index", "query"]
+			storage {
+				storage_type = "GP3"
+				iops = "3000"
+				storage_size = "50"
+			}
+		}
+	}	
+	`, clusterName, projectId, supportPackageType)
 }

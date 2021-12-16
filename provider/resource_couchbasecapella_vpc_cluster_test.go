@@ -20,24 +20,52 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccCouchbaseCapellaVpcCluster(t *testing.T) {
+// Test to see if a vpc cluster can be created, exists and is deleted successfully in AWS
+func TestAccCouchbaseCapellaVpcCluster_AWS(t *testing.T) {
 	var (
 		cluster couchbasecapella.Cluster
 	)
 
+	resourceName := "couchbasecapella_vpc_cluster.test"
 	clusterName := fmt.Sprintf("testacc-vpc-%s", acctest.RandString(5))
-	cloudId := os.Getenv("CBC_CLOUD_ID")
+	cloudId := os.Getenv("CBC_AWS_CLOUD_ID")
 	projectId := os.Getenv("CBC_PROJECT_ID")
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckCouchbaseCapellaVpcClusterDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCouchbaseCapellaVpcClusterConfig(clusterName, cloudId, projectId),
+				Config: testAccCouchbaseCapellaVpcClusterConfig_AWS(clusterName, cloudId, projectId),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCouchbaseCapellaVpcClusterExists("couchbasecapella_vpc_cluster.test", &cluster),
+					testAccCheckCouchbaseCapellaVpcClusterExists(resourceName, &cluster),
+				),
+			},
+		},
+	})
+}
+
+// Test to see if a vpc cluster can be created, exists and is deleted successfully in Azure
+func TestAccCouchbaseCapellaVpcCluster_Azure(t *testing.T) {
+	var (
+		cluster couchbasecapella.Cluster
+	)
+
+	resourceName := "couchbasecapella_vpc_cluster.test"
+	clusterName := fmt.Sprintf("testacc-vpc-%s", acctest.RandString(5))
+	cloudId := os.Getenv("CBC_AZURE_CLOUD_ID")
+	projectId := os.Getenv("CBC_PROJECT_ID")
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckCouchbaseCapellaVpcClusterDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCouchbaseCapellaVpcClusterConfig_Azure(clusterName, cloudId, projectId),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckCouchbaseCapellaVpcClusterExists(resourceName, &cluster),
 				),
 			},
 		},
@@ -109,8 +137,8 @@ func testAccCheckCouchbaseCapellaVpcClusterExists(resourceName string, cluster *
 	}
 }
 
-// This is the Terraform Configuration that will be applied for the tests
-func testAccCouchbaseCapellaVpcClusterConfig(clusterName, cloudId, projectId string) string {
+// This is the Terraform Configuration that will be applied for the testing a cluster deployed in AWS
+func testAccCouchbaseCapellaVpcClusterConfig_AWS(clusterName, cloudId, projectId string) string {
 	return fmt.Sprintf(`
 		resource "couchbasecapella_vpc_cluster" "test" {
 			name   = "%s"
@@ -122,6 +150,25 @@ func testAccCouchbaseCapellaVpcClusterConfig(clusterName, cloudId, projectId str
 				aws {
 					instance_size = "m5.xlarge"
 					ebs_size_gib = 50
+				}
+			}
+		}
+	`, clusterName, cloudId, projectId)
+}
+
+// This is the Terraform Configuration that will be applied for the testing a cluster deployed in Azure
+func testAccCouchbaseCapellaVpcClusterConfig_Azure(clusterName, cloudId, projectId string) string {
+	return fmt.Sprintf(`
+		resource "couchbasecapella_vpc_cluster" "test" {
+			name       = "%s"
+			cloud_id   = "%s"
+			project_id = "%s"
+			servers {
+				size     = 3
+				services = ["data", "query", "index"]
+				azure {
+					instance_size = "Standard_F4s_v2"
+					volume_type  = "P4"
 				}
 			}
 		}

@@ -1,6 +1,13 @@
-# couchbasecapella_hosted_cluster Resource
+---
+page_title: "Couchbase Capella: Hosted Cluster"
+subcategory: ""
+description: |-
+Create, edit and delete Hosted Clusters in Couchbase Capella.
+---
 
-`couchbasecapella_hosted_cluster` provides a Hosted Cluster resource. The resource allows you to create, edit and delete hosted clusters. The resource requires your Project ID.
+# Resource couchbasecapella_hosted_cluster
+
+`couchbasecapella_hosted_cluster` allows you to create, edit and delete hosted clusters in Couchbase Capella. The resource requires your Project ID.
 
 ~> **WARNING:** This current release of Terraform Couchbase Capella provider doesn't support creating bucket or database user resources for hosted clusters. Please log in to the Couchbase Capella UI where you'll be able to manage buckets and database users once your hosted cluster has been deployed.
 
@@ -24,16 +31,16 @@ resource "couchbasecapella_hosted_cluster" "test" {
   }
   support_package {
     timezone = "GMT"
-    type     = "Basic"
+    support_package_type     = "Basic"
   }
   servers {
     size     = 3
     compute  = "m5.xlarge"
     services = ["data"]
     storage {
-      type = "GP3"
+      storage_type = "GP3"
       iops = "3000"
-      size = "50"
+      storage_size = "50"
     }
   }
 }
@@ -60,7 +67,7 @@ resource "couchbasecapella_hosted_cluster" "test" {
 ### Support Package
 
 - `timezone` - (Required) The time zone that you would like to receive support from. `ET`, Eastern Time, `GMT`, Greenwich Mean Time , `IST`, India Standard Time, `PT`, Pacific Time, are the available time zones that you can specify.
-- `type` - (Required) The support plan that you would like for your Capella cluster. `Basic`, `DeveloperPro`, `Enterprise` are the available support plans that you can specify.
+- `support_package_type` - (Required) The support plan that you would like for your Capella cluster. `Basic`, `DeveloperPro`, `Enterprise` are the available support plans that you can specify.
 
 For more detailed information on support packages, you can view this [detailed plan comparison](https://www.couchbase.com/support-policy/cloud).
 
@@ -72,12 +79,12 @@ For more detailed information on support packages, you can view this [detailed p
 
 #### Storage
 
-- `type` - (Required) The name of the storage type. `GP3`, `IO2` are the available storage types that you can specify.
+- `storage_type` - (Required) The name of the storage type. `GP3`, `IO2` are the available storage types that you can specify.
 - `iops` - (Required) The number of the IOPS.
 
 ~> **IMPORTANT:** The minimum value is 3000 for GP3, and 1000 if IO2. The maximum value is 16000 for GP3, and 64000 if IO2.
 
-- `size` - (Required) The storage per node in gigabytes.
+- `storage_size` - (Required) The storage per node in gigabytes.
 
 ~> **IMPORTANT:** The minimum storage per node is 50Gb. The maximum storage per node is 16Tb.
 

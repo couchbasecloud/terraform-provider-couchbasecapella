@@ -116,15 +116,25 @@ If you wish to work on the provider, you'll first need [Go](http://www.golang.or
 You must also configure the following environment variables before running the tests:
 
 ```sh
-export CBC_CLOUD_ID=<YOUR_CLOUD_ID>
+export CBC_AWS_CLOUD_ID=<YOUR_CLOUD_ID>
+export CBC_AZURE_CLOUD_ID=<YOUR_CLOUD_ID>
 export CBC_PROJECT_ID=<YOUR_PROJECT_ID>
 export CBC_CLUSTER_ID=<YOUR_CLUSTER_ID>
+export CBC_BUCKET_NAME=<YOUR_BUCKET_NAME>
 ```
 
-In order to run the full suite of Acceptance tests, you will need to have a deployed cluster available so that you can configure a cluster ID in the environment variables. To run the tests, run `make testacc`.
-
-_Note:_ Acceptance tests create real resources, and often cost money to run.
+In order to run the full suite of Acceptance tests, you will need to have a deployed in-vpc cluster available in AWS and Azure so that you can configure a cluster ID in the environment variables. You will also need to have a bucket created in that cluster so you can configure CBC_BUCKET_NAME. To run the tests, run `make testacc`.
 
 ```sh
 $ make testacc
 ```
+
+_Note:_ Running all tests will take approximately 1 hour to complete.
+
+To run individual tests, run the following command:
+
+```sh
+go test -v -timeout 60m -run ^NameOfTestFunction$ github.com/couchbasecloud/terraform-provider-couchbasecapella/provider
+```
+
+_Note:_ Acceptance tests create real resources, and often cost money to run.

@@ -52,6 +52,7 @@ func Provider() *schema.Provider {
 }
 
 // TODO: create a client with access/secret keys
+// providerConfigure is responsible for initializing the client
 func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 	configuration := couchbasecapella.NewConfiguration()
 	apiClient := couchbasecapella.NewAPIClient(configuration)

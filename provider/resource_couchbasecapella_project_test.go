@@ -20,6 +20,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
+// Test to see if a project can be created, recreated and deleted successfully
 func TestAccCouchbaseCapellaProject(t *testing.T) {
 	var (
 		project couchbasecapella.Project

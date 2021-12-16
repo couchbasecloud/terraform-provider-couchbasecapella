@@ -32,50 +32,50 @@ func resourceCouchbaseCapellaHostedCluster() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"id": {
-				Description: "Cluster's id.",
+				Description: "ID of the Cluster",
 				Type:        schema.TypeString,
 				ForceNew:    true,
 				Computed:    true,
 			},
 			"name": {
-				Description: "Cluster's name.",
+				Description: "Name of the Cluster",
 				Type:        schema.TypeString,
 				Required:    true,
 			},
 			"description": {
-				Description: "Cluster's description.",
+				Description: "A description for the Cluster",
 				Type:        schema.TypeString,
 				Optional:    true,
 			},
 			"project_id": {
-				Description: "Project's Id.",
+				Description: "ID of the Project the Cluster is contained in",
 				Type:        schema.TypeString,
 				Required:    true,
 			},
 			"place": {
-				Description: "Cluster's place",
+				Description: "The place where the Cluster is deployed",
 				Type:        schema.TypeSet,
 				Required:    true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"single_az": {
 							Type:        schema.TypeBool,
-							Description: "Single AZ",
+							Description: "A boolean for if the Cluster has a single Availability Zone",
 							Required:    true,
 						},
 						"hosted": {
 							Type:        schema.TypeSet,
-							Description: "Support package type",
+							Description: "The environment of the hosted cluster",
 							Required:    true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"provider": {
-										Description: "Cloud provider",
+										Description: "The name of the cloud provider where the cluster will be deployed",
 										Type:        schema.TypeString,
 										Required:    true,
 									},
 									"region": {
-										Description: "A valid region for the cloudProvider",
+										Description: "A valid region for the Cloud Provider",
 										Type:        schema.TypeString,
 										Required:    true,
 									},
@@ -91,26 +91,26 @@ func resourceCouchbaseCapellaHostedCluster() *schema.Resource {
 				},
 			},
 			"support_package": {
-				Description: "Suport package for cluster",
+				Description: "Support Package for the Cluster",
 				Type:        schema.TypeSet,
 				Required:    true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"timezone": {
 							Type:        schema.TypeString,
-							Description: "Timezone",
+							Description: "The Timezone of the Support Package",
 							Required:    true,
 						},
-						"type": {
+						"support_package_type": {
 							Type:        schema.TypeString,
-							Description: "Support package type",
+							Description: "The Support Package type of the cluster",
 							Required:    true,
 						},
 					},
 				},
 			},
 			"servers": {
-				Description: "Cluster servers configuration",
+				Description: "Configuration of the servers in Cluster",
 				Type:        schema.TypeSet,
 				Required:    true,
 				ForceNew:    true,
@@ -128,7 +128,7 @@ func resourceCouchbaseCapellaHostedCluster() *schema.Resource {
 						},
 						"services": {
 							Type:        schema.TypeList,
-							Description: "Services",
+							Description: "Couchbase Services",
 							Required:    true,
 							MinItems:    1,
 							Elem: &schema.Schema{
@@ -136,12 +136,12 @@ func resourceCouchbaseCapellaHostedCluster() *schema.Resource {
 							},
 						},
 						"storage": {
-							Description: "Storage configuration.",
+							Description: "Configuration for storage",
 							Type:        schema.TypeSet,
 							Required:    true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
-									"type": {
+									"storage_type": {
 										Description: "Storage type",
 										Type:        schema.TypeString,
 										Required:    true,
@@ -151,8 +151,8 @@ func resourceCouchbaseCapellaHostedCluster() *schema.Resource {
 										Type:        schema.TypeInt,
 										Required:    true,
 									},
-									"size": {
-										Description: "size(Gb).",
+									"storage_size": {
+										Description: "Storage size in Gb",
 										Type:        schema.TypeInt,
 										Required:    true,
 									},
@@ -388,9 +388,9 @@ func createHostedServer(v map[string]interface{}) couchbasecapella.V3Servers {
 				Compute:  v["compute"].(string),
 				Services: expandHostedServiceList(v["services"].([]interface{})),
 				Storage: couchbasecapella.V3ServersStorage{
-					Type: couchbasecapella.V3StorageType((storage["type"].(string))),
+					Type: couchbasecapella.V3StorageType((storage["storage_type"].(string))),
 					IOPS: int32(storage["iops"].(int)),
-					Size: int32(storage["size"].(int)),
+					Size: int32(storage["storage_size"].(int)),
 				},
 			}
 		}
@@ -444,7 +444,7 @@ func createHostedSupportPackage(v map[string]interface{}) couchbasecapella.V3Sup
 	var supportPackage couchbasecapella.V3SupportPackage
 	supportPackage = couchbasecapella.V3SupportPackage{
 		Timezone: couchbasecapella.V3SupportPackageTimezones((v["timezone"].(string))),
-		Type:     couchbasecapella.V3SupportPackageType((v["type"].(string))),
+		Type:     couchbasecapella.V3SupportPackageType((v["support_package_type"].(string))),
 	}
 
 	return supportPackage

@@ -1,6 +1,13 @@
-# couchbasecapella_vpc_cluster Resource
+---
+page_title: "Couchbase Capella: VPC Cluster"
+subcategory: ""
+description: |-
+Create and delete VPC Clusters in Couchbase Capella.
+---
 
-`couchbasecapella_vpc_cluster` provides a VPC Cluster resource. The resource allows you to create, edit and delete VPC clusters. The resource requires your Project ID.
+# Resource couchbasecapella_vpc_cluster
+
+`couchbasecapella_vpc_cluster` allows you to create and delete VPC clusters in Couchbase Capella. The resource requires your Project ID.
 
 ~> **WARNING:** This current release of Terraform Couchbase Capella provider doesn't support updating a VPC cluster. Please log in to the Couchbase Capella UI where you'll be able to update the name of your cluster.
 
