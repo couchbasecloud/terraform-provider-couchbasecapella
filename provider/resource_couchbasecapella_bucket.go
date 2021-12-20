@@ -45,7 +45,7 @@ func resourceCouchbaseCapellaBucket() *schema.Resource {
 					name := val.(string)
 					nameValidate := isStringAlphabetic(name) && len(name) > 0 && len(name) < 100 && isAlphaNumeric(name[0:1])
 					if !nameValidate {
-						errs = append(errs, fmt.Errorf("Use letters, numbers, periods (.) or dashes (- ). Bucket names cannot exceed 100 characters and must begin with a letter or a number."))
+						errs = append(errs, fmt.Errorf("use letters, numbers, periods (.) or dashes (- ). Bucket names cannot exceed 100 characters and must begin with a letter or a number"))
 					}
 					return
 				},
@@ -54,6 +54,14 @@ func resourceCouchbaseCapellaBucket() *schema.Resource {
 				Description: "Bucket Memory quota in Mb",
 				Type:        schema.TypeInt,
 				Required:    true,
+				ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
+					memory := val.(int)
+					if memory < 100 {
+						errs = append(errs, fmt.Errorf("please enter a memory value greater than 100 MiB"))
+
+					}
+					return
+				},
 			},
 			"replicas": {
 				Description: "Number of bucket replicas.",
@@ -64,6 +72,16 @@ func resourceCouchbaseCapellaBucket() *schema.Resource {
 				Description: "Conflict resolution for bucket",
 				Type:        schema.TypeString,
 				Required:    true,
+				ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
+					conflict := val.(string)
+					conflictList := []string{"lww", "seqno"}
+					conflictValidation := contains(conflictList, conflict)
+					if !conflictValidation {
+						errs = append(errs, fmt.Errorf("please enter a valid value for conflict resolution {lww, seqno}"))
+
+					}
+					return
+				},
 			},
 		},
 	}
