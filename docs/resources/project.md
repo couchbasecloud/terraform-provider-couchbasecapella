@@ -1,8 +1,15 @@
-# couchbasecapella_project Resource
+---
+page_title: "Couchbase Capella: Project"
+subcategory: ""
+description: |-
+Create, edit and delete Projects in Couchbase Capella.
+---
 
-`couchbasecapella_project` provides a Project resource. This resource allows projects to be created or deleted.
+# Resource couchbasecapella_project
 
-~> **WARNING:** Changing the name of an existing Project in your Terraform configuration will result in the destruction of that Project and the creation of a new Project with the new name. Projects that contain clusters cannot be destroyed without the associated clusters being destroyed first. Terraform will inform you of the destroyed/created resources before applying so be sure to verify any change to your environment before applying.
+`couchbasecapella_project` allows Projects to be created, edited and deleted in Couchbase Capella.
+
+~> **WARNING:** Changing the name of an existing Project in your Terraform configuration will result in the deletion and recreation of the Project with the new name in Capella. Projects that contain clusters cannot be destroyed without the associated clusters being destroyed first. Before applying your changes, Terraform will inform you that it will destroy and recreate the resources. Make sure to review these changes before typing `yes` to apply them.
 
 ## Example Usage
 
@@ -14,7 +21,7 @@ resource "couchbasecapella_project" "test" {
 
 ## Argument Reference
 
-- `name` - (Required) The name of the project you want to create. (Cannot be changed via this Provider after creation.)
+- `name` - (Required) The name of the project you want to create.
 
 ## Attribute Reference
 

@@ -20,7 +20,7 @@ import (
 
 func resourceCouchbaseCapellaBucket() *schema.Resource {
 	return &schema.Resource{
-		Description: "Manage Couchbase Buckets.",
+		Description: "Manage Couchbase Capella Buckets",
 
 		CreateContext: resourceCouchbaseCapellaBucketCreate,
 		ReadContext:   resourceCouchbaseCapellaBucketRead,
@@ -29,27 +29,27 @@ func resourceCouchbaseCapellaBucket() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"cluster_id": {
-				Description: "Cluster's id.",
+				Description: "ID of the Cluster",
 				Type:        schema.TypeString,
 				Required:    true,
 			},
 			"name": {
-				Description: "Bucket's name.",
+				Description: "Name of the Bucket",
 				Type:        schema.TypeString,
 				Required:    true,
 			},
 			"memory_quota": {
-				Description: "Bucket Memory quota.",
+				Description: "Bucket Memory quota in Mb",
 				Type:        schema.TypeInt,
 				Required:    true,
 			},
 			"replicas": {
-				Description: "replicas.",
+				Description: "Number of bucket replicas.",
 				Type:        schema.TypeInt,
 				Required:    true,
 			},
 			"conflict_resolution": {
-				Description: "replicas.",
+				Description: "Conflict resolution for bucket",
 				Type:        schema.TypeString,
 				Required:    true,
 			},

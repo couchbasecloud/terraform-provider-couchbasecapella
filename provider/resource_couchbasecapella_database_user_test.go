@@ -20,30 +20,108 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccCouchbaseCapellaDatabaseUser(t *testing.T) {
+// Test to see if a databaser user with all bucket access can be created, updated, recreated and deleted
+// successfully
+func TestAccCouchbaseCapellaDatabaseUser_allBucketAccess(t *testing.T) {
 	var (
 		databaseUser couchbasecapella.CreateDatabaseUserRequest
 	)
 
 	testClusterId := os.Getenv("CBC_CLUSTER_ID")
+	resourceName := "couchbasecapella_database_user.test"
 	username := fmt.Sprintf("testacc-user-%s", acctest.RandString(5))
+	updatedUsername := fmt.Sprintf("testacc-user-%s", acctest.RandString(4))
 	password := "Password123!"
+	allBucketAccess := "data_reader"
+	updatedAllBucketAccess := "data_writer"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckCouchbaseCapellaDatabaseUserDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCouchbaseCapellaDatabaseUserConfig(testClusterId, username, password),
+				Config: testAccCouchbaseCapellaDatabaseUserConfig_allBucketAccess(testClusterId, username, password, allBucketAccess),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCouchbaseCapellaDatabaseUserExists("couchbasecapella_database_user.test", &databaseUser),
+					testAccCheckCouchbaseCapellaDatabaseUserExists(resourceName, &databaseUser),
+					resource.TestCheckResourceAttr(resourceName, "username", username),
+					resource.TestCheckResourceAttr(resourceName, "password", password),
+					resource.TestCheckResourceAttr(resourceName, "all_bucket_access", allBucketAccess),
+				),
+			},
+			{
+				Config: testAccCouchbaseCapellaDatabaseUserConfig_allBucketAccess(testClusterId, username, password, updatedAllBucketAccess),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckCouchbaseCapellaDatabaseUserExists(resourceName, &databaseUser),
+					resource.TestCheckResourceAttr(resourceName, "username", username),
+					resource.TestCheckResourceAttr(resourceName, "password", password),
+					resource.TestCheckResourceAttr(resourceName, "all_bucket_access", updatedAllBucketAccess),
+				),
+			},
+			{
+				Config: testAccCouchbaseCapellaDatabaseUserConfig_allBucketAccess(testClusterId, updatedUsername, password, allBucketAccess),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckCouchbaseCapellaDatabaseUserExists(resourceName, &databaseUser),
+					resource.TestCheckResourceAttr(resourceName, "username", updatedUsername),
+					resource.TestCheckResourceAttr(resourceName, "password", password),
+					resource.TestCheckResourceAttr(resourceName, "all_bucket_access", allBucketAccess),
 				),
 			},
 		},
 	})
 }
 
+// Test to see if a databaser user with specific bucket access can be created, updated, recreated and deleted
+// successfully
+func TestAccCouchbaseCapellaDatabaseUser_specificBucketAccess(t *testing.T) {
+	var (
+		databaseUser couchbasecapella.CreateDatabaseUserRequest
+	)
+
+	testClusterId := os.Getenv("CBC_CLUSTER_ID")
+
+	resourceName := "couchbasecapella_database_user.test"
+	username := fmt.Sprintf("testacc-user-%s", acctest.RandString(5))
+	updatedUsername := fmt.Sprintf("testacc-user-%s", acctest.RandString(4))
+	password := "Password123!"
+	testBucketName := os.Getenv("CBC_BUCKET_NAME")
+	bucketAccess := "data_reader"
+	updatedBucketAccess := "data_writer"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckCouchbaseCapellaDatabaseUserDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCouchbaseCapellaDatabaseUserConfig_specificBucketAccess(testClusterId, username, password, testBucketName, bucketAccess),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckCouchbaseCapellaDatabaseUserExists(resourceName, &databaseUser),
+					resource.TestCheckResourceAttr(resourceName, "username", username),
+					resource.TestCheckResourceAttr(resourceName, "password", password),
+				),
+			},
+			{
+				Config: testAccCouchbaseCapellaDatabaseUserConfig_specificBucketAccess(testClusterId, username, password, testBucketName, updatedBucketAccess),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckCouchbaseCapellaDatabaseUserExists(resourceName, &databaseUser),
+					resource.TestCheckResourceAttr(resourceName, "username", username),
+					resource.TestCheckResourceAttr(resourceName, "password", password),
+				),
+			},
+			{
+				Config: testAccCouchbaseCapellaDatabaseUserConfig_specificBucketAccess(testClusterId, updatedUsername, password, testBucketName, updatedBucketAccess),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckCouchbaseCapellaDatabaseUserExists(resourceName, &databaseUser),
+					resource.TestCheckResourceAttr(resourceName, "username", updatedUsername),
+					resource.TestCheckResourceAttr(resourceName, "password", password),
+				),
+			},
+		},
+	})
+}
+
+// Test to see if database user has been destroyed after Terraform Destory has been executed
 func testAccCheckCouchbaseCapellaDatabaseUserDestroy(s *terraform.State) error {
 	client := testAccProvider.Meta().(*couchbasecapella.APIClient)
 	auth := context.WithValue(
@@ -78,6 +156,7 @@ func testAccCheckCouchbaseCapellaDatabaseUserDestroy(s *terraform.State) error {
 	return nil
 }
 
+// Test to see if database user exists after Terraform Apply has been executed
 func testAccCheckCouchbaseCapellaDatabaseUserExists(resourceName string, databaseUser *couchbasecapella.CreateDatabaseUserRequest) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		client := testAccProvider.Meta().(*couchbasecapella.APIClient)
@@ -117,13 +196,29 @@ func testAccCheckCouchbaseCapellaDatabaseUserExists(resourceName string, databas
 	}
 }
 
-func testAccCouchbaseCapellaDatabaseUserConfig(clusterId, username, password string) string {
+// This is the Terraform Configuration that will be applied for testing a database user with all bucket access
+func testAccCouchbaseCapellaDatabaseUserConfig_allBucketAccess(clusterId, username, password, allBucketAccess string) string {
 	return fmt.Sprintf(`
 		resource "couchbasecapella_database_user" "test" {
 			cluster_id   = "%s"
 			username = "%s"
 			password = "%s"
-			all_bucket_access = "data_reader"
+			all_bucket_access = "%s"
 		}
-	`, clusterId, username, password)
+	`, clusterId, username, password, allBucketAccess)
+}
+
+// This is the Terraform Configuration that will be applied for testing a database user with specific bucket access
+func testAccCouchbaseCapellaDatabaseUserConfig_specificBucketAccess(clusterId, username, password, bucketName, bucketAccess string) string {
+	return fmt.Sprintf(`
+		resource "couchbasecapella_database_user" "test" {
+			cluster_id = "%s"
+			username = "%s"
+			password = "%s"
+			buckets{
+				bucket_name = "%s"
+				bucket_access = ["%s"]
+			}
+		}
+	`, clusterId, username, password, bucketName, bucketAccess)
 }

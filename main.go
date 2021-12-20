@@ -12,7 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/plugin"
 
-	provider "github.com/JamesWilkinsonCB/terraform-provider-couchbasecapella/provider"
+	provider "github.com/couchbasecloud/terraform-provider-couchbasecapella/provider"
 )
 
 func main() {

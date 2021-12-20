@@ -20,12 +20,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
+// Test to see if a project can be created, recreated and deleted successfully
 func TestAccCouchbaseCapellaProject(t *testing.T) {
 	var (
 		project couchbasecapella.Project
 	)
 
 	projectName := fmt.Sprintf("testacc-project-%s", acctest.RandString(5))
+	updateProjectName := fmt.Sprintf("testacc-project-%s", acctest.RandString(4))
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -36,12 +38,21 @@ func TestAccCouchbaseCapellaProject(t *testing.T) {
 				Config: testAccCouchbaseCapellaProjectConfig(projectName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCouchbaseCapellaProjectExists("couchbasecapella_project.test", &project),
+					resource.TestCheckResourceAttr("couchbasecapella_project.test", "name", projectName),
+				),
+			},
+			{
+				Config: testAccCouchbaseCapellaProjectConfig(updateProjectName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckCouchbaseCapellaProjectExists("couchbasecapella_project.test", &project),
+					resource.TestCheckResourceAttr("couchbasecapella_project.test", "name", updateProjectName),
 				),
 			},
 		},
 	})
 }
 
+// Test to see if project has been destroyed after Terraform Destory has been executed
 func testAccCheckCouchbaseCapellaProjectDestroy(s *terraform.State) error {
 	client := testAccProvider.Meta().(*couchbasecapella.APIClient)
 	auth := context.WithValue(
@@ -71,6 +82,7 @@ func testAccCheckCouchbaseCapellaProjectDestroy(s *terraform.State) error {
 	return nil
 }
 
+// Test to see if project exists after Terraform Apply has been executed
 func testAccCheckCouchbaseCapellaProjectExists(resourceName string, project *couchbasecapella.Project) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		client := testAccProvider.Meta().(*couchbasecapella.APIClient)
@@ -105,6 +117,7 @@ func testAccCheckCouchbaseCapellaProjectExists(resourceName string, project *cou
 	}
 }
 
+// This is the Terraform Configuration that will be applied for the tests
 func testAccCouchbaseCapellaProjectConfig(projectName string) string {
 	return fmt.Sprintf(`
 		resource "couchbasecapella_project" "test" {

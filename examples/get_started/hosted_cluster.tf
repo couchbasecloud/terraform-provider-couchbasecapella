@@ -11,17 +11,17 @@ resource "couchbasecapella_hosted_cluster" "cluster" {
     }
   }
   support_package {
-    timezone = "GMT"
-    type     = "Basic"
+    timezone             = "GMT"
+    support_package_type = "Basic"
   }
   servers {
     size     = 3
     compute  = "m5.xlarge"
     services = ["data"]
     storage {
-      type = "GP3"
-      iops = "3000"
-      size = "50"
+      storage_type = "GP3"
+      iops         = "3000"
+      storage_size = "50"
     }
   }
 }
