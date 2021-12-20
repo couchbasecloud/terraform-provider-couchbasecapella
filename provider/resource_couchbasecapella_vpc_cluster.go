@@ -37,7 +37,6 @@ func resourceCouchbaseCapellaVpcCluster() *schema.Resource {
 				Type:        schema.TypeString,
 				ForceNew:    true,
 				Computed:    true,
-				},
 			},
 			"name": {
 				Description: "Cluster's name.",
