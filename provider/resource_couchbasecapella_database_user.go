@@ -10,6 +10,7 @@ package provider
 
 import (
 	"context"
+	"fmt"
 	"time"
 	"unicode"
 
@@ -87,6 +88,20 @@ func resourceCouchbaseCapellaDatabaseUserCreate(ctx context.Context, d *schema.R
 	auth := getAuth(ctx)
 
 	clusterId := d.Get("cluster_id").(string)
+
+	// Check if the Cluster is inVPC to create the users
+	// Managing buckets is not available for hosted clusters
+	_, _, err := client.ClustersApi.ClustersShow(auth, clusterId).Execute()
+
+	if err != nil {
+		// Check V3Cluster :: Need to be fixed in next versions
+		_, _, err3 := client.ClustersV3Api.ClustersV3show(auth, clusterId).Execute()
+		if err3 != nil {
+			return diag.FromErr(fmt.Errorf("a problem occured while accessing to the cluster"))
+		}
+		return diag.FromErr(fmt.Errorf("sorry, managing database users is not available for hosted clusters"))
+	}
+
 	username := d.Get("username").(string)
 	password := d.Get("password").(string)
 
@@ -151,8 +166,20 @@ func resourceCouchbaseCapellaDatabaseUserCreate(ctx context.Context, d *schema.R
 func resourceCouchbaseCapellaDatabaseUserRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*couchbasecapella.APIClient)
 	auth := getAuth(ctx)
-
 	clusterId := d.Get("cluster_id").(string)
+
+	// Check if the Cluster is inVPC to read the db users
+	// Managing buckets is not available for hosted clusters
+	_, _, err := client.ClustersApi.ClustersShow(auth, clusterId).Execute()
+
+	if err != nil {
+		// Check V3Cluster :: Need to be fixed in next versions
+		_, _, err3 := client.ClustersV3Api.ClustersV3show(auth, clusterId).Execute()
+		if err3 != nil {
+			return diag.FromErr(fmt.Errorf("a problem occured while accessing to the cluster"))
+		}
+		return diag.FromErr(fmt.Errorf("sorry, managing database users is not available for hosted clusters"))
+	}
 
 	// The current version of the Capella API doesn't support getting a singular
 	// database user. To obtain the database user, we need to iterate the trough
@@ -184,6 +211,20 @@ func resourceCouchbaseCapellaDatabaseUserUpdate(ctx context.Context, d *schema.R
 	client := meta.(*couchbasecapella.APIClient)
 	auth := getAuth(ctx)
 	clusterId := d.Get("cluster_id").(string)
+
+	// Check if the Cluster is inVPC to update the users
+	// Managing buckets is not available for hosted clusters
+	_, _, err := client.ClustersApi.ClustersShow(auth, clusterId).Execute()
+
+	if err != nil {
+		// Check V3Cluster :: Need to be fixed in next versions
+		_, _, err3 := client.ClustersV3Api.ClustersV3show(auth, clusterId).Execute()
+		if err3 != nil {
+			return diag.FromErr(fmt.Errorf("a problem occured while accessing to the cluster"))
+		}
+		return diag.FromErr(fmt.Errorf("sorry, managing database users is not available for hosted clusters"))
+	}
+
 	username := d.Get("username").(string)
 
 	updateDatabaseUserRequest := *couchbasecapella.NewUpdateDatabaseUserRequest()
@@ -218,6 +259,20 @@ func resourceCouchbaseCapellaDatabaseUserDelete(ctx context.Context, d *schema.R
 	auth := getAuth(ctx)
 
 	clusterId := d.Get("cluster_id").(string)
+
+	// Check if the Cluster is inVPC to delete the users
+	// Managing buckets is not available for hosted clusters
+	_, _, err := client.ClustersApi.ClustersShow(auth, clusterId).Execute()
+
+	if err != nil {
+		// Check V3Cluster :: Need to be fixed in next versions
+		_, _, err3 := client.ClustersV3Api.ClustersV3show(auth, clusterId).Execute()
+		if err3 != nil {
+			return diag.FromErr(fmt.Errorf("a problem occured while accessing to the cluster"))
+		}
+		return diag.FromErr(fmt.Errorf("sorry, managing database users is not available for hosted clusters"))
+	}
+
 	username := d.Get("username").(string)
 
 	// Check to see if database user exists in list of database users. If the database user
