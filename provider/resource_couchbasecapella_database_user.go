@@ -50,7 +50,7 @@ func resourceCouchbaseCapellaDatabaseUser() *schema.Resource {
 					password := val.(string)
 					passwordValidate := validatePassword(password)
 					if !passwordValidate {
-						errs = append(errs, fmt.Errorf("Password must contain 8+ characters, 1+ lowercase, 1+ uppercase, 1+ symbols, 1+ numbers."))
+						errs = append(errs, fmt.Errorf("password must contain 8+ characters, 1+ lowercase, 1+ uppercase, 1+ symbols, 1+ numbers."))
 					}
 					return
 				},
@@ -70,6 +70,14 @@ func resourceCouchbaseCapellaDatabaseUser() *schema.Resource {
 							Optional: true,
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
+								ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
+									access := val.(string)
+									accessValidation := couchbasecapella.BucketRoleTypes(access).IsValid()
+									if !accessValidation {
+										errs = append(errs, fmt.Errorf("please enter a valid value for bucket access {data_reader, data_writer}"))
+									}
+									return
+								},
 							},
 						},
 					},
@@ -79,6 +87,15 @@ func resourceCouchbaseCapellaDatabaseUser() *schema.Resource {
 				Description: "Define all bucket access for the Database User",
 				Type:        schema.TypeString,
 				Optional:    true,
+				ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
+					access := val.(string)
+					accessValidation := couchbasecapella.BucketRoleTypes(access).IsValid()
+					if !accessValidation {
+						errs = append(errs, fmt.Errorf("please enter a valid value for all bucket access {data_reader, data_writer}"))
+
+					}
+					return
+				},
 			},
 		},
 		Timeouts: &schema.ResourceTimeout{
@@ -105,7 +122,7 @@ func resourceCouchbaseCapellaDatabaseUserCreate(ctx context.Context, d *schema.R
 		// Check V3Cluster :: Need to be fixed in next versions
 		_, _, err3 := client.ClustersV3Api.ClustersV3show(auth, clusterId).Execute()
 		if err3 != nil {
-			return diag.FromErr(fmt.Errorf("a problem occured while accessing to the cluster"))
+			return diag.FromErr(fmt.Errorf("a problem occurred while accessing to the cluster"))
 		}
 		return diag.FromErr(fmt.Errorf("sorry, managing database users is not available for hosted clusters"))
 	}
@@ -178,7 +195,7 @@ func resourceCouchbaseCapellaDatabaseUserRead(ctx context.Context, d *schema.Res
 		// Check V3Cluster :: Need to be fixed in next versions
 		_, _, err3 := client.ClustersV3Api.ClustersV3show(auth, clusterId).Execute()
 		if err3 != nil {
-			return diag.FromErr(fmt.Errorf("a problem occured while accessing to the cluster"))
+			return diag.FromErr(fmt.Errorf("a problem occurred while accessing to the cluster"))
 		}
 		return diag.FromErr(fmt.Errorf("sorry, managing database users is not available for hosted clusters"))
 	}
@@ -222,7 +239,7 @@ func resourceCouchbaseCapellaDatabaseUserUpdate(ctx context.Context, d *schema.R
 		// Check V3Cluster :: Need to be fixed in next versions
 		_, _, err3 := client.ClustersV3Api.ClustersV3show(auth, clusterId).Execute()
 		if err3 != nil {
-			return diag.FromErr(fmt.Errorf("a problem occured while accessing to the cluster"))
+			return diag.FromErr(fmt.Errorf("a problem occurred while accessing to the cluster"))
 		}
 		return diag.FromErr(fmt.Errorf("sorry, managing database users is not available for hosted clusters"))
 	}
@@ -270,7 +287,7 @@ func resourceCouchbaseCapellaDatabaseUserDelete(ctx context.Context, d *schema.R
 		// Check V3Cluster :: Need to be fixed in next versions
 		_, _, err3 := client.ClustersV3Api.ClustersV3show(auth, clusterId).Execute()
 		if err3 != nil {
-			return diag.FromErr(fmt.Errorf("a problem occured while accessing to the cluster"))
+			return diag.FromErr(fmt.Errorf("a problem occurred while accessing to the cluster"))
 		}
 		return diag.FromErr(fmt.Errorf("sorry, managing database users is not available for hosted clusters"))
 	}
