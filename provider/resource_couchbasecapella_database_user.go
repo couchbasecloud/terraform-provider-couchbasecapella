@@ -46,6 +46,14 @@ func resourceCouchbaseCapellaDatabaseUser() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    true,
 				Sensitive:   true,
+				ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
+					password := val.(string)
+					passwordValidate := validatePassword(password)
+					if !passwordValidate {
+						errs = append(errs, fmt.Errorf("Password must contain 8+ characters, 1+ lowercase, 1+ uppercase, 1+ symbols, 1+ numbers."))
+					}
+					return
+				},
 			},
 			"buckets": {
 				Description: "Define bucket access level for the Database User",
@@ -115,12 +123,6 @@ func resourceCouchbaseCapellaDatabaseUserCreate(ctx context.Context, d *schema.R
 		if user.Username == username {
 			return diag.Errorf("Failed to create: A user already exists with that name")
 		}
-	}
-
-	// An error will return if the password doesn't match the required format
-	validateErr := validatePassword(password)
-	if validateErr != nil {
-		return diag.FromErr(validateErr)
 	}
 
 	createDatabaseUserRequest := *couchbasecapella.NewCreateDatabaseUserRequest(username, password)
@@ -329,21 +331,11 @@ func expandBucketAccessList(bucketAccess []interface{}) (roles []couchbasecapell
 	return roles
 }
 
-// validatePassword is responsbile for handling the error if the password fails to match
-// the required format.
-func validatePassword(password string) error {
-	verified := verifyPassword(password)
-	if verified {
-		return nil
-	}
-	return Error("Password must contain 8+ characters, 1+ lowercase, 1+ uppercase, 1+ symbols, 1+ numbers")
-}
-
-// verifyPassword is responsible for checking if a password string matches the required
+// validatePassword is responsible for checking if a password string matches the required
 // format. A password must contain 8+ characters, 1+ lowercase, 1+ uppercase, 1+ symbols, 1+ numbers.
 // If the password matches the required format, the function will return true.
 // If the password fails to match the required format, the function will return false.
-func verifyPassword(password string) bool {
+func validatePassword(password string) bool {
 	chars, lower, upper, symbol, number := false, false, false, false, false
 	letters := 0
 	for _, c := range password {
