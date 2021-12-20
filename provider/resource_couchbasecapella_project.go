@@ -62,7 +62,7 @@ func resourceCouchbaseCapellaProjectCreate(ctx context.Context, d *schema.Resour
 func resourceCouchbaseCapellaProjectRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*couchbasecapella.APIClient)
 	auth := getAuth(ctx)
-	projectId := d.Get("id").(string)
+	projectId := d.Id()
 
 	project, resp, err := client.ProjectsApi.ProjectsShow(auth, projectId).Execute()
 
@@ -84,7 +84,7 @@ func resourceCouchbaseCapellaProjectDelete(ctx context.Context, d *schema.Resour
 	client := meta.(*couchbasecapella.APIClient)
 	auth := getAuth(ctx)
 
-	projectId := d.Get("id").(string)
+	projectId := d.Id()
 
 	r, err := client.ProjectsApi.ProjectsDelete(auth, projectId).Execute()
 	if err != nil {

@@ -30,6 +30,7 @@ require (
 	github.com/mitchellh/mapstructure v1.4.2 // indirect
 	github.com/oklog/run v1.1.0 // indirect
 	github.com/ulikunitz/xz v0.5.10 // indirect
+	go.uber.org/zap v1.19.1 // indirect
 	google.golang.org/api v0.59.0 // indirect
 	google.golang.org/genproto v0.0.0-20211021150943-2b146023228c // indirect
 	google.golang.org/grpc v1.41.0 // indirect

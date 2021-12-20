@@ -42,6 +42,7 @@ func resourceCouchbaseCapellaDatabaseUser() *schema.Resource {
 				Description: "Database user password",
 				Type:        schema.TypeString,
 				Required:    true,
+				Sensitive:   true,
 			},
 			"buckets": {
 				Description: "Database user bucket access",
@@ -124,12 +125,18 @@ func resourceCouchbaseCapellaDatabaseUserRead(ctx context.Context, d *schema.Res
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	userExists := false
 	for _, user := range users {
-		if user.Username == d.Get("username") {
-			return nil
+		if user.Username == d.Id() {
+			userExists = true
 		}
 	}
-	return diag.FromErr(err)
+	if !userExists {
+		username := d.Id()
+		d.SetId("")
+		return diag.Errorf("Error 404: Failed to find the username %s ", username)
+	}
+	return nil
 }
 
 func resourceCouchbaseCapellaDatabaseUserUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
