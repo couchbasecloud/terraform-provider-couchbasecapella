@@ -44,6 +44,16 @@ func resourceCouchbaseCapellaVpcCluster() *schema.Resource {
 				Type:        schema.TypeString,
 				ForceNew:    true,
 				Required:    true,
+				ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
+					var isStringAlphabetic = regexp.MustCompile(`^[a-zA-Z0-9_. ]*$`).MatchString
+					var isAlphaNumeric = regexp.MustCompile(`^[a-zA-Z0-9]*$`).MatchString
+					name := val.(string)
+					nameValidate := isStringAlphabetic(name) && len(name) >= 2 && len(name) < 100 && isAlphaNumeric(name[0:1])
+					if !nameValidate {
+						errs = append(errs, fmt.Errorf("use letters, numbers, periods (.), dashes (-) or space. Cluster name cannot exceed 100 characters and must begin with a letter or a number"))
+					}
+					return
+				},
 			},
 			"cloud_id": {
 				Description: "Cloud's Id.",
@@ -80,6 +90,14 @@ func resourceCouchbaseCapellaVpcCluster() *schema.Resource {
 							Type:        schema.TypeInt,
 							Description: "Number of nodes",
 							Required:    true,
+							ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
+								size := val.(int)
+								sizeIsValid := size >= 3 && size < 28 
+								if !sizeIsValid {
+									errs = append(errs, fmt.Errorf("number of nodes should be more than 3 and less than 27"))
+								}
+								return
+							},
 						},
 						"services": {
 							Type:        schema.TypeList,
@@ -100,6 +118,14 @@ func resourceCouchbaseCapellaVpcCluster() *schema.Resource {
 										Description: "Aws instance.",
 										Type:        schema.TypeString,
 										Required:    true,
+										ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
+											instance := val.(string)
+											instanceValidation := couchbasecapella.AwsInstances(instance).IsValid()
+											if !instanceValidation {
+												errs = append(errs, fmt.Errorf("please enter a valid value Aws instance"))
+											}
+											return
+										},
 									},
 									"ebs_size_gib": {
 										Description: "Aws size(Gb).",
@@ -119,11 +145,27 @@ func resourceCouchbaseCapellaVpcCluster() *schema.Resource {
 										Description: "Azure instance.",
 										Type:        schema.TypeString,
 										Required:    true,
+										ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
+											instance := val.(string)
+											instanceValidation := couchbasecapella.AzureInstances(instance).IsValid()
+											if !instanceValidation {
+												errs = append(errs, fmt.Errorf("please enter a valid value Azure instance"))
+											}
+											return
+										},
 									},
 									"volume_type": {
 										Description: "Azure size(Gb).",
 										Type:        schema.TypeString,
 										Required:    true,
+										ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
+											volume := val.(string)
+											volumeValidation := couchbasecapella.AzureVolumeTypes(volume).IsValid()
+											if !volumeValidation {
+												errs = append(errs, fmt.Errorf("please enter a valid value for Azure size"))
+											}
+											return
+										},
 									},
 								},
 							},
