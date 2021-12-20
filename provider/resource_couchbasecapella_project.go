@@ -70,7 +70,7 @@ func resourceCouchbaseCapellaProjectCreate(ctx context.Context, d *schema.Resour
 func resourceCouchbaseCapellaProjectRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*couchbasecapella.APIClient)
 	auth := getAuth(ctx)
-	projectId := d.Get("id").(string)
+	projectId := d.Id()
 
 	_, resp, err := client.ProjectsApi.ProjectsShow(auth, projectId).Execute()
 
@@ -91,7 +91,7 @@ func resourceCouchbaseCapellaProjectDelete(ctx context.Context, d *schema.Resour
 	client := meta.(*couchbasecapella.APIClient)
 	auth := getAuth(ctx)
 
-	projectId := d.Get("id").(string)
+	projectId := d.Id()
 
 	// Check to see if project exists in Capella. If the project
 	// exists, it will be deleted. If the project does not exist in Capella,

@@ -196,7 +196,7 @@ func resourceCouchbaseCapellaVpcClusterCreate(ctx context.Context, d *schema.Res
 func resourceCouchbaseCapellaVpcClusterRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*couchbasecapella.APIClient)
 	auth := getAuth(ctx)
-	clusterId := d.Get("id").(string)
+	clusterId := d.Id()
 
 	_, resp, err := client.ClustersApi.ClustersShow(auth, clusterId).Execute()
 
@@ -219,7 +219,7 @@ func resourceCouchbaseCapellaVpcClusterDelete(ctx context.Context, d *schema.Res
 	client := meta.(*couchbasecapella.APIClient)
 	auth := getAuth(ctx)
 
-	clusterId := d.Get("id").(string)
+	clusterId := d.Id()
 
 	// Check that Cluster is ready to be destroyed
 	statusResp, _, err := client.ClustersApi.ClustersStatus(auth, clusterId).Execute()

@@ -10,6 +10,8 @@ package provider
 
 import (
 	"context"
+	"fmt"
+	"regexp"
 
 	couchbasecapella "github.com/couchbaselabs/couchbase-cloud-go-client"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -30,11 +32,23 @@ func resourceCouchbaseCapellaBucket() *schema.Resource {
 				Description: "ID of the Cluster",
 				Type:        schema.TypeString,
 				Required:    true,
+				ForceNew:    true,
 			},
 			"name": {
 				Description: "Name of the Bucket",
 				Type:        schema.TypeString,
 				Required:    true,
+				ForceNew:    true,
+				ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
+					var isStringAlphabetic = regexp.MustCompile(`^[a-zA-Z0-9_.]*$`).MatchString
+					var isAlphaNumeric = regexp.MustCompile(`^[a-zA-Z0-9]*$`).MatchString
+					name := val.(string)
+					nameValidate := isStringAlphabetic(name) && len(name) > 0 && len(name) < 100 && isAlphaNumeric(name[0:1])
+					if !nameValidate {
+						errs = append(errs, fmt.Errorf("Use letters, numbers, periods (.) or dashes (- ). Bucket names cannot exceed 100 characters and must begin with a letter or a number."))
+					}
+					return
+				},
 			},
 			"memory_quota": {
 				Description: "Bucket Memory quota in Mb",
@@ -55,23 +69,45 @@ func resourceCouchbaseCapellaBucket() *schema.Resource {
 	}
 }
 
+/**
+*** Creating the Bucket
+**/
 func resourceCouchbaseCapellaBucketCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*couchbasecapella.APIClient)
 	auth := getAuth(ctx)
 
 	clusterId := d.Get("cluster_id").(string)
+
+	// Check if the Cluster is inVPC to create the bucket
+	// Managing buckets is not available for hosted clusters
+	_, _, clusterError := client.ClustersApi.ClustersShow(auth, clusterId).Execute()
+
+	if clusterError != nil {
+		// Check V3Cluster :: Need to be fixed in next versions
+		_, _, err3 := client.ClustersV3Api.ClustersV3show(auth, clusterId).Execute()
+		if err3 != nil {
+			return diag.FromErr(fmt.Errorf("a problem occured while accessing to the cluster"))
+		}
+		return diag.FromErr(fmt.Errorf("sorry, managing buckets is not available for hosted clusters"))
+	}
+
 	bucketName := d.Get("name").(string)
 	memoryQuota := int32(d.Get("memory_quota").(int))
 	replicas := int32(d.Get("replicas").(int))
 	conflictResolution := couchbasecapella.ConflictResolution(d.Get("conflict_resolution").(string))
 
-	couchbaseBucketSpec := *couchbasecapella.NewCouchbaseBucketSpec(bucketName, memoryQuota)
+	couchbaseBucketSpec := couchbasecapella.NewCouchbaseBucketSpec(bucketName, memoryQuota)
 	couchbaseBucketSpec.SetReplicas(replicas)
 	couchbaseBucketSpec.SetConflictResolution(conflictResolution)
 
-	_, _, err := client.ClustersApi.ClustersCreateBucket(auth, clusterId).CouchbaseBucketSpec(couchbaseBucketSpec).Execute()
+	_, r, err := client.ClustersApi.ClustersCreateBucket(auth, clusterId).CouchbaseBucketSpec(*couchbaseBucketSpec).Execute()
 	if err != nil {
-		return diag.FromErr(err)
+		if r != nil {
+			// TODO:  HANDLE ERRORS GRACEFULLY HERE AND REPORT AN ERROR THAT
+			//  MAKES SENSE TO THE USER SO THEY KNOW HOW TO FIX THE PROBLEM
+			// diag.FromErr((handleResponse(r))
+		}
+		return diag.FromErr(fmt.Errorf("problem occured :: %v", r))
 	}
 
 	d.SetId(bucketName)
@@ -84,23 +120,59 @@ func resourceCouchbaseCapellaBucketRead(ctx context.Context, d *schema.ResourceD
 	auth := getAuth(ctx)
 
 	clusterId := d.Get("cluster_id").(string)
+
+	// Check if the Cluster is inVPC to read the bucket list
+	// Managing buckets is not available for hosted clusters
+	_, _, err := client.ClustersApi.ClustersShow(auth, clusterId).Execute()
+
+	if err != nil {
+		// Check V3Cluster :: Need to be fixed in next versions
+		_, _, err3 := client.ClustersV3Api.ClustersV3show(auth, clusterId).Execute()
+		if err3 != nil {
+			return diag.FromErr(fmt.Errorf("a problem occured while accessing to the cluster"))
+		}
+		return diag.FromErr(fmt.Errorf("sorry, managing buckets is not available for hosted clusters"))
+	}
 	buckets, _, err := client.ClustersApi.ClustersListBuckets(auth, clusterId).Execute()
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	bucketExists := false
 	for _, bucket := range buckets {
-		if bucket.Name == d.Get("name") {
-			return nil
+		if bucket.Name == d.Id() {
+			bucketExists = true
 		}
 	}
-	return diag.FromErr(err)
+	if !bucketExists {
+		bucketName := d.Id()
+		d.SetId("")
+		return diag.Errorf("Error 404: Failed to find the bucket %s ", bucketName)
+	}
+	return nil
 }
 
+/**
+*** Updating the Bucket
+**/
 func resourceCouchbaseCapellaBucketUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*couchbasecapella.APIClient)
 	auth := getAuth(ctx)
 
 	clusterId := d.Get("cluster_id").(string)
+
+	// Check if the Cluster is inVPC to update the bucket
+	// Managing buckets is not available for hosted clusters
+	_, _, err := client.ClustersApi.ClustersShow(auth, clusterId).Execute()
+
+	if err != nil {
+		// Check V3Cluster :: Need to be fixed in next versions
+		_, _, err3 := client.ClustersV3Api.ClustersV3show(auth, clusterId).Execute()
+		if err3 != nil {
+			return diag.FromErr(fmt.Errorf("a problem occured while accessing to the cluster"))
+		}
+		return diag.FromErr(fmt.Errorf("sorry, managing buckets is not available for hosted clusters"))
+	}
+
 	bucketName := d.Get("name").(string)
 	memoryQuota := int32(d.Get("memory_quota").(int))
 
@@ -126,18 +198,34 @@ func resourceCouchbaseCapellaBucketUpdate(ctx context.Context, d *schema.Resourc
 	return resourceCouchbaseCapellaBucketRead(ctx, d, meta)
 }
 
+/**
+*** Deleting the Bucket
+**/
 func resourceCouchbaseCapellaBucketDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*couchbasecapella.APIClient)
 	auth := getAuth(ctx)
 
 	clusterId := d.Get("cluster_id").(string)
+
+	// Check if the Cluster is inVPC to delete the bucket
+	// Managing buckets is not available for hosted clusters
+	_, _, err := client.ClustersApi.ClustersShow(auth, clusterId).Execute()
+
+	if err != nil {
+		// Check V3Cluster :: Need to be fixed in next versions
+		_, _, err3 := client.ClustersV3Api.ClustersV3show(auth, clusterId).Execute()
+		if err3 != nil {
+			return diag.FromErr(fmt.Errorf("a problem occured while accessing to the cluster"))
+		}
+		return diag.FromErr(fmt.Errorf("sorry, managing buckets is not available for hosted clusters"))
+	}
 	bucketName := d.Get("name").(string)
 
 	deleteBucketRequest := *couchbasecapella.NewDeleteBucketRequest(bucketName)
 
-	_, err := client.ClustersApi.ClustersDeleteBucket(auth, clusterId).DeleteBucketRequest(deleteBucketRequest).Execute()
-	if err != nil {
-		return diag.FromErr(err)
+	_, deleteError := client.ClustersApi.ClustersDeleteBucket(auth, clusterId).DeleteBucketRequest(deleteBucketRequest).Execute()
+	if deleteError != nil {
+		return diag.FromErr(deleteError)
 	}
 	return nil
 }
