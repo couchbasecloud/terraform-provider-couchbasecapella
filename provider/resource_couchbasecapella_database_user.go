@@ -34,6 +34,13 @@ func resourceCouchbaseCapellaDatabaseUser() *schema.Resource {
 				Description: "ID of the Cluster",
 				Type:        schema.TypeString,
 				Required:    true,
+				ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
+					idIsValid := IsValidUUID(val.(string))
+					if !idIsValid {
+						errs = append(errs, fmt.Errorf("please enter a valid cluster uuid"))
+					}
+					return
+				},
 			},
 			"username": {
 				Description: "Username for the Database User",
