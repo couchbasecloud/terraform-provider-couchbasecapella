@@ -11,11 +11,11 @@ package provider
 import (
 	"context"
 	"fmt"
+	"regexp"
 
 	couchbasecapella "github.com/couchbaselabs/couchbase-cloud-go-client"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"go.uber.org/zap"
 )
 
 func resourceCouchbaseCapellaBucket() *schema.Resource {
@@ -32,11 +32,23 @@ func resourceCouchbaseCapellaBucket() *schema.Resource {
 				Description: "ID of the Cluster",
 				Type:        schema.TypeString,
 				Required:    true,
+				ForceNew:    true,
 			},
 			"name": {
 				Description: "Name of the Bucket",
 				Type:        schema.TypeString,
 				Required:    true,
+				ForceNew:    true,
+				ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
+					var isStringAlphabetic = regexp.MustCompile(`^[a-zA-Z0-9_.]*$`).MatchString
+					var isAlphaNumeric = regexp.MustCompile(`^[a-zA-Z0-9]*$`).MatchString
+					name := val.(string)
+					nameValidate := isStringAlphabetic(name) && len(name) > 0 && len(name) < 100 && isAlphaNumeric(name[0:1])
+					if !nameValidate {
+						errs = append(errs, fmt.Errorf("Use letters, numbers, periods (.) or dashes (- ). Bucket names cannot exceed 100 characters and must begin with a letter or a number."))
+					}
+					return
+				},
 			},
 			"memory_quota": {
 				Description: "Bucket Memory quota in Mb",
@@ -68,9 +80,9 @@ func resourceCouchbaseCapellaBucketCreate(ctx context.Context, d *schema.Resourc
 
 	// Check if the Cluster is inVPC to create the bucket
 	// Managing buckets is not available for hosted clusters
-	_, _, err := client.ClustersApi.ClustersShow(auth, clusterId).Execute()
+	_, _, clusterError := client.ClustersApi.ClustersShow(auth, clusterId).Execute()
 
-	if err != nil {
+	if clusterError != nil {
 		// Check V3Cluster :: Need to be fixed in next versions
 		_, _, err3 := client.ClustersV3Api.ClustersV3show(auth, clusterId).Execute()
 		if err3 != nil {
@@ -95,7 +107,7 @@ func resourceCouchbaseCapellaBucketCreate(ctx context.Context, d *schema.Resourc
 			//  MAKES SENSE TO THE USER SO THEY KNOW HOW TO FIX THE PROBLEM
 			// diag.FromErr((handleResponse(r))
 		}
-		return diag.FromErr(fmt.Errorf("problem occured :: %v", zap.Error(err)))
+		return diag.FromErr(fmt.Errorf("problem occured :: %v", r))
 	}
 
 	d.SetId(bucketName)
