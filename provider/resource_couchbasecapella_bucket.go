@@ -74,8 +74,7 @@ func resourceCouchbaseCapellaBucket() *schema.Resource {
 				Required:    true,
 				ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
 					conflict := val.(string)
-					conflictList := []string{"lww", "seqno"}
-					conflictValidation := contains(conflictList, conflict)
+					conflictValidation := couchbasecapella.ConflictResolution(conflict).IsValid()
 					if !conflictValidation {
 						errs = append(errs, fmt.Errorf("please enter a valid value for conflict resolution {lww, seqno}"))
 
