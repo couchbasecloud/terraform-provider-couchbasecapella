@@ -37,6 +37,7 @@ func resourceCouchbaseCapellaVpcCluster() *schema.Resource {
 				Type:        schema.TypeString,
 				ForceNew:    true,
 				Computed:    true,
+				},
 			},
 			"name": {
 				Description: "Cluster's name.",
@@ -48,11 +49,25 @@ func resourceCouchbaseCapellaVpcCluster() *schema.Resource {
 				Description: "Cloud's Id.",
 				Type:        schema.TypeString,
 				Required:    true,
+				ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
+					idIsValid := IsValidUUID(val.(string))
+					if !idIsValid {
+						errs = append(errs, fmt.Errorf("please enter a valid cloud uuid"))
+					}
+					return
+				},
 			},
 			"project_id": {
 				Description: "Project's Id.",
 				Type:        schema.TypeString,
 				Required:    true,
+				ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
+					idIsValid := IsValidUUID(val.(string))
+					if !idIsValid {
+						errs = append(errs, fmt.Errorf("please enter a valid project uuid"))
+					}
+					return
+				},
 			},
 			"servers": {
 				Description: "Cluster servers configuration",

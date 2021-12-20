@@ -33,6 +33,13 @@ func resourceCouchbaseCapellaBucket() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    true,
 				ForceNew:    true,
+				ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
+					idIsValid := IsValidUUID(val.(string))
+					if !idIsValid {
+						errs = append(errs, fmt.Errorf("please enter a valid cluster uuid"))
+					}
+					return
+				},
 			},
 			"name": {
 				Description: "Name of the Bucket",
@@ -58,7 +65,6 @@ func resourceCouchbaseCapellaBucket() *schema.Resource {
 					memory := val.(int)
 					if memory < 100 {
 						errs = append(errs, fmt.Errorf("please enter a memory value greater than 100 MiB"))
-
 					}
 					return
 				},

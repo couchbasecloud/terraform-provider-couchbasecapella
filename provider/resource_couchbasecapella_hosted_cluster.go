@@ -10,6 +10,7 @@ package provider
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"strings"
 	"time"
@@ -51,6 +52,13 @@ func resourceCouchbaseCapellaHostedCluster() *schema.Resource {
 				Description: "ID of the Project the Cluster is contained in",
 				Type:        schema.TypeString,
 				Required:    true,
+				ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
+					idIsValid := IsValidUUID(val.(string))
+					if !idIsValid {
+						errs = append(errs, fmt.Errorf("please enter a valid project uuid"))
+					}
+					return
+				},
 			},
 			"place": {
 				Description: "The place where the Cluster is deployed",

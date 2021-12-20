@@ -34,6 +34,13 @@ func resourceCouchbaseCapellaDatabaseUser() *schema.Resource {
 				Description: "ID of the Cluster",
 				Type:        schema.TypeString,
 				Required:    true,
+				ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
+					idIsValid := IsValidUUID(val.(string))
+					if !idIsValid {
+						errs = append(errs, fmt.Errorf("please enter a valid cluster uuid"))
+					}
+					return
+				},
 			},
 			"username": {
 				Description: "Username for the Database User",
@@ -50,7 +57,7 @@ func resourceCouchbaseCapellaDatabaseUser() *schema.Resource {
 					password := val.(string)
 					passwordValidate := validatePassword(password)
 					if !passwordValidate {
-						errs = append(errs, fmt.Errorf("Password must contain 8+ characters, 1+ lowercase, 1+ uppercase, 1+ symbols, 1+ numbers."))
+						errs = append(errs, fmt.Errorf("password must contain 8+ characters, 1+ lowercase, 1+ uppercase, 1+ symbols, 1+ numbers"))
 					}
 					return
 				},
