@@ -12,6 +12,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"regexp"
 	"strings"
 	"time"
 
@@ -91,7 +92,7 @@ func resourceCouchbaseCapellaVpcCluster() *schema.Resource {
 							Required:    true,
 							ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
 								size := val.(int)
-								sizeIsValid := size >= 3 && size < 28 
+								sizeIsValid := size >= 3 && size < 28
 								if !sizeIsValid {
 									errs = append(errs, fmt.Errorf("number of nodes should be more than 3 and less than 27"))
 								}
@@ -105,6 +106,14 @@ func resourceCouchbaseCapellaVpcCluster() *schema.Resource {
 							MinItems:    1,
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
+								ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
+									service := val.(string)
+									serviceValidation := couchbasecapella.CouchbaseServices(service).IsValid()
+									if !serviceValidation {
+										errs = append(errs, fmt.Errorf("please enter a valid value for service {data, index, query, search, eventing, analytics}"))
+									}
+									return
+								},
 							},
 						},
 						"aws": {
