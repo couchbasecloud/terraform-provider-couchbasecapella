@@ -9,7 +9,9 @@ Create and delete VPC Clusters in Couchbase Capella.
 
 `couchbasecapella_vpc_cluster` allows you to create and delete VPC clusters in Couchbase Capella. The resource requires your Project ID.
 
-~> **WARNING:** This current release of Terraform Couchbase Capella provider doesn't support updating a VPC cluster. Please log in to the Couchbase Capella UI where you'll be able to update the name of your cluster.
+~> **WARNING:** Changing the name of an existing VPC Cluster in your Terraform configuration will result in the deletion and recreation of the Cluster with the new name in Capella. Before applying your changes, Terraform will inform you that it will destroy and recreate the resources. Make sure to review these changes before typing `yes` to apply them.
+
+~> **VERY IMPORTANT:** **THIS MEANS YOU WILL LOSE ANY DATA IN THE EXISTING CLUSTER**
 
 ## Example Usage
 

@@ -285,7 +285,7 @@ func resourceCouchbaseCapellaVpcClusterRead(ctx context.Context, d *schema.Resou
 }
 
 func resourceCouchbaseCapellaVpcClusterUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	return diag.Errorf("This current release of terraform provider doesn't support updating vpc clusters, Please log to your Capella UI account")
+	return diag.Errorf("This current release of the terraform provider doesn't support updating vpc clusters, please log in to the Capella UI where you can update your cluster")
 }
 
 func resourceCouchbaseCapellaVpcClusterDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {

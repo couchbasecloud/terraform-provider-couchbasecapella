@@ -129,9 +129,9 @@ func resourceCouchbaseCapellaDatabaseUserCreate(ctx context.Context, d *schema.R
 		// Check V3Cluster :: Need to be fixed in next versions
 		_, _, err3 := client.ClustersV3Api.ClustersV3show(auth, clusterId).Execute()
 		if err3 != nil {
-			return diag.FromErr(fmt.Errorf("a problem occurred while accessing to the cluster"))
+			return diag.FromErr(fmt.Errorf("a problem occurred while accessing the cluster"))
 		}
-		return diag.FromErr(fmt.Errorf("sorry, managing database users is not available for hosted clusters"))
+		return diag.FromErr(fmt.Errorf("This current release of the terraform provider doesn't support managing database users in hosted clusters, please log in to the Capella UI where you can update your cluster"))
 	}
 
 	username := d.Get("username").(string)
@@ -202,9 +202,9 @@ func resourceCouchbaseCapellaDatabaseUserRead(ctx context.Context, d *schema.Res
 		// Check V3Cluster :: Need to be fixed in next versions
 		_, _, err3 := client.ClustersV3Api.ClustersV3show(auth, clusterId).Execute()
 		if err3 != nil {
-			return diag.FromErr(fmt.Errorf("a problem occurred while accessing to the cluster"))
+			return diag.FromErr(fmt.Errorf("a problem occurred while accessing the cluster"))
 		}
-		return diag.FromErr(fmt.Errorf("sorry, managing database users is not available for hosted clusters"))
+		return diag.FromErr(fmt.Errorf("This current release of the terraform provider doesn't support managing database users in hosted clusters, please log in to the Capella UI where you can update your cluster"))
 	}
 
 	// The current version of the Capella API doesn't support getting a singular
@@ -246,9 +246,9 @@ func resourceCouchbaseCapellaDatabaseUserUpdate(ctx context.Context, d *schema.R
 		// Check V3Cluster :: Need to be fixed in next versions
 		_, _, err3 := client.ClustersV3Api.ClustersV3show(auth, clusterId).Execute()
 		if err3 != nil {
-			return diag.FromErr(fmt.Errorf("a problem occurred while accessing to the cluster"))
+			return diag.FromErr(fmt.Errorf("a problem occurred while accessing the cluster"))
 		}
-		return diag.FromErr(fmt.Errorf("sorry, managing database users is not available for hosted clusters"))
+		return diag.FromErr(fmt.Errorf("This current release of the terraform provider doesn't support managing database users in hosted clusters, please log in to the Capella UI where you can update your cluster"))
 	}
 
 	username := d.Get("username").(string)
@@ -294,9 +294,9 @@ func resourceCouchbaseCapellaDatabaseUserDelete(ctx context.Context, d *schema.R
 		// Check V3Cluster :: Need to be fixed in next versions
 		_, _, err3 := client.ClustersV3Api.ClustersV3show(auth, clusterId).Execute()
 		if err3 != nil {
-			return diag.FromErr(fmt.Errorf("a problem occurred while accessing to the cluster"))
+			return diag.FromErr(fmt.Errorf("a problem occurred while accessing the cluster"))
 		}
-		return diag.FromErr(fmt.Errorf("sorry, managing database users is not available for hosted clusters"))
+		return diag.FromErr(fmt.Errorf("This current release of the terraform provider doesn't support managing database users in hosted clusters, please log in to the Capella UI where you can update your cluster"))
 	}
 
 	username := d.Get("username").(string)

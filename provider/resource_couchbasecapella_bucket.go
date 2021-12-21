@@ -109,9 +109,9 @@ func resourceCouchbaseCapellaBucketCreate(ctx context.Context, d *schema.Resourc
 		// Check V3Cluster :: Need to be fixed in next versions
 		_, _, err3 := client.ClustersV3Api.ClustersV3show(auth, clusterId).Execute()
 		if err3 != nil {
-			return diag.FromErr(fmt.Errorf("a problem occured while accessing to the cluster"))
+			return diag.FromErr(fmt.Errorf("a problem occurred while accessing the cluster"))
 		}
-		return diag.FromErr(fmt.Errorf("sorry, managing buckets is not available for hosted clusters"))
+		return diag.FromErr(fmt.Errorf("This current release of the terraform provider doesn't support managing buckets in hosted clusters, please log in to the Capella UI where you can update your cluster"))
 	}
 
 	bucketName := d.Get("name").(string)
@@ -152,9 +152,9 @@ func resourceCouchbaseCapellaBucketRead(ctx context.Context, d *schema.ResourceD
 		// Check V3Cluster :: Need to be fixed in next versions
 		_, _, err3 := client.ClustersV3Api.ClustersV3show(auth, clusterId).Execute()
 		if err3 != nil {
-			return diag.FromErr(fmt.Errorf("a problem occured while accessing to the cluster"))
+			return diag.FromErr(fmt.Errorf("a problem occurred while accessing the cluster"))
 		}
-		return diag.FromErr(fmt.Errorf("sorry, managing buckets is not available for hosted clusters"))
+		return diag.FromErr(fmt.Errorf("This current release of the terraform provider doesn't support managing buckets in hosted clusters, please log in to the Capella UI where you can update your cluster"))
 	}
 	buckets, _, err := client.ClustersApi.ClustersListBuckets(auth, clusterId).Execute()
 	if err != nil {
@@ -191,9 +191,9 @@ func resourceCouchbaseCapellaBucketUpdate(ctx context.Context, d *schema.Resourc
 		// Check V3Cluster :: Need to be fixed in next versions
 		_, _, err3 := client.ClustersV3Api.ClustersV3show(auth, clusterId).Execute()
 		if err3 != nil {
-			return diag.FromErr(fmt.Errorf("a problem occured while accessing to the cluster"))
+			return diag.FromErr(fmt.Errorf("a problem occurred while accessing the cluster"))
 		}
-		return diag.FromErr(fmt.Errorf("sorry, managing buckets is not available for hosted clusters"))
+		return diag.FromErr(fmt.Errorf("This current release of the terraform provider doesn't support managing buckets in hosted clusters, please log in to the Capella UI where you can update your cluster"))
 	}
 
 	bucketName := d.Get("name").(string)
@@ -238,9 +238,9 @@ func resourceCouchbaseCapellaBucketDelete(ctx context.Context, d *schema.Resourc
 		// Check V3Cluster :: Need to be fixed in next versions
 		_, _, err3 := client.ClustersV3Api.ClustersV3show(auth, clusterId).Execute()
 		if err3 != nil {
-			return diag.FromErr(fmt.Errorf("a problem occured while accessing to the cluster"))
+			return diag.FromErr(fmt.Errorf("a problem occurred while accessing the cluster"))
 		}
-		return diag.FromErr(fmt.Errorf("sorry, managing buckets is not available for hosted clusters"))
+		return diag.FromErr(fmt.Errorf("This current release of the terraform provider doesn't support managing buckets in hosted clusters, please log in to the Capella UI where you can update your cluster"))
 	}
 	bucketName := d.Get("name").(string)
 
