@@ -14,6 +14,7 @@ import (
 	"time"
 	"unicode"
 
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -43,10 +44,11 @@ func resourceCouchbaseCapellaDatabaseUser() *schema.Resource {
 				},
 			},
 			"username": {
-				Description: "Username for the Database User",
-				Type:        schema.TypeString,
-				Required:    true,
-				ForceNew:    true,
+				Description:  "Username for the Database User",
+				Type:         schema.TypeString,
+				Required:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.StringIsNotEmpty,
 			},
 			"password": {
 				Description: "Password for the Database User",
@@ -69,8 +71,9 @@ func resourceCouchbaseCapellaDatabaseUser() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"bucket_name": {
-							Type:     schema.TypeString,
-							Optional: true,
+							Type:         schema.TypeString,
+							Optional:     true,
+							ValidateFunc: validation.StringIsNotEmpty,
 						},
 						"bucket_access": {
 							Type:     schema.TypeList,

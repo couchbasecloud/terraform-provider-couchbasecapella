@@ -12,6 +12,7 @@ import (
 	"context"
 	"net/http"
 
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -34,10 +35,11 @@ func resourceCouchbaseCapellaProject() *schema.Resource {
 				Computed:    true,
 			},
 			"name": {
-				Description: "Project name.",
-				Type:        schema.TypeString,
-				ForceNew:    true,
-				Required:    true,
+				Description:  "Project name.",
+				Type:         schema.TypeString,
+				ForceNew:     true,
+				Required:     true,
+				ValidateFunc: validation.StringIsNotEmpty,
 			},
 		},
 	}
