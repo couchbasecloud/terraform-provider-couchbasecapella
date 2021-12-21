@@ -180,7 +180,7 @@ func resourceCouchbaseCapellaHostedCluster() *schema.Resource {
 								instance := val.(string)
 								awsInstanceValidation := couchbasecapella.AwsInstances(instance).IsValid()
 								azureInstanceValidation := couchbasecapella.AzureInstances(instance).IsValid()
-								if !awsInstanceValidation && azureInstanceValidation {
+								if !awsInstanceValidation && !azureInstanceValidation {
 									errs = append(errs, fmt.Errorf("please enter a valid value for compute instance"))
 								}
 								return
