@@ -105,6 +105,15 @@ func resourceCouchbaseCapellaHostedCluster() *schema.Resource {
 										Description: "A valid region for the Cloud Provider",
 										Type:        schema.TypeString,
 										Required:    true,
+										ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
+											region := val.(string)
+											awsRegionValidation := couchbasecapella.AwsRegions(region).IsValid()
+											azureRegionValidation := couchbasecapella.AzureRegions(region).IsValid()
+											if !awsRegionValidation && !azureRegionValidation {
+												errs = append(errs, fmt.Errorf("please enter a valid region for the cloud provider you have selected."))
+											}
+											return
+										},
 									},
 									"cidr": {
 										Description: "CIDR block",
