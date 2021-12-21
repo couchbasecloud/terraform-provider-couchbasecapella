@@ -45,12 +45,12 @@ func resourceCouchbaseCapellaHostedCluster() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    true,
 				ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
-					var isStringAlphabetic = regexp.MustCompile(`^[a-zA-Z0-9_. ]*$`).MatchString
+					var isStringAlphabetic = regexp.MustCompile(`^[a-zA-Z0-9-_. ]*$`).MatchString
 					var isAlphaNumeric = regexp.MustCompile(`^[a-zA-Z0-9]*$`).MatchString
 					name := val.(string)
-					nameValidate := isStringAlphabetic(name) && len(name) >= 2 && len(name) < 100 && isAlphaNumeric(name[0:1])
+					nameValidate := isStringAlphabetic(name) && len(name) >= 2 && len(name) < 128 && isAlphaNumeric(name[0:1])
 					if !nameValidate {
-						errs = append(errs, fmt.Errorf("use letters, numbers, periods (.), dashes (-) or space. Cluster name cannot exceed 100 characters and must begin with a letter or a number"))
+						errs = append(errs, fmt.Errorf("cluster name can include letters, numbers, spaces, periods (.), dashes (-), and underscores (_) . Cluster name size should be between 2 and 128 characters and must begin with a letter or a number"))
 					}
 					return
 				},
