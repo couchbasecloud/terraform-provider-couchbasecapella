@@ -11,6 +11,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"net"
 	"net/http"
 	"regexp"
 	"strings"
@@ -119,6 +120,14 @@ func resourceCouchbaseCapellaHostedCluster() *schema.Resource {
 										Description: "CIDR block",
 										Type:        schema.TypeString,
 										Required:    true,
+										ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
+											cidr := val.(string)
+											_, _, err := net.ParseCIDR(cidr)
+											if err != nil {
+												errs = append(errs, fmt.Errorf("%s, please enter a valid CIDR address", err))
+											}
+											return
+										},
 									},
 								},
 							},
