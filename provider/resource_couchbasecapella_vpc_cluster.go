@@ -139,6 +139,14 @@ func resourceCouchbaseCapellaVpcCluster() *schema.Resource {
 										Description: "Aws size(Gb).",
 										Type:        schema.TypeInt,
 										Required:    true,
+										ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
+											size := val.(int)
+											sizeIsValid := size >= 50 && size < 16000
+											if !sizeIsValid {
+												errs = append(errs, fmt.Errorf("please enter a storage size between 50 and 16000"))
+											}
+											return
+										},
 									},
 								},
 							},
