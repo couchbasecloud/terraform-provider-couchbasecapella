@@ -12,6 +12,7 @@ import (
 	"context"
 	"fmt"
 	"regexp"
+	"time"
 
 	couchbasecapella "github.com/couchbaselabs/couchbase-cloud-go-client"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -156,22 +157,30 @@ func resourceCouchbaseCapellaBucketRead(ctx context.Context, d *schema.ResourceD
 		}
 		return diag.FromErr(fmt.Errorf("This current release of the terraform provider doesn't support managing buckets in hosted clusters, please log in to the Capella UI where you can update your cluster"))
 	}
-	buckets, _, err := client.ClustersApi.ClustersListBuckets(auth, clusterId).Execute()
-	if err != nil {
-		return diag.FromErr(err)
-	}
-	bucketExists := false
-	for _, bucket := range buckets {
-		if bucket.Name == d.Id() {
-			bucketExists = true
+
+	// NOTE: There is a delay for retrieving a newly created bucket from Capella's list of buckets.
+	// This poll will check at regular intervals if the newly created bucket is in the list of buckets
+	// until the timeout period expires. If the timeout is reached, then the newly created bucket is not in the list of buckets.
+	timeout := time.NewTimer(time.Second * 60)
+	ticker := time.NewTicker(time.Second * 2)
+	for {
+		select {
+		case <-timeout.C:
+			bucketName := d.Id()
+			d.SetId("")
+			return diag.Errorf("Error 404: Failed to find the bucket %s ", bucketName)
+		case <-ticker.C:
+			buckets, _, err := client.ClustersApi.ClustersListBuckets(auth, clusterId).Execute()
+			if err != nil {
+				return diag.FromErr(err)
+			}
+			for _, bucket := range buckets {
+				if bucket.Name == d.Id() {
+					return nil
+				}
+			}
 		}
 	}
-	if !bucketExists {
-		bucketName := d.Id()
-		d.SetId("")
-		return diag.Errorf("Error 404: Failed to find the bucket %s ", bucketName)
-	}
-	return nil
 }
 
 /**
