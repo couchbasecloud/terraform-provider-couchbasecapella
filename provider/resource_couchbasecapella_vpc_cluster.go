@@ -19,6 +19,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	couchbasecapella "github.com/couchbaselabs/couchbase-cloud-go-client"
 )
@@ -56,28 +57,16 @@ func resourceCouchbaseCapellaVpcCluster() *schema.Resource {
 				},
 			},
 			"cloud_id": {
-				Description: "Cloud's Id.",
-				Type:        schema.TypeString,
-				Required:    true,
-				ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
-					idIsValid := IsValidUUID(val.(string))
-					if !idIsValid {
-						errs = append(errs, fmt.Errorf("please enter a valid cloud uuid"))
-					}
-					return
-				},
+				Description:  "Cloud's Id.",
+				Type:         schema.TypeString,
+				Required:     true,
+				ValidateFunc: validation.IsUUID,
 			},
 			"project_id": {
-				Description: "Project's Id.",
-				Type:        schema.TypeString,
-				Required:    true,
-				ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
-					idIsValid := IsValidUUID(val.(string))
-					if !idIsValid {
-						errs = append(errs, fmt.Errorf("please enter a valid project uuid"))
-					}
-					return
-				},
+				Description:  "Project's Id.",
+				Type:         schema.TypeString,
+				Required:     true,
+				ValidateFunc: validation.IsUUID,
 			},
 			"servers": {
 				Description: "Cluster servers configuration",

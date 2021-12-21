@@ -15,7 +15,7 @@ Create and delete VPC Clusters in Couchbase Capella.
 
 ## Example Usage
 
-### Example AWS cluster
+### Example AWS C1luster
 
 ```hcl
 resource "couchbasecapella_vpc_cluster" "test" {
@@ -33,7 +33,7 @@ resource "couchbasecapella_vpc_cluster" "test" {
 }
 ```
 
-### Example Azure cluster.
+### Example Azure Cluster.
 
 ```hcl
 resource "couchbasecapella_vpc_cluster" "test" {

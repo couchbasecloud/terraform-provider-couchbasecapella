@@ -14,6 +14,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	couchbasecapella "github.com/couchbaselabs/couchbase-cloud-go-client"
 )
@@ -34,10 +35,11 @@ func resourceCouchbaseCapellaProject() *schema.Resource {
 				Computed:    true,
 			},
 			"name": {
-				Description: "Project name.",
-				Type:        schema.TypeString,
-				ForceNew:    true,
-				Required:    true,
+				Description:  "Project name.",
+				Type:         schema.TypeString,
+				ForceNew:     true,
+				Required:     true,
+				ValidateFunc: validation.StringIsNotEmpty,
 			},
 		},
 	}
