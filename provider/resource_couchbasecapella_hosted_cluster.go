@@ -12,6 +12,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"regexp"
 	"strings"
 	"time"
 
@@ -42,6 +43,16 @@ func resourceCouchbaseCapellaHostedCluster() *schema.Resource {
 				Description: "Name of the Cluster",
 				Type:        schema.TypeString,
 				Required:    true,
+				ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
+					var isStringAlphabetic = regexp.MustCompile(`^[a-zA-Z0-9_. ]*$`).MatchString
+					var isAlphaNumeric = regexp.MustCompile(`^[a-zA-Z0-9]*$`).MatchString
+					name := val.(string)
+					nameValidate := isStringAlphabetic(name) && len(name) >= 2 && len(name) < 100 && isAlphaNumeric(name[0:1])
+					if !nameValidate {
+						errs = append(errs, fmt.Errorf("use letters, numbers, periods (.), dashes (-) or space. Cluster name cannot exceed 100 characters and must begin with a letter or a number"))
+					}
+					return
+				},
 			},
 			"description": {
 				Description: "A description for the Cluster",
@@ -81,6 +92,14 @@ func resourceCouchbaseCapellaHostedCluster() *schema.Resource {
 										Description: "The name of the cloud provider where the cluster will be deployed",
 										Type:        schema.TypeString,
 										Required:    true,
+										ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
+											provider := val.(string)
+											providerValidation := couchbasecapella.V3Provider(provider).IsValid()
+											if !providerValidation {
+												errs = append(errs, fmt.Errorf("please enter a valid value for provider {aws, azure, gcp}"))
+											}
+											return
+										},
 									},
 									"region": {
 										Description: "A valid region for the Cloud Provider",
@@ -108,11 +127,27 @@ func resourceCouchbaseCapellaHostedCluster() *schema.Resource {
 							Type:        schema.TypeString,
 							Description: "The Timezone of the Support Package",
 							Required:    true,
+							ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
+								timezone := val.(string)
+								timezoneValidation := couchbasecapella.V3SupportPackageTimezones(timezone).IsValid()
+								if !timezoneValidation {
+									errs = append(errs, fmt.Errorf("please enter a valid value for timzone {ET, GMT, IST, PT}"))
+								}
+								return
+							},
 						},
 						"support_package_type": {
 							Type:        schema.TypeString,
 							Description: "The Support Package type of the cluster",
 							Required:    true,
+							ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
+								packageType := val.(string)
+								packageTypeValidation := couchbasecapella.V3SupportPackageType(packageType).IsValid()
+								if !packageTypeValidation {
+									errs = append(errs, fmt.Errorf("please enter a valid value for support package type {Basic, DeveloperPro, Enterprise}"))
+								}
+								return
+							},
 						},
 					},
 				},
@@ -128,11 +163,28 @@ func resourceCouchbaseCapellaHostedCluster() *schema.Resource {
 							Type:        schema.TypeInt,
 							Description: "Number of nodes",
 							Required:    true,
+							ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
+								size := val.(int)
+								sizeIsValid := size >= 3 && size < 28
+								if !sizeIsValid {
+									errs = append(errs, fmt.Errorf("number of nodes should be a value between 3 and 27"))
+								}
+								return
+							},
 						},
 						"compute": {
 							Type:        schema.TypeString,
 							Description: "Compute instance type",
 							Required:    true,
+							ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
+								instance := val.(string)
+								awsInstanceValidation := couchbasecapella.AwsInstances(instance).IsValid()
+								azureInstanceValidation := couchbasecapella.AzureInstances(instance).IsValid()
+								if !awsInstanceValidation && azureInstanceValidation {
+									errs = append(errs, fmt.Errorf("please enter a valid value for compute instance"))
+								}
+								return
+							},
 						},
 						"services": {
 							Type:        schema.TypeList,
@@ -141,6 +193,14 @@ func resourceCouchbaseCapellaHostedCluster() *schema.Resource {
 							MinItems:    1,
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
+								ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
+									service := val.(string)
+									serviceValidation := couchbasecapella.V3CouchbaseServices(service).IsValid()
+									if !serviceValidation {
+										errs = append(errs, fmt.Errorf("please enter a valid value for service {data, index, query, search, eventing, analytics}"))
+									}
+									return
+								},
 							},
 						},
 						"storage": {
@@ -153,16 +213,41 @@ func resourceCouchbaseCapellaHostedCluster() *schema.Resource {
 										Description: "Storage type",
 										Type:        schema.TypeString,
 										Required:    true,
+										ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
+											storageType := val.(string)
+											storageTypeValidation := couchbasecapella.V3StorageType(storageType).IsValid()
+											if !storageTypeValidation {
+												errs = append(errs, fmt.Errorf("please enter a valid value for storage type {GP3, IO2}"))
+											}
+											return
+										},
 									},
 									"iops": {
 										Description: "IOPS",
 										Type:        schema.TypeInt,
 										Required:    true,
+										ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
+											iops := val.(int)
+											GP3IopsIsValid := iops >= 3000 && iops <= 16000
+											IO2IopsIsValid := iops >= 1000 && iops <= 64000
+											if !GP3IopsIsValid && !IO2IopsIsValid {
+												errs = append(errs, fmt.Errorf("If storage type is GP3, iops should be a value between 3000 and 16000. If storage type is IO2, iops should be a value between 1000 and 64000"))
+											}
+											return
+										},
 									},
 									"storage_size": {
 										Description: "Storage size in Gb",
 										Type:        schema.TypeInt,
 										Required:    true,
+										ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
+											storageSize := val.(int)
+											storageSizeIsValid := storageSize >= 50 && storageSize <= 16000
+											if !storageSizeIsValid {
+												errs = append(errs, fmt.Errorf("storage size should be a value between 50 and 16000"))
+											}
+											return
+										},
 									},
 								},
 							},
