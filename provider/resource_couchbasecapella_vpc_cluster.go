@@ -106,6 +106,14 @@ func resourceCouchbaseCapellaVpcCluster() *schema.Resource {
 							MinItems:    1,
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
+								ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
+									service := val.(string)
+									serviceValidation := couchbasecapella.CouchbaseServices(service).IsValid()
+									if !serviceValidation {
+										errs = append(errs, fmt.Errorf("please enter a valid value for service {data, index, query, search, eventing, analytics}"))
+									}
+									return
+								},
 							},
 						},
 						"aws": {
