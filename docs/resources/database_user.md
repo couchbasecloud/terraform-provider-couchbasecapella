@@ -54,7 +54,7 @@ resource "couchbasecapella_database_user" "test" {
 
 #### Specific Bucket Access
 
-- `bucket_name` - (Required) The name of the bucket that you want to specify access levels for.
+- `bucket_name` - (Required) The name of the bucket that you want to specify access levels for. This bucket must exist in Capella.
 - `bucket_access` - (Required) The bucket level access you want the database user to have for the named bucket. You can either specify `data_reader`, which will give read access, or `data_writer`, which will give read/write access.
 
 For more information see: [Couchbase Capella Public API Reference](https://docs.couchbase.com/cloud/reference/rest-endpoints-all.html#clusters).

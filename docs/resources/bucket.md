@@ -27,10 +27,10 @@ resource "couchbasecapella_bucket" "bucket_test" {
 
 ## Argument Reference
 
-- `cluster_id` - (Required) The id of the cluster where your bucket will be created. (Cannot be changed via this Provider after creation.)
-- `name` - (Required) The name of the bucket you want to create. (Cannot be changed via this Provider after creation.)
-- `memory_quota` - (Required) The amount of memory that the bucket will be allocated in megabytes. Buckets require a minimum of 100 MiB of memory per node. (Cannot be changed via this Provider after creation.)
-- `replicas` - (Required) The number of replicas this bucket will have. (Cannot be changed via this Provider after creation.)
-- `conflict_resolution` - (Required) The type of conflict resolution. You can select `seqno`, sequence number, or `lww`, last write wins. (Cannot be changed via this Provider after creation.)
+- `cluster_id` - (Required) The id of the cluster where your bucket will be created. This must be a valid UUID and an existing cluster id.
+- `name` - (Required) The name of the bucket you want to create. The bucket name can contain letters, numbers, periods (.) or dashes (-). Bucket names cannot exceed 100 characters and must begin with a letter or a number.
+- `memory_quota` - (Required) The amount of memory that the bucket will be allocated in megabytes. Buckets require a minimum of 100 MiB of memory per node.
+- `replicas` - (Required) The number of replicas this bucket will have.
+- `conflict_resolution` - (Required) The type of conflict resolution. You can select `seqno`, sequence number, or `lww`, last write wins.
 
 For more information see: [Couchbase Capella Public API Reference](https://docs.couchbase.com/cloud/reference/rest-endpoints-all.html#clusters).

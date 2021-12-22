@@ -48,21 +48,21 @@ resource "couchbasecapella_hosted_cluster" "test" {
 
 ## Argument Reference
 
-- `name` - (Required) The name of the cluster you want to create.
-- `project_id` - (Required) The id of the project where your cluster will be created. (Cannot be changed via this Provider after creation.)
+- `name` - (Required) The name of the cluster you want to create. The cluster name can include letters, numbers, spaces, periods (.), dashes (-), and underscores (\_). Cluster name should be between 2 and 128 characters and must begin with a letter or a number.
+- `project_id` - (Required) The id of the project where your cluster will be created. This must be a valid UUID and an existing project ID. (Cannot be changed via this Provider after creation.)
 - `description` - (Optional) A description for the cluster.
 
 ### Place
 
 - `single_az` - (Required) A boolean to describe if there is only a single availability zone. (Cannot be changed via this Provider after creation.)
 
-~> **WARNING:** `single_az` Has to be true if the you select the "Basic" support package.
+~> **WARNING:** `single_az` must be set to true if the you select the "Basic" support package.
 
 #### Hosted
 
-- `provider` - (Required) The name of the cloud provider you want your cluster to be hosted in. (Cannot be changed via this Provider after creation.)
-- `region` - (Required) A valid region for the cloud provider that you want you cluster to be hosted in. (Cannot be changed via this Provider after creation.)
-- `cidr` - (Required) The cidr block. (Cannot be changed via this Provider after creation.)
+- `provider` - (Required) The name of the cloud provider you want your cluster to be hosted in. `aws`, `azure`, or `gcp` are the available providers that you can specify. (Cannot be changed via this Provider after creation.)
+- `region` - (Required) A valid region for the cloud provider that you want you cluster to be hosted in. This must be a valid region for the cloud provider you have specified. (Cannot be changed via this Provider after creation.)
+- `cidr` - (Required) The CIDR address. This must be a valid CIDR address. (Cannot be changed via this Provider after creation.)
 
 ### Support Package
 
@@ -73,8 +73,8 @@ For more detailed information on support packages, you can view this [detailed p
 
 ### Servers
 
-- `size` - (Required) The number of nodes in your cluster.
-- `compute` - (Required) The name of the compute instance type.
+- `size` - (Required) The number of nodes in your cluster. This must be a value between 3 and 27.
+- `compute` - (Required) The name of the compute instance type. This must be a valid compute instance type for the provider that you have specified.
 - `services` - (Required) A list of Couchbase services that you want in your cluster. `Data`, `Query`, `Index`, `Search`,`eventing`, `analytics` are the available services that you can specify.
 
 #### Storage
