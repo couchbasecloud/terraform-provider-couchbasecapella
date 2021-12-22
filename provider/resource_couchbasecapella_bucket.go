@@ -17,6 +17,7 @@ import (
 	couchbasecapella "github.com/couchbaselabs/couchbase-cloud-go-client"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func resourceCouchbaseCapellaBucket() *schema.Resource {
@@ -30,17 +31,11 @@ func resourceCouchbaseCapellaBucket() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"cluster_id": {
-				Description: "ID of the Cluster",
-				Type:        schema.TypeString,
-				Required:    true,
-				ForceNew:    true,
-				ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
-					idIsValid := IsValidUUID(val.(string))
-					if !idIsValid {
-						errs = append(errs, fmt.Errorf("please enter a valid cluster uuid"))
-					}
-					return
-				},
+				Description:  "ID of the Cluster",
+				Type:         schema.TypeString,
+				Required:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.IsUUID,
 			},
 			"name": {
 				Description: "Name of the Bucket",
@@ -53,7 +48,7 @@ func resourceCouchbaseCapellaBucket() *schema.Resource {
 					name := val.(string)
 					nameValidate := isStringAlphabetic(name) && len(name) > 0 && len(name) < 100 && isAlphaNumeric(name[0:1])
 					if !nameValidate {
-						errs = append(errs, fmt.Errorf("use letters, numbers, periods (.) or dashes (- ). Bucket names cannot exceed 100 characters and must begin with a letter or a number"))
+						errs = append(errs, fmt.Errorf(BucketInvalidName))
 					}
 					return
 				},
@@ -65,7 +60,7 @@ func resourceCouchbaseCapellaBucket() *schema.Resource {
 				ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
 					memory := val.(int)
 					if memory < 100 {
-						errs = append(errs, fmt.Errorf("please enter a memory value greater than 100 MiB"))
+						errs = append(errs, fmt.Errorf(BucketInvalidMemoryQuota, memory))
 					}
 					return
 				},
@@ -83,7 +78,7 @@ func resourceCouchbaseCapellaBucket() *schema.Resource {
 					conflict := val.(string)
 					conflictValidation := couchbasecapella.ConflictResolution(conflict).IsValid()
 					if !conflictValidation {
-						errs = append(errs, fmt.Errorf("please enter a valid value for conflict resolution {lww, seqno}"))
+						errs = append(errs, fmt.Errorf(BucketInvalidConflictResolution, conflict))
 
 					}
 					return
@@ -93,9 +88,8 @@ func resourceCouchbaseCapellaBucket() *schema.Resource {
 	}
 }
 
-/**
-*** Creating the Bucket
-**/
+// resourceCouchbaseCapellaBucketCreate is responsible for creating a
+// bucket in a Couchbase Capella VPC Cluster using the Terraform resource data.
 func resourceCouchbaseCapellaBucketCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*couchbasecapella.APIClient)
 	auth := getAuth(ctx)
@@ -110,9 +104,9 @@ func resourceCouchbaseCapellaBucketCreate(ctx context.Context, d *schema.Resourc
 		// Check V3Cluster :: Need to be fixed in next versions
 		_, _, err3 := client.ClustersV3Api.ClustersV3show(auth, clusterId).Execute()
 		if err3 != nil {
-			return diag.FromErr(fmt.Errorf("a problem occurred while accessing the cluster"))
+			return diag.FromErr(fmt.Errorf(ClusterProblemAccessing))
 		}
-		return diag.FromErr(fmt.Errorf("This current release of the terraform provider doesn't support managing buckets in hosted clusters, please log in to the Capella UI where you can update your cluster"))
+		return diag.FromErr(fmt.Errorf(BucketHostedNotSupported))
 	}
 
 	bucketName := d.Get("name").(string)
@@ -139,6 +133,8 @@ func resourceCouchbaseCapellaBucketCreate(ctx context.Context, d *schema.Resourc
 	return resourceCouchbaseCapellaBucketRead(ctx, d, meta)
 }
 
+// resourceCouchbaseCapellaBucketRead is responsible for reading a
+// bucket in a Couchbase Capella VPC Cluster using the Terraform resource data.
 func resourceCouchbaseCapellaBucketRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*couchbasecapella.APIClient)
 	auth := getAuth(ctx)
@@ -153,9 +149,9 @@ func resourceCouchbaseCapellaBucketRead(ctx context.Context, d *schema.ResourceD
 		// Check V3Cluster :: Need to be fixed in next versions
 		_, _, err3 := client.ClustersV3Api.ClustersV3show(auth, clusterId).Execute()
 		if err3 != nil {
-			return diag.FromErr(fmt.Errorf("a problem occurred while accessing the cluster"))
+			return diag.FromErr(fmt.Errorf(ClusterProblemAccessing))
 		}
-		return diag.FromErr(fmt.Errorf("This current release of the terraform provider doesn't support managing buckets in hosted clusters, please log in to the Capella UI where you can update your cluster"))
+		return diag.FromErr(fmt.Errorf(BucketHostedNotSupported))
 	}
 
 	// NOTE: There is a delay for retrieving a newly created bucket from Capella's list of buckets.
@@ -183,9 +179,8 @@ func resourceCouchbaseCapellaBucketRead(ctx context.Context, d *schema.ResourceD
 	}
 }
 
-/**
-*** Updating the Bucket
-**/
+// resourceCouchbaseCapellaBucketUpdate is responsible for updating a
+// bucket in a Couchbase Capella VPC Cluster using the Terraform resource data.
 func resourceCouchbaseCapellaBucketUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*couchbasecapella.APIClient)
 	auth := getAuth(ctx)
@@ -200,9 +195,9 @@ func resourceCouchbaseCapellaBucketUpdate(ctx context.Context, d *schema.Resourc
 		// Check V3Cluster :: Need to be fixed in next versions
 		_, _, err3 := client.ClustersV3Api.ClustersV3show(auth, clusterId).Execute()
 		if err3 != nil {
-			return diag.FromErr(fmt.Errorf("a problem occurred while accessing the cluster"))
+			return diag.FromErr(fmt.Errorf(ClusterProblemAccessing))
 		}
-		return diag.FromErr(fmt.Errorf("This current release of the terraform provider doesn't support managing buckets in hosted clusters, please log in to the Capella UI where you can update your cluster"))
+		return diag.FromErr(fmt.Errorf(BucketHostedNotSupported))
 	}
 
 	bucketName := d.Get("name").(string)
@@ -230,9 +225,8 @@ func resourceCouchbaseCapellaBucketUpdate(ctx context.Context, d *schema.Resourc
 	return resourceCouchbaseCapellaBucketRead(ctx, d, meta)
 }
 
-/**
-*** Deleting the Bucket
-**/
+// resourceCouchbaseCapellaBucketDelete is responsible for deleting a
+// bucket in a Couchbase Capella VPC Cluster using the Terraform resource data.
 func resourceCouchbaseCapellaBucketDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*couchbasecapella.APIClient)
 	auth := getAuth(ctx)
@@ -247,9 +241,9 @@ func resourceCouchbaseCapellaBucketDelete(ctx context.Context, d *schema.Resourc
 		// Check V3Cluster :: Need to be fixed in next versions
 		_, _, err3 := client.ClustersV3Api.ClustersV3show(auth, clusterId).Execute()
 		if err3 != nil {
-			return diag.FromErr(fmt.Errorf("a problem occurred while accessing the cluster"))
+			return diag.FromErr(fmt.Errorf(ClusterProblemAccessing))
 		}
-		return diag.FromErr(fmt.Errorf("This current release of the terraform provider doesn't support managing buckets in hosted clusters, please log in to the Capella UI where you can update your cluster"))
+		return diag.FromErr(fmt.Errorf(BucketHostedNotSupported))
 	}
 	bucketName := d.Get("name").(string)
 

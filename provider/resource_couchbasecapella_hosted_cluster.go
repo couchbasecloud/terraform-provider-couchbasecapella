@@ -20,6 +20,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	couchbasecapella "github.com/couchbaselabs/couchbase-cloud-go-client"
 )
@@ -50,7 +51,7 @@ func resourceCouchbaseCapellaHostedCluster() *schema.Resource {
 					name := val.(string)
 					nameValidate := isStringAlphabetic(name) && len(name) >= 2 && len(name) < 128 && isAlphaNumeric(name[0:1])
 					if !nameValidate {
-						errs = append(errs, fmt.Errorf("cluster name can include letters, numbers, spaces, periods (.), dashes (-), and underscores (_) . Cluster name size should be between 2 and 128 characters and must begin with a letter or a number"))
+						errs = append(errs, fmt.Errorf(ClusterInvalidName))
 					}
 					return
 				},
@@ -61,16 +62,10 @@ func resourceCouchbaseCapellaHostedCluster() *schema.Resource {
 				Optional:    true,
 			},
 			"project_id": {
-				Description: "ID of the Project the Cluster is contained in",
-				Type:        schema.TypeString,
-				Required:    true,
-				ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
-					idIsValid := IsValidUUID(val.(string))
-					if !idIsValid {
-						errs = append(errs, fmt.Errorf("please enter a valid project uuid"))
-					}
-					return
-				},
+				Description:  "ID of the Project the Cluster is contained in",
+				Type:         schema.TypeString,
+				Required:     true,
+				ValidateFunc: validation.IsUUID,
 			},
 			"place": {
 				Description: "The place where the Cluster is deployed",
@@ -97,7 +92,7 @@ func resourceCouchbaseCapellaHostedCluster() *schema.Resource {
 											provider := val.(string)
 											providerValidation := couchbasecapella.V3Provider(provider).IsValid()
 											if !providerValidation {
-												errs = append(errs, fmt.Errorf("please enter a valid value for provider {aws, azure, gcp}"))
+												errs = append(errs, fmt.Errorf(HostedClusterInvalidProvider, provider))
 											}
 											return
 										},
@@ -111,7 +106,7 @@ func resourceCouchbaseCapellaHostedCluster() *schema.Resource {
 											awsRegionValidation := couchbasecapella.AwsRegions(region).IsValid()
 											azureRegionValidation := couchbasecapella.AzureRegions(region).IsValid()
 											if !awsRegionValidation && !azureRegionValidation {
-												errs = append(errs, fmt.Errorf("please enter a valid region for the cloud provider you have selected."))
+												errs = append(errs, fmt.Errorf(HostedClusterInvalidRegion, region))
 											}
 											return
 										},
@@ -124,7 +119,7 @@ func resourceCouchbaseCapellaHostedCluster() *schema.Resource {
 											cidr := val.(string)
 											_, _, err := net.ParseCIDR(cidr)
 											if err != nil {
-												errs = append(errs, fmt.Errorf("%s, please enter a valid CIDR address", err))
+												errs = append(errs, fmt.Errorf(HostedClusterInvalidCIDR, cidr))
 											}
 											return
 										},
@@ -149,7 +144,7 @@ func resourceCouchbaseCapellaHostedCluster() *schema.Resource {
 								timezone := val.(string)
 								timezoneValidation := couchbasecapella.V3SupportPackageTimezones(timezone).IsValid()
 								if !timezoneValidation {
-									errs = append(errs, fmt.Errorf("please enter a valid value for timzone {ET, GMT, IST, PT}"))
+									errs = append(errs, fmt.Errorf(HostedClusterInvalidSupportPackageTimezone, timezone))
 								}
 								return
 							},
@@ -162,7 +157,7 @@ func resourceCouchbaseCapellaHostedCluster() *schema.Resource {
 								packageType := val.(string)
 								packageTypeValidation := couchbasecapella.V3SupportPackageType(packageType).IsValid()
 								if !packageTypeValidation {
-									errs = append(errs, fmt.Errorf("please enter a valid value for support package type {Basic, DeveloperPro, Enterprise}"))
+									errs = append(errs, fmt.Errorf(HostedClusterInvalidSupportPackageType, packageType))
 								}
 								return
 							},
@@ -185,7 +180,7 @@ func resourceCouchbaseCapellaHostedCluster() *schema.Resource {
 								size := val.(int)
 								sizeIsValid := size >= 3 && size < 28
 								if !sizeIsValid {
-									errs = append(errs, fmt.Errorf("number of nodes should be a value between 3 and 27"))
+									errs = append(errs, fmt.Errorf(ClusterInvalidSize, size))
 								}
 								return
 							},
@@ -199,7 +194,7 @@ func resourceCouchbaseCapellaHostedCluster() *schema.Resource {
 								awsInstanceValidation := couchbasecapella.AwsInstances(instance).IsValid()
 								azureInstanceValidation := couchbasecapella.AzureInstances(instance).IsValid()
 								if !awsInstanceValidation && !azureInstanceValidation {
-									errs = append(errs, fmt.Errorf("please enter a valid value for compute instance"))
+									errs = append(errs, fmt.Errorf(HostedClusterInvalidCompute, instance))
 								}
 								return
 							},
@@ -215,7 +210,7 @@ func resourceCouchbaseCapellaHostedCluster() *schema.Resource {
 									service := val.(string)
 									serviceValidation := couchbasecapella.V3CouchbaseServices(service).IsValid()
 									if !serviceValidation {
-										errs = append(errs, fmt.Errorf("please enter a valid value for service {data, index, query, search, eventing, analytics}"))
+										errs = append(errs, fmt.Errorf(ClusterInvalidCouchbaseService, service))
 									}
 									return
 								},
@@ -235,7 +230,7 @@ func resourceCouchbaseCapellaHostedCluster() *schema.Resource {
 											storageType := val.(string)
 											storageTypeValidation := couchbasecapella.V3StorageType(storageType).IsValid()
 											if !storageTypeValidation {
-												errs = append(errs, fmt.Errorf("please enter a valid value for storage type {GP3, IO2}"))
+												errs = append(errs, fmt.Errorf(ClusterInvalidStorageType, storageType))
 											}
 											return
 										},
@@ -249,7 +244,7 @@ func resourceCouchbaseCapellaHostedCluster() *schema.Resource {
 											GP3IopsIsValid := iops >= 3000 && iops <= 16000
 											IO2IopsIsValid := iops >= 1000 && iops <= 64000
 											if !GP3IopsIsValid && !IO2IopsIsValid {
-												errs = append(errs, fmt.Errorf("If storage type is GP3, iops should be a value between 3000 and 16000. If storage type is IO2, iops should be a value between 1000 and 64000"))
+												errs = append(errs, fmt.Errorf(HostedClusterInvalidIOPS))
 											}
 											return
 										},
@@ -262,7 +257,7 @@ func resourceCouchbaseCapellaHostedCluster() *schema.Resource {
 											storageSize := val.(int)
 											storageSizeIsValid := storageSize >= 50 && storageSize <= 16000
 											if !storageSizeIsValid {
-												errs = append(errs, fmt.Errorf("storage size should be a value between 50 and 16000"))
+												errs = append(errs, fmt.Errorf(ClusterInvalidStorageSize, storageSize))
 											}
 											return
 										},
@@ -282,6 +277,8 @@ func resourceCouchbaseCapellaHostedCluster() *schema.Resource {
 	}
 }
 
+// resourceCouchbaseCapellaHostedClusterCreate is responsible for creating a
+// hosted cluster in Couchbase Capella using the Terraform resource data.
 func resourceCouchbaseCapellaHostedClusterCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*couchbasecapella.APIClient)
 	auth := getAuth(ctx)
@@ -343,6 +340,8 @@ func resourceCouchbaseCapellaHostedClusterCreate(ctx context.Context, d *schema.
 	return resourceCouchbaseCapellaHostedClusterRead(ctx, d, meta)
 }
 
+// resourceCouchbaseCapellaHostedClusterRead is responsible for reading a
+// hosted cluster in Couchbase Capella using the Terraform resource data.
 func resourceCouchbaseCapellaHostedClusterRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*couchbasecapella.APIClient)
 	auth := getAuth(ctx)
@@ -364,6 +363,8 @@ func resourceCouchbaseCapellaHostedClusterRead(ctx context.Context, d *schema.Re
 	return nil
 }
 
+// resourceCouchbaseCapellaHostedClusterUpdate is responsible for updating a
+// hosted cluster in Couchbase Capella using the Terraform resource data.
 func resourceCouchbaseCapellaHostedClusterUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*couchbasecapella.APIClient)
 	auth := getAuth(ctx)
@@ -430,6 +431,8 @@ func resourceCouchbaseCapellaHostedClusterUpdate(ctx context.Context, d *schema.
 	return resourceCouchbaseCapellaHostedClusterRead(ctx, d, meta)
 }
 
+// resourceCouchbaseCapellaHostedClusterDelete is responsible for deleting a
+// hosted cluster in Couchbase Capella using the Terraform resource data.
 func resourceCouchbaseCapellaHostedClusterDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*couchbasecapella.APIClient)
 	auth := getAuth(ctx)
@@ -470,6 +473,8 @@ func resourceCouchbaseCapellaHostedClusterDelete(ctx context.Context, d *schema.
 	return nil
 }
 
+// expandHostedServersSet is responsible for converting the servers set into
+// a slice of type V3Servers
 func expandHostedServersSet(servers *schema.Set) []couchbasecapella.V3Servers {
 	result := make([]couchbasecapella.V3Servers, servers.Len())
 
@@ -481,6 +486,8 @@ func expandHostedServersSet(servers *schema.Set) []couchbasecapella.V3Servers {
 	return result
 }
 
+// expandHostedServiceList is responsible for converting the services interface into
+// a slice of type V3CouchbaseServices
 func expandHostedServiceList(services []interface{}) (res []couchbasecapella.V3CouchbaseServices) {
 	for _, v := range services {
 		res = append(res, couchbasecapella.V3CouchbaseServices(v.(string)))
@@ -510,6 +517,8 @@ func createHostedServer(v map[string]interface{}) couchbasecapella.V3Servers {
 	return server
 }
 
+// expandHostedPlaceSet is responsible for converting the place set into
+// a slice of type V3Place
 func expandHostedPlaceSet(place *schema.Set) couchbasecapella.V3Place {
 	result := make([]couchbasecapella.V3Place, place.Len())
 
@@ -540,6 +549,8 @@ func createHostedPlace(v map[string]interface{}) couchbasecapella.V3Place {
 	return place
 }
 
+// expandHostedSupportPackageSet is responsible for converting the supportPackage set into
+// type V3SupportPackage
 func expandHostedSupportPackageSet(supportPackage *schema.Set) couchbasecapella.V3SupportPackage {
 	result := make([]couchbasecapella.V3SupportPackage, supportPackage.Len())
 

@@ -29,13 +29,13 @@ func resourceCouchbaseCapellaProject() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"id": {
-				Description: "Project id.",
+				Description: "ID of the Project",
 				Type:        schema.TypeString,
 				ForceNew:    true,
 				Computed:    true,
 			},
 			"name": {
-				Description:  "Project name.",
+				Description:  "Name of the Project",
 				Type:         schema.TypeString,
 				ForceNew:     true,
 				Required:     true,

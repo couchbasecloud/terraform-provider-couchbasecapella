@@ -32,16 +32,10 @@ func resourceCouchbaseCapellaDatabaseUser() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"cluster_id": {
-				Description: "ID of the Cluster",
-				Type:        schema.TypeString,
-				Required:    true,
-				ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
-					idIsValid := IsValidUUID(val.(string))
-					if !idIsValid {
-						errs = append(errs, fmt.Errorf("please enter a valid cluster uuid"))
-					}
-					return
-				},
+				Description:  "ID of the Cluster",
+				Type:         schema.TypeString,
+				Required:     true,
+				ValidateFunc: validation.IsUUID,
 			},
 			"username": {
 				Description:  "Username for the Database User",
@@ -59,7 +53,7 @@ func resourceCouchbaseCapellaDatabaseUser() *schema.Resource {
 					password := val.(string)
 					passwordValidate := validatePassword(password)
 					if !passwordValidate {
-						errs = append(errs, fmt.Errorf("password must contain 8+ characters, 1+ lowercase, 1+ uppercase, 1+ symbols, 1+ numbers."))
+						errs = append(errs, fmt.Errorf(DatabaseUserInvalidPassword))
 					}
 					return
 				},
@@ -84,7 +78,7 @@ func resourceCouchbaseCapellaDatabaseUser() *schema.Resource {
 									access := val.(string)
 									accessValidation := couchbasecapella.BucketRoleTypes(access).IsValid()
 									if !accessValidation {
-										errs = append(errs, fmt.Errorf("please enter a valid value for bucket access {data_reader, data_writer}"))
+										errs = append(errs, fmt.Errorf(DatabaseUserInvalidBucketAccess, access))
 									}
 									return
 								},
@@ -101,7 +95,7 @@ func resourceCouchbaseCapellaDatabaseUser() *schema.Resource {
 					access := val.(string)
 					accessValidation := couchbasecapella.BucketRoleTypes(access).IsValid()
 					if !accessValidation {
-						errs = append(errs, fmt.Errorf("please enter a valid value for all bucket access {data_reader, data_writer}"))
+						errs = append(errs, fmt.Errorf(DatabaseUserInvalidAllBucketAccess, access))
 
 					}
 					return
@@ -132,9 +126,9 @@ func resourceCouchbaseCapellaDatabaseUserCreate(ctx context.Context, d *schema.R
 		// Check V3Cluster :: Need to be fixed in next versions
 		_, _, err3 := client.ClustersV3Api.ClustersV3show(auth, clusterId).Execute()
 		if err3 != nil {
-			return diag.FromErr(fmt.Errorf("a problem occurred while accessing the cluster"))
+			return diag.FromErr(fmt.Errorf(ClusterProblemAccessing))
 		}
-		return diag.FromErr(fmt.Errorf("This current release of the terraform provider doesn't support managing database users in hosted clusters, please log in to the Capella UI where you can update your cluster"))
+		return diag.FromErr(fmt.Errorf(DatabaseUserHostedNotSupported))
 	}
 
 	username := d.Get("username").(string)
@@ -205,9 +199,9 @@ func resourceCouchbaseCapellaDatabaseUserRead(ctx context.Context, d *schema.Res
 		// Check V3Cluster :: Need to be fixed in next versions
 		_, _, err3 := client.ClustersV3Api.ClustersV3show(auth, clusterId).Execute()
 		if err3 != nil {
-			return diag.FromErr(fmt.Errorf("a problem occurred while accessing the cluster"))
+			return diag.FromErr(fmt.Errorf(ClusterProblemAccessing))
 		}
-		return diag.FromErr(fmt.Errorf("This current release of the terraform provider doesn't support managing database users in hosted clusters, please log in to the Capella UI where you can update your cluster"))
+		return diag.FromErr(fmt.Errorf(DatabaseUserHostedNotSupported))
 	}
 
 	// The current version of the Capella API doesn't support getting a singular
@@ -249,9 +243,9 @@ func resourceCouchbaseCapellaDatabaseUserUpdate(ctx context.Context, d *schema.R
 		// Check V3Cluster :: Need to be fixed in next versions
 		_, _, err3 := client.ClustersV3Api.ClustersV3show(auth, clusterId).Execute()
 		if err3 != nil {
-			return diag.FromErr(fmt.Errorf("a problem occurred while accessing the cluster"))
+			return diag.FromErr(fmt.Errorf(ClusterProblemAccessing))
 		}
-		return diag.FromErr(fmt.Errorf("This current release of the terraform provider doesn't support managing database users in hosted clusters, please log in to the Capella UI where you can update your cluster"))
+		return diag.FromErr(fmt.Errorf(DatabaseUserHostedNotSupported))
 	}
 
 	username := d.Get("username").(string)
@@ -297,9 +291,9 @@ func resourceCouchbaseCapellaDatabaseUserDelete(ctx context.Context, d *schema.R
 		// Check V3Cluster :: Need to be fixed in next versions
 		_, _, err3 := client.ClustersV3Api.ClustersV3show(auth, clusterId).Execute()
 		if err3 != nil {
-			return diag.FromErr(fmt.Errorf("a problem occurred while accessing the cluster"))
+			return diag.FromErr(fmt.Errorf(ClusterProblemAccessing))
 		}
-		return diag.FromErr(fmt.Errorf("This current release of the terraform provider doesn't support managing database users in hosted clusters, please log in to the Capella UI where you can update your cluster"))
+		return diag.FromErr(fmt.Errorf(DatabaseUserHostedNotSupported))
 	}
 
 	username := d.Get("username").(string)

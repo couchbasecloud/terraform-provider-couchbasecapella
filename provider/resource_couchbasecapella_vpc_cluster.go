@@ -35,13 +35,13 @@ func resourceCouchbaseCapellaVpcCluster() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"id": {
-				Description: "Cluster's id.",
+				Description: "ID of the Cluster",
 				Type:        schema.TypeString,
 				ForceNew:    true,
 				Computed:    true,
 			},
 			"name": {
-				Description: "Cluster's name.",
+				Description: "Name of the Cluster",
 				Type:        schema.TypeString,
 				ForceNew:    true,
 				Required:    true,
@@ -51,25 +51,25 @@ func resourceCouchbaseCapellaVpcCluster() *schema.Resource {
 					name := val.(string)
 					nameValidate := isStringAlphabetic(name) && len(name) >= 2 && len(name) < 128 && isAlphaNumeric(name[0:1])
 					if !nameValidate {
-						errs = append(errs, fmt.Errorf("cluster name can include letters, numbers, spaces, periods (.), dashes (-), and underscores (_) . Cluster name size should be between 2 and 128 characters and must begin with a letter or a number"))
+						errs = append(errs, fmt.Errorf(ClusterInvalidName))
 					}
 					return
 				},
 			},
 			"cloud_id": {
-				Description:  "Cloud's Id.",
+				Description:  "ID of the Cloud the Cluster will be deployed in",
 				Type:         schema.TypeString,
 				Required:     true,
 				ValidateFunc: validation.IsUUID,
 			},
 			"project_id": {
-				Description:  "Project's Id.",
+				Description:  "ID of the Project",
 				Type:         schema.TypeString,
 				Required:     true,
 				ValidateFunc: validation.IsUUID,
 			},
 			"servers": {
-				Description: "Cluster servers configuration",
+				Description: "Server Configuration of the Cluster",
 				Type:        schema.TypeSet,
 				Required:    true,
 				ForceNew:    true,
@@ -83,14 +83,14 @@ func resourceCouchbaseCapellaVpcCluster() *schema.Resource {
 								size := val.(int)
 								sizeIsValid := size >= 3 && size < 28
 								if !sizeIsValid {
-									errs = append(errs, fmt.Errorf("number of nodes should be a value between 3 and 27"))
+									errs = append(errs, fmt.Errorf(ClusterInvalidSize, size))
 								}
 								return
 							},
 						},
 						"services": {
 							Type:        schema.TypeList,
-							Description: "Services",
+							Description: "Couchbase Services",
 							Required:    true,
 							MinItems:    1,
 							Elem: &schema.Schema{
@@ -99,40 +99,40 @@ func resourceCouchbaseCapellaVpcCluster() *schema.Resource {
 									service := val.(string)
 									serviceValidation := couchbasecapella.CouchbaseServices(service).IsValid()
 									if !serviceValidation {
-										errs = append(errs, fmt.Errorf("please enter a valid value for service {data, index, query, search, eventing, analytics}"))
+										errs = append(errs, fmt.Errorf(ClusterInvalidCouchbaseService, service))
 									}
 									return
 								},
 							},
 						},
 						"aws": {
-							Description: "Aws configuration.",
+							Description: "Aws configuration",
 							Type:        schema.TypeSet,
 							Optional:    true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"instance_size": {
-										Description: "Aws instance.",
+										Description: "Aws instance",
 										Type:        schema.TypeString,
 										Required:    true,
 										ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
 											instance := val.(string)
 											instanceValidation := couchbasecapella.AwsInstances(instance).IsValid()
 											if !instanceValidation {
-												errs = append(errs, fmt.Errorf("please enter a valid value Aws instance"))
+												errs = append(errs, fmt.Errorf(VpcClusterInvalidAwsInstance, instance))
 											}
 											return
 										},
 									},
 									"ebs_size_gib": {
-										Description: "Aws size(Gb).",
+										Description: "Aws volume size (Gb)",
 										Type:        schema.TypeInt,
 										Required:    true,
 										ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
 											size := val.(int)
 											sizeIsValid := size >= 50 && size < 16000
 											if !sizeIsValid {
-												errs = append(errs, fmt.Errorf("please enter a storage size between 50 and 16000"))
+												errs = append(errs, fmt.Errorf(ClusterInvalidStorageSize, size))
 											}
 											return
 										},
@@ -141,33 +141,33 @@ func resourceCouchbaseCapellaVpcCluster() *schema.Resource {
 							},
 						},
 						"azure": {
-							Description: "Azure configuration.",
+							Description: "Azure configuration",
 							Type:        schema.TypeSet,
 							Optional:    true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"instance_size": {
-										Description: "Azure instance.",
+										Description: "Azure instance",
 										Type:        schema.TypeString,
 										Required:    true,
 										ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
 											instance := val.(string)
 											instanceValidation := couchbasecapella.AzureInstances(instance).IsValid()
 											if !instanceValidation {
-												errs = append(errs, fmt.Errorf("please enter a valid value Azure instance"))
+												errs = append(errs, fmt.Errorf(VpcClusterInvalidAzureInstance, instance))
 											}
 											return
 										},
 									},
 									"volume_type": {
-										Description: "Azure size(Gb).",
+										Description: "Azure volume size (Gb)",
 										Type:        schema.TypeString,
 										Required:    true,
 										ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
 											volume := val.(string)
 											volumeValidation := couchbasecapella.AzureVolumeTypes(volume).IsValid()
 											if !volumeValidation {
-												errs = append(errs, fmt.Errorf("please enter a valid value for Azure size"))
+												errs = append(errs, fmt.Errorf(VpcClusterInvalidAzureVolumeSize, volume))
 											}
 											return
 										},
@@ -186,6 +186,8 @@ func resourceCouchbaseCapellaVpcCluster() *schema.Resource {
 	}
 }
 
+// resourceCouchbaseCapellaVpcClusterCreate is responsible for creating a
+// vpc cluster in Couchbase Capella using the Terraform resource data.
 func resourceCouchbaseCapellaVpcClusterCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*couchbasecapella.APIClient)
 	auth := getAuth(ctx)
@@ -210,10 +212,10 @@ func resourceCouchbaseCapellaVpcClusterCreate(ctx context.Context, d *schema.Res
 		// check server providers
 		providers := getVpcServersProvider(servers.(*schema.Set))
 		if len(providers) > 1 {
-			return diag.FromErr(fmt.Errorf("cluster's server should be the same as the cloud provider"))
+			return diag.FromErr(fmt.Errorf(VpcClusterServerDoesNotMatchProvider))
 		}
 		if len(providers) == 1 && !Has(providers, providerName) {
-			return diag.FromErr(fmt.Errorf("cluster's server should be the same as the cloud provider"))
+			return diag.FromErr(fmt.Errorf(VpcClusterServerDoesNotMatchProvider))
 		}
 		newClusterRequest.SetServers(expandVpcServersSet(servers.(*schema.Set)))
 	}
@@ -255,6 +257,8 @@ func resourceCouchbaseCapellaVpcClusterCreate(ctx context.Context, d *schema.Res
 	return resourceCouchbaseCapellaVpcClusterRead(ctx, d, meta)
 }
 
+// resourceCouchbaseCapellaVpcClusterRead is responsible for reading a
+// vpc cluster in Couchbase Capella using the Terraform resource data.
 func resourceCouchbaseCapellaVpcClusterRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*couchbasecapella.APIClient)
 	auth := getAuth(ctx)
@@ -273,10 +277,14 @@ func resourceCouchbaseCapellaVpcClusterRead(ctx context.Context, d *schema.Resou
 	return nil
 }
 
+// resourceCouchbaseCapellaVpcClusterUpdate is responsible for updating a
+// vpc cluster in Couchbase Capella using the Terraform resource data.
 func resourceCouchbaseCapellaVpcClusterUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	return diag.Errorf("This current release of the terraform provider doesn't support updating vpc clusters, please log in to the Capella UI where you can update your cluster")
+	return diag.Errorf(VpcClusterUpdateNotSupported)
 }
 
+// resourceCouchbaseCapellaVpcClusterDelete is responsible for deleting a
+// vpc cluster in Couchbase Capella using the Terraform resource data.
 func resourceCouchbaseCapellaVpcClusterDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*couchbasecapella.APIClient)
 	auth := getAuth(ctx)
@@ -317,6 +325,8 @@ func resourceCouchbaseCapellaVpcClusterDelete(ctx context.Context, d *schema.Res
 	return nil
 }
 
+// expandVpcServersSet is responsible for converting the servers set into
+// a slice of type Server
 func expandVpcServersSet(servers *schema.Set) []couchbasecapella.Server {
 	result := make([]couchbasecapella.Server, servers.Len())
 
@@ -328,6 +338,8 @@ func expandVpcServersSet(servers *schema.Set) []couchbasecapella.Server {
 	return result
 }
 
+// expandVpcServicesList is responsible for converting the services interface into
+// a slice of type CouchbaseServices
 func expandVpcServiceList(services []interface{}) (res []couchbasecapella.CouchbaseServices) {
 	for _, v := range services {
 		res = append(res, couchbasecapella.CouchbaseServices(v.(string)))
