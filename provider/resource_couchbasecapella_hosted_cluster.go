@@ -91,6 +91,11 @@ func resourceCouchbaseCapellaHostedCluster() *schema.Resource {
 										ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
 											provider := val.(string)
 											providerValidation := couchbasecapella.V3Provider(provider).IsValid()
+											// Temporary check for gcp provider whilst it is not yet available in Capella
+											if provider == "gcp" {
+												errs = append(errs, fmt.Errorf("GCP is not yet available in Couchbase Capella"))
+												return
+											}
 											if !providerValidation {
 												errs = append(errs, fmt.Errorf(HostedClusterInvalidProvider, provider))
 											}
