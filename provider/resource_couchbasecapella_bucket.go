@@ -11,7 +11,6 @@ package provider
 import (
 	"context"
 	"fmt"
-	"regexp"
 	"time"
 
 	couchbasecapella "github.com/couchbaselabs/couchbase-cloud-go-client"
@@ -38,32 +37,17 @@ func resourceCouchbaseCapellaBucket() *schema.Resource {
 				ValidateFunc: validation.IsUUID,
 			},
 			"name": {
-				Description: "Name of the Bucket",
-				Type:        schema.TypeString,
-				Required:    true,
-				ForceNew:    true,
-				ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
-					var isStringAlphabetic = regexp.MustCompile(`^[a-zA-Z0-9_.]*$`).MatchString
-					var isAlphaNumeric = regexp.MustCompile(`^[a-zA-Z0-9]*$`).MatchString
-					name := val.(string)
-					nameValidate := isStringAlphabetic(name) && len(name) > 0 && len(name) < 100 && isAlphaNumeric(name[0:1])
-					if !nameValidate {
-						errs = append(errs, fmt.Errorf(BucketInvalidName))
-					}
-					return
-				},
+				Description:  "Name of the Bucket",
+				Type:         schema.TypeString,
+				Required:     true,
+				ForceNew:     true,
+				ValidateFunc: validateBucketName,
 			},
 			"memory_quota": {
-				Description: "Bucket Memory quota in Mb",
-				Type:        schema.TypeInt,
-				Required:    true,
-				ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
-					memory := val.(int)
-					if memory < 100 {
-						errs = append(errs, fmt.Errorf(BucketInvalidMemoryQuota, memory))
-					}
-					return
-				},
+				Description:  "Bucket Memory quota in Mb",
+				Type:         schema.TypeInt,
+				Required:     true,
+				ValidateFunc: validateMemoryQuota,
 			},
 			"replicas": {
 				Description: "Number of bucket replicas.",
@@ -71,18 +55,10 @@ func resourceCouchbaseCapellaBucket() *schema.Resource {
 				Required:    true,
 			},
 			"conflict_resolution": {
-				Description: "Conflict resolution for bucket",
-				Type:        schema.TypeString,
-				Required:    true,
-				ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
-					conflict := val.(string)
-					conflictValidation := couchbasecapella.ConflictResolution(conflict).IsValid()
-					if !conflictValidation {
-						errs = append(errs, fmt.Errorf(BucketInvalidConflictResolution, conflict))
-
-					}
-					return
-				},
+				Description:  "Conflict resolution for bucket",
+				Type:         schema.TypeString,
+				Required:     true,
+				ValidateFunc: validateConflictResolution,
 			},
 		},
 	}

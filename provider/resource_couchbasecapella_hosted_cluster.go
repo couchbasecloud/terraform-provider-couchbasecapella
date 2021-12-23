@@ -10,10 +10,7 @@ package provider
 
 import (
 	"context"
-	"fmt"
-	"net"
 	"net/http"
-	"regexp"
 	"strings"
 	"time"
 
@@ -42,19 +39,10 @@ func resourceCouchbaseCapellaHostedCluster() *schema.Resource {
 				Computed:    true,
 			},
 			"name": {
-				Description: "Name of the Cluster",
-				Type:        schema.TypeString,
-				Required:    true,
-				ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
-					var isStringAlphabetic = regexp.MustCompile(`^[a-zA-Z0-9-_. ]*$`).MatchString
-					var isAlphaNumeric = regexp.MustCompile(`^[a-zA-Z0-9]*$`).MatchString
-					name := val.(string)
-					nameValidate := isStringAlphabetic(name) && len(name) >= 2 && len(name) < 128 && isAlphaNumeric(name[0:1])
-					if !nameValidate {
-						errs = append(errs, fmt.Errorf(ClusterInvalidName))
-					}
-					return
-				},
+				Description:  "Name of the Cluster",
+				Type:         schema.TypeString,
+				Required:     true,
+				ValidateFunc: validateClusterName,
 			},
 			"description": {
 				Description: "A description for the Cluster",
@@ -85,49 +73,22 @@ func resourceCouchbaseCapellaHostedCluster() *schema.Resource {
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"provider": {
-										Description: "The name of the cloud provider where the cluster will be deployed",
-										Type:        schema.TypeString,
-										Required:    true,
-										ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
-											provider := val.(string)
-											providerValidation := couchbasecapella.V3Provider(provider).IsValid()
-											// Temporary check for gcp provider whilst it is not yet available in Capella
-											if provider == "gcp" {
-												errs = append(errs, fmt.Errorf("GCP is not yet available in Couchbase Capella"))
-												return
-											}
-											if !providerValidation {
-												errs = append(errs, fmt.Errorf(HostedClusterInvalidProvider, provider))
-											}
-											return
-										},
+										Description:  "The name of the cloud provider where the cluster will be deployed",
+										Type:         schema.TypeString,
+										Required:     true,
+										ValidateFunc: validateProvider,
 									},
 									"region": {
-										Description: "A valid region for the Cloud Provider",
-										Type:        schema.TypeString,
-										Required:    true,
-										ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
-											region := val.(string)
-											awsRegionValidation := couchbasecapella.AwsRegions(region).IsValid()
-											azureRegionValidation := couchbasecapella.AzureRegions(region).IsValid()
-											if !awsRegionValidation && !azureRegionValidation {
-												errs = append(errs, fmt.Errorf(HostedClusterInvalidRegion, region))
-											}
-											return
-										},
+										Description:  "A valid region for the Cloud Provider",
+										Type:         schema.TypeString,
+										Required:     true,
+										ValidateFunc: validateRegion,
 									},
 									"cidr": {
-										Description: "CIDR block",
-										Type:        schema.TypeString,
-										Required:    true,
-										ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
-											cidr := val.(string)
-											_, _, err := net.ParseCIDR(cidr)
-											if err != nil {
-												errs = append(errs, fmt.Errorf(HostedClusterInvalidCIDR, cidr))
-											}
-											return
-										},
+										Description:  "CIDR block",
+										Type:         schema.TypeString,
+										Required:     true,
+										ValidateFunc: validateCIDR,
 									},
 								},
 							},
@@ -142,30 +103,16 @@ func resourceCouchbaseCapellaHostedCluster() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"timezone": {
-							Type:        schema.TypeString,
-							Description: "The Timezone of the Support Package",
-							Required:    true,
-							ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
-								timezone := val.(string)
-								timezoneValidation := couchbasecapella.V3SupportPackageTimezones(timezone).IsValid()
-								if !timezoneValidation {
-									errs = append(errs, fmt.Errorf(HostedClusterInvalidSupportPackageTimezone, timezone))
-								}
-								return
-							},
+							Type:         schema.TypeString,
+							Description:  "The Timezone of the Support Package",
+							Required:     true,
+							ValidateFunc: validateTimezone,
 						},
 						"support_package_type": {
-							Type:        schema.TypeString,
-							Description: "The Support Package type of the cluster",
-							Required:    true,
-							ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
-								packageType := val.(string)
-								packageTypeValidation := couchbasecapella.V3SupportPackageType(packageType).IsValid()
-								if !packageTypeValidation {
-									errs = append(errs, fmt.Errorf(HostedClusterInvalidSupportPackageType, packageType))
-								}
-								return
-							},
+							Type:         schema.TypeString,
+							Description:  "The Support Package type of the cluster",
+							Required:     true,
+							ValidateFunc: validateSupportPackageType,
 						},
 					},
 				},
@@ -178,31 +125,16 @@ func resourceCouchbaseCapellaHostedCluster() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"size": {
-							Type:        schema.TypeInt,
-							Description: "Number of nodes",
-							Required:    true,
-							ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
-								size := val.(int)
-								sizeIsValid := size >= 3 && size < 28
-								if !sizeIsValid {
-									errs = append(errs, fmt.Errorf(ClusterInvalidSize, size))
-								}
-								return
-							},
+							Type:         schema.TypeInt,
+							Description:  "Number of nodes",
+							Required:     true,
+							ValidateFunc: validateSize,
 						},
 						"compute": {
-							Type:        schema.TypeString,
-							Description: "Compute instance type",
-							Required:    true,
-							ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
-								instance := val.(string)
-								awsInstanceValidation := couchbasecapella.AwsInstances(instance).IsValid()
-								azureInstanceValidation := couchbasecapella.AzureInstances(instance).IsValid()
-								if !awsInstanceValidation && !azureInstanceValidation {
-									errs = append(errs, fmt.Errorf(HostedClusterInvalidCompute, instance))
-								}
-								return
-							},
+							Type:         schema.TypeString,
+							Description:  "Compute instance type",
+							Required:     true,
+							ValidateFunc: validateCompute,
 						},
 						"services": {
 							Type:        schema.TypeList,
@@ -210,15 +142,8 @@ func resourceCouchbaseCapellaHostedCluster() *schema.Resource {
 							Required:    true,
 							MinItems:    1,
 							Elem: &schema.Schema{
-								Type: schema.TypeString,
-								ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
-									service := val.(string)
-									serviceValidation := couchbasecapella.V3CouchbaseServices(service).IsValid()
-									if !serviceValidation {
-										errs = append(errs, fmt.Errorf(ClusterInvalidCouchbaseService, service))
-									}
-									return
-								},
+								Type:         schema.TypeString,
+								ValidateFunc: validateService,
 							},
 						},
 						"storage": {
@@ -228,44 +153,22 @@ func resourceCouchbaseCapellaHostedCluster() *schema.Resource {
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"storage_type": {
-										Description: "Storage type",
-										Type:        schema.TypeString,
-										Required:    true,
-										ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
-											storageType := val.(string)
-											storageTypeValidation := couchbasecapella.V3StorageType(storageType).IsValid()
-											if !storageTypeValidation {
-												errs = append(errs, fmt.Errorf(ClusterInvalidStorageType, storageType))
-											}
-											return
-										},
+										Description:  "Storage type",
+										Type:         schema.TypeString,
+										Required:     true,
+										ValidateFunc: validateStorageType,
 									},
 									"iops": {
-										Description: "IOPS",
-										Type:        schema.TypeInt,
-										Required:    true,
-										ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
-											iops := val.(int)
-											GP3IopsIsValid := iops >= 3000 && iops <= 16000
-											IO2IopsIsValid := iops >= 1000 && iops <= 64000
-											if !GP3IopsIsValid && !IO2IopsIsValid {
-												errs = append(errs, fmt.Errorf(HostedClusterInvalidIOPS))
-											}
-											return
-										},
+										Description:  "IOPS",
+										Type:         schema.TypeInt,
+										Required:     true,
+										ValidateFunc: validateIops,
 									},
 									"storage_size": {
-										Description: "Storage size in Gb",
-										Type:        schema.TypeInt,
-										Required:    true,
-										ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
-											storageSize := val.(int)
-											storageSizeIsValid := storageSize >= 50 && storageSize <= 16000
-											if !storageSizeIsValid {
-												errs = append(errs, fmt.Errorf(ClusterInvalidStorageSize, storageSize))
-											}
-											return
-										},
+										Description:  "Storage size in Gb",
+										Type:         schema.TypeInt,
+										Required:     true,
+										ValidateFunc: validateStorageSize,
 									},
 								},
 							},

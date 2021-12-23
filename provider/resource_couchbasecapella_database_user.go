@@ -45,18 +45,11 @@ func resourceCouchbaseCapellaDatabaseUser() *schema.Resource {
 				ValidateFunc: validation.StringIsNotEmpty,
 			},
 			"password": {
-				Description: "Password for the Database User",
-				Type:        schema.TypeString,
-				Required:    true,
-				Sensitive:   true,
-				ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
-					password := val.(string)
-					passwordValidate := validatePassword(password)
-					if !passwordValidate {
-						errs = append(errs, fmt.Errorf(DatabaseUserInvalidPassword))
-					}
-					return
-				},
+				Description:  "Password for the Database User",
+				Type:         schema.TypeString,
+				Required:     true,
+				Sensitive:    true,
+				ValidateFunc: validateDatabaseUserPassword,
 			},
 			"buckets": {
 				Description: "Define bucket access level for the Database User",
@@ -73,33 +66,18 @@ func resourceCouchbaseCapellaDatabaseUser() *schema.Resource {
 							Type:     schema.TypeList,
 							Optional: true,
 							Elem: &schema.Schema{
-								Type: schema.TypeString,
-								ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
-									access := val.(string)
-									accessValidation := couchbasecapella.BucketRoleTypes(access).IsValid()
-									if !accessValidation {
-										errs = append(errs, fmt.Errorf(DatabaseUserInvalidBucketAccess, access))
-									}
-									return
-								},
+								Type:         schema.TypeString,
+								ValidateFunc: validateBucketAccess,
 							},
 						},
 					},
 				},
 			},
 			"all_bucket_access": {
-				Description: "Define all bucket access for the Database User",
-				Type:        schema.TypeString,
-				Optional:    true,
-				ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
-					access := val.(string)
-					accessValidation := couchbasecapella.BucketRoleTypes(access).IsValid()
-					if !accessValidation {
-						errs = append(errs, fmt.Errorf(DatabaseUserInvalidAllBucketAccess, access))
-
-					}
-					return
-				},
+				Description:  "Define all bucket access for the Database User",
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validateAllBucketAccess,
 			},
 		},
 		Timeouts: &schema.ResourceTimeout{

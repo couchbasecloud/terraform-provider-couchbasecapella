@@ -17,7 +17,7 @@ const (
 	DatabaseUserInvalidBucketAccess    string = "expected a valid value for bucket access {data_reader, data_writer}, got %s"
 	DatabaseUserInvalidAllBucketAccess string = "expected a valid value for all bucket access {data_reader, data_writer}, got %s"
 
-	HostedClusterInvalidProvider               string = "expected a valid value for provider {aws, azure, gcp}, got %s"
+	HostedClusterInvalidProvider               string = "expected a valid value for provider {aws, azure}, got %s"
 	HostedClusterInvalidRegion                 string = "expected a valid region for the cloud provider, got %s"
 	HostedClusterInvalidCIDR                   string = "expected a valid CIDR address, got %s"
 	HostedClusterInvalidSupportPackageTimezone string = "expected a valid value for timzone {ET, GMT, IST, PT}, got %s"
