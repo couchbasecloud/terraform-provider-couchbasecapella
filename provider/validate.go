@@ -8,7 +8,7 @@ import (
 )
 
 func validateBucketName(val interface{}, key string) (warns []string, errs []error) {
-	var isStringAlphabetic = regexp.MustCompile(`^[a-zA-Z0-9_.]*$`).MatchString
+	var isStringAlphabetic = regexp.MustCompile(`^[a-zA-Z0-9-.]*$`).MatchString
 	var isAlphaNumeric = regexp.MustCompile(`^[a-zA-Z0-9]*$`).MatchString
 	name := val.(string)
 	nameValidate := isStringAlphabetic(name) && len(name) > 0 && len(name) < 100 && isAlphaNumeric(name[0:1])

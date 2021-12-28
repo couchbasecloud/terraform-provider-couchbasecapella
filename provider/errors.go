@@ -8,7 +8,7 @@ func (e Error) Error() string { return string(e) }
 
 const (
 	BucketHostedNotSupported        string = "this current release of the terraform provider doesn't support managing buckets in hosted clusters, please log in to the Capella UI where you can update your cluster"
-	BucketInvalidName               string = "use letters, numbers, periods (.) or dashes (- ). Bucket names cannot exceed 100 characters and must begin with a letter or a number"
+	BucketInvalidName               string = "use letters, numbers, periods (.) or dashes (-). Bucket names cannot exceed 100 characters and must begin with a letter or a number"
 	BucketInvalidMemoryQuota        string = "expected a value greater than 100 MiB, got %v MiB"
 	BucketInvalidConflictResolution string = "expected a valid value for conflict resolution {lww, seqno}, got %s"
 
