@@ -88,7 +88,7 @@ func resourceCouchbaseCapellaHostedCluster() *schema.Resource {
 										Description:  "CIDR block",
 										Type:         schema.TypeString,
 										Required:     true,
-										ValidateFunc: validateCIDR,
+										ValidateFunc: validation.IsCIDR,
 									},
 								},
 							},

@@ -99,16 +99,6 @@ func validateProvider(val interface{}, key string) (warns []string, errs []error
 	return nil, errs
 }
 
-func validateCIDR(val interface{}, key string) (warns []string, errs []error) {
-	region := val.(string)
-	awsRegionValidation := couchbasecapella.AwsRegions(region).IsValid()
-	azureRegionValidation := couchbasecapella.AzureRegions(region).IsValid()
-	if !awsRegionValidation && !azureRegionValidation {
-		errs = append(errs, fmt.Errorf(HostedClusterInvalidRegion, region))
-	}
-	return
-}
-
 func validateTimezone(val interface{}, key string) (warns []string, errs []error) {
 	timezone := val.(string)
 	timezoneValidation := couchbasecapella.V3SupportPackageTimezones(timezone).IsValid()
