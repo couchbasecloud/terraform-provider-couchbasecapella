@@ -11,7 +11,7 @@ Create, edit and delete Hosted Clusters in Couchbase Capella.
 
 ~> **WARNING:** This current release of Terraform Couchbase Capella provider doesn't support creating bucket or database user resources for hosted clusters. Please log in to the Couchbase Capella UI where you'll be able to manage buckets and database users once your hosted cluster has been deployed.
 
-~> **WARNING:** Updating cluster servers will cause your cluster to redeploy. You won't be able to access the cluster in the Couchbase Capella UI until it has been deployed. Your cluster will remain functional during this time.
+~> **WARNING:** **UPDATING CLUSTER SERVERS WILL CAUSE BUCKETS TO BE DELETED**. Updating cluster servers will cause your cluster to redeploy. You won't be able to access the cluster in the Couchbase Capella UI until it has been deployed.
 
 ## Example Usage
 
