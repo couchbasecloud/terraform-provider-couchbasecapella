@@ -37,4 +37,6 @@ const (
 	ClusterInvalidStorageType      string = "expected a valid value for storage type {GP3, IO2}, got %s"
 	ClusterProblemAccessing        string = "a problem occurred while accessing the cluster"
 	ClusterInvalidStorageSize      string = "expected a value between 50 and 16000, got %v"
+
+	ProjectDeleteClustersStillAssociated string = "Project cannot be deleted whilst there are still clusters associated with the project"
 )

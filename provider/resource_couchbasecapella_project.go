@@ -106,6 +106,10 @@ func resourceCouchbaseCapellaProjectDelete(ctx context.Context, d *schema.Resour
 	if r == nil {
 		return diag.Errorf("Pointer to project delete http.Response is nil")
 	}
+	if r.StatusCode == 400 {
+		return diag.Errorf(ProjectDeleteClustersStillAssociated)
+	}
+
 	if err != nil {
 		return manageErrors(err, *r, "Delete Project")
 	}
