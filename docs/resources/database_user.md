@@ -38,6 +38,28 @@ resource "couchbasecapella_database_user" "test" {
 }
 ```
 
+### Creating Multiple Database Users
+
+Multiple instances of database users should depend on each other using the field `depends_on`, as seen below. This tells Terraform to create database users one after another, allowing enough time for the previous database user creation job to be completed.
+
+```hcl
+resource "couchbasecapella_database_user" "test" {
+  cluster_id        = "your_cluster_id"
+  username          = "username"
+  password          = "password"
+  all_bucket_access = "data_reader"
+}
+
+resource "couchbasecapella_database_user" "test2" {
+  depends_on = [couchbasecapella_database_user.test]
+
+  cluster_id        = "your_cluster_id"
+  username          = "username"
+  password          = "password"
+  all_bucket_access = "data_reader"
+}
+```
+
 ## Argument Reference
 
 - `cluster_id` - (Required) The id of the cluster where you will create your database user. (Cannot be changed via this Provider after creation.)

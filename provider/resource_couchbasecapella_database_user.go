@@ -183,25 +183,29 @@ func resourceCouchbaseCapellaDatabaseUserRead(ctx context.Context, d *schema.Res
 	}
 
 	// The current version of the Capella API doesn't support getting a singular
-	// database user. To obtain the database user, we need to iterate the trough
+	// database user. To obtain the database user, we need to iterate through
 	// the list of all database users and check if it exists. If the user
 	// is not present in the list of users and error is thrown.
-	users, _, err := client.ClustersApi.ClustersListUsers(auth, clusterId).Execute()
-	if err != nil {
-		return diag.FromErr(err)
-	}
-	userExists := false
-	for _, user := range users {
-		if user.Username == d.Id() {
-			userExists = true
+	timeout := time.NewTimer(time.Second * 120)
+	ticker := time.NewTicker(time.Second * 2)
+	for {
+		select {
+		case <-timeout.C:
+			username := d.Id()
+			d.SetId("")
+			return diag.Errorf("Error 404: Failed to find the username %s ", username)
+		case <-ticker.C:
+			users, _, err := client.ClustersApi.ClustersListUsers(auth, clusterId).Execute()
+			if err != nil {
+				return diag.FromErr(err)
+			}
+			for _, user := range users {
+				if user.Username == d.Id() {
+					return nil
+				}
+			}
 		}
 	}
-	if !userExists {
-		username := d.Id()
-		d.SetId("")
-		return diag.Errorf("Error 404: Failed to find the username %s ", username)
-	}
-	return nil
 }
 
 // resourceCouchbaseCapellaDatabaseUserUpdate is responsible for updating a
