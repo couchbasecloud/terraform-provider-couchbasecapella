@@ -56,7 +56,7 @@ func resourceCouchbaseCapellaProjectCreate(ctx context.Context, d *schema.Resour
 
 	project, r, err := client.ProjectsApi.ProjectsCreate(auth).CreateProjectRequest(createProjectRequest).Execute()
 	if r == nil {
-		return diag.Errorf("Pointer to database project create http.Response is nil")
+		return diag.Errorf("Pointer to project create http.Response is nil")
 	}
 	if err != nil {
 		return manageErrors(err, *r, "Create Project")
