@@ -49,15 +49,11 @@ func resourceCouchbaseCapellaBucket() *schema.Resource {
 				Required:     true,
 				ValidateFunc: validateMemoryQuota,
 			},
-			"replicas": {
-				Description: "Number of bucket replicas.",
-				Type:        schema.TypeInt,
-				Required:    true,
-			},
 			"conflict_resolution": {
 				Description:  "Conflict resolution for bucket",
 				Type:         schema.TypeString,
 				Required:     true,
+				ForceNew:     true,
 				ValidateFunc: validateConflictResolution,
 			},
 		},
@@ -87,21 +83,17 @@ func resourceCouchbaseCapellaBucketCreate(ctx context.Context, d *schema.Resourc
 
 	bucketName := d.Get("name").(string)
 	memoryQuota := int32(d.Get("memory_quota").(int))
-	replicas := int32(d.Get("replicas").(int))
 	conflictResolution := couchbasecapella.ConflictResolution(d.Get("conflict_resolution").(string))
 
 	couchbaseBucketSpec := couchbasecapella.NewCouchbaseBucketSpec(bucketName, memoryQuota)
-	couchbaseBucketSpec.SetReplicas(replicas)
 	couchbaseBucketSpec.SetConflictResolution(conflictResolution)
 
 	_, r, err := client.ClustersApi.ClustersCreateBucket(auth, clusterId).CouchbaseBucketSpec(*couchbaseBucketSpec).Execute()
+	if r == nil {
+		return diag.Errorf("Pointer to bucket create http.Response is nil")
+	}
 	if err != nil {
-		if r != nil {
-			// TODO:  HANDLE ERRORS GRACEFULLY HERE AND REPORT AN ERROR THAT
-			//  MAKES SENSE TO THE USER SO THEY KNOW HOW TO FIX THE PROBLEM
-			// diag.FromErr((handleResponse(r))
-		}
-		return diag.FromErr(fmt.Errorf("problem occured :: %v", r))
+		return diag.FromErr(fmt.Errorf("problem ocurred :: %v", r))
 	}
 
 	d.SetId(bucketName)
@@ -133,7 +125,7 @@ func resourceCouchbaseCapellaBucketRead(ctx context.Context, d *schema.ResourceD
 	// NOTE: There is a delay for retrieving a newly created bucket from Capella's list of buckets.
 	// This poll will check at regular intervals if the newly created bucket is in the list of buckets
 	// until the timeout period expires. If the timeout is reached, then the newly created bucket is not in the list of buckets.
-	timeout := time.NewTimer(time.Second * 60)
+	timeout := time.NewTimer(time.Second * 180)
 	ticker := time.NewTicker(time.Second * 2)
 	for {
 		select {
