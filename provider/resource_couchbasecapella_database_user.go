@@ -49,6 +49,7 @@ func resourceCouchbaseCapellaDatabaseUser() *schema.Resource {
 				Type:         schema.TypeString,
 				Required:     true,
 				Sensitive:    true,
+				ForceNew:     true,
 				ValidateFunc: validateDatabaseUserPassword,
 			},
 			"buckets": {
