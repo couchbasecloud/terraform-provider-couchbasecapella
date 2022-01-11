@@ -7,7 +7,7 @@ Create, edit and delete Buckets in a Couchbase Capella Cluster.
 
 # Resource couchbasecapella_bucket
 
-`couchbasecapella_bucket` allows buckets to be created, edited and deleted for a Couchbase Capella In-VPC Cluster. This resource requires the Cluster ID of an In-VPC Cluster.
+`couchbasecapella_bucket` allows buckets to be created and deleted for a Couchbase Capella In-VPC Cluster. This resource requires the Cluster ID of an In-VPC Cluster.
 
 ~> **WARNING:** Changing the cluster_id, name or conflict_resolution of an existing Bucket in your Terraform configuration will result in the deletion and recreation of the Bucket with the new name in Capella. Before applying your changes, Terraform will inform you that it will destroy and recreate the resources. Make sure to review these changes before typing `yes` to apply them.
 
