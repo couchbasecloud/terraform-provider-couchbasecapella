@@ -169,7 +169,6 @@ func resourceCouchbaseCapellaBucketUpdate(ctx context.Context, d *schema.Resourc
 	}
 
 	bucketName := d.Get("name").(string)
-	memoryQuota := int32(d.Get("memory_quota").(int))
 
 	// List buckets and iterate through to find bucket ID
 	buckets, _, err := client.ClustersApi.ClustersListBuckets(auth, clusterId).Execute()
@@ -178,19 +177,12 @@ func resourceCouchbaseCapellaBucketUpdate(ctx context.Context, d *schema.Resourc
 	}
 	for _, bucket := range buckets {
 		if bucket.Name == bucketName {
-			bucketId := string(bucket.Id)
-
-			updateBucketRequest := *couchbasecapella.NewUpdateBucketRequest(memoryQuota)
-
-			// Update bucket with bucket ID
-			_, err := client.ClustersApi.ClustersUpdateSingleBucket(auth, clusterId, bucketId).UpdateBucketRequest(updateBucketRequest).Execute()
-			if err != nil {
-				return diag.FromErr(err)
-			}
+			d.Set("conflict_resolution", bucket.ConflictResolution)
+			d.Set("memory_quota", bucket.MemoryQuota)
 		}
 	}
-
-	return resourceCouchbaseCapellaBucketRead(ctx, d, meta)
+	return diag.FromErr(fmt.Errorf(BucketHostedNotSupported))
+	// return resourceCouchbaseCapellaBucketRead(ctx, d, meta)
 }
 
 // resourceCouchbaseCapellaBucketDelete is responsible for deleting a
