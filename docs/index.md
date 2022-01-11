@@ -4,15 +4,7 @@ You can use the Couchbase Capella provider to interact with Projects, Clusters, 
 
 The provider needs to be configured with the proper credentials before it can be used.
 
-Use the navigation to the left to read about the available provider resources and data sources.
-
-## Example Usage
-
-```terraform
-#Configure the Couchbase Capella Provider
-provider "couchbasecapella" {}
-# Create the resources
-```
+Use the navigation to the left to read about the available provider resources.
 
 ## Configuring Programmatic Access
 
@@ -30,4 +22,48 @@ Usage (prefix the export commands with a space to avoid the keys being recorded 
 $  export CBC_ACCESS_KEY="xxxx"
 $  export CBC_SECRET_KEY="xxxx"
 $ terraform plan
+```
+
+## Example Usage
+
+```terraform
+terraform {
+  required_providers {
+    couchbasecapella = {
+      source  = "terraform.couchbase.com/local/couchbasecapella"
+      version = "1.0.0"
+    }
+  }
+}
+
+#Configure the Couchbase Capella Provider
+provider "couchbasecapella" {}
+
+#Create a hosted cluster
+resource "couchbasecapella_hosted_cluster" "test" {
+  name        = "cluster_name"
+  project_id  = "your_project_id"
+  place {
+    single_az = true
+    hosted {
+      provider = "aws"
+      region   = "us-west-2"
+      cidr     = "cidr_block"
+    }
+  }
+  support_package {
+    timezone = "GMT"
+    support_package_type     = "Basic"
+  }
+  servers {
+    size     = 3
+    compute  = "m5.xlarge"
+    services = ["data"]
+    storage {
+      storage_type = "GP3"
+      iops = "3000"
+      storage_size = "50"
+    }
+  }
+}
 ```
