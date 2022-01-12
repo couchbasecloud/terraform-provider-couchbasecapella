@@ -9,7 +9,7 @@ Create and delete VPC Clusters in Couchbase Capella.
 
 `couchbasecapella_vpc_cluster` allows you to create and delete VPC clusters in Couchbase Capella. The resource requires your Project ID.
 
-~> **WARNING:** Changing the name/servers of an existing VPC Cluster in your Terraform configuration will result in the deletion and recreation of the Cluster with the new name/servers in Capella. Before applying your changes, Terraform will inform you that it will destroy and recreate the resources. Make sure to review these changes before typing `yes` to apply them.
+~> **WARNING:** Changing any field for an existing VPC Cluster in your Terraform configuration will result in the deletion and recreation of the Cluster with the new name/servers in Capella. Before applying your changes, Terraform will inform you that it will destroy and recreate the resources. Make sure to review these changes before typing `yes` to apply them.
 
 ~> **VERY IMPORTANT:** **THIS MEANS YOU WILL LOSE ANY DATA IN THE EXISTING CLUSTER**
 
@@ -54,8 +54,8 @@ resource "couchbasecapella_vpc_cluster" "test" {
 ## Argument Reference
 
 - `name` - (Required) The name of the cluster you want to create. The cluster name can include letters, numbers, spaces, periods (.), dashes (-), and underscores (\_). Cluster name should be between 2 and 128 characters and must begin with a letter or a number.
-- `cloud_id` - (Required) The id of the cloud where your cluster will be created. This must be a valid UUID and an existing cloud ID. (Cannot be changed via this Provider after creation.)
-- `project_id` - (Required) The id of the project where your cluster will be created. This must be a valid UUID and an existing project ID. (Cannot be changed via this Provider after creation.)
+- `cloud_id` - (Required) The id of the cloud where your cluster will be created. This must be a valid UUID and an existing cloud ID.
+- `project_id` - (Required) The id of the project where your cluster will be created. This must be a valid UUID and an existing project ID.
 
 ### Servers
 

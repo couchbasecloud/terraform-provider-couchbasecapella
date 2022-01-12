@@ -29,7 +29,6 @@ func resourceCouchbaseCapellaVpcCluster() *schema.Resource {
 
 		CreateContext: resourceCouchbaseCapellaVpcClusterCreate,
 		ReadContext:   resourceCouchbaseCapellaVpcClusterRead,
-		UpdateContext: resourceCouchbaseCapellaVpcClusterUpdate,
 		DeleteContext: resourceCouchbaseCapellaVpcClusterDelete,
 
 		Schema: map[string]*schema.Schema{
@@ -50,12 +49,14 @@ func resourceCouchbaseCapellaVpcCluster() *schema.Resource {
 				Description:  "ID of the Cloud the Cluster will be deployed in",
 				Type:         schema.TypeString,
 				Required:     true,
+				ForceNew:     true,
 				ValidateFunc: validation.IsUUID,
 			},
 			"project_id": {
 				Description:  "ID of the Project",
 				Type:         schema.TypeString,
 				Required:     true,
+				ForceNew:     true,
 				ValidateFunc: validation.IsUUID,
 			},
 			"servers": {
@@ -223,12 +224,6 @@ func resourceCouchbaseCapellaVpcClusterRead(ctx context.Context, d *schema.Resou
 	}
 
 	return nil
-}
-
-// resourceCouchbaseCapellaVpcClusterUpdate is responsible for updating a
-// vpc cluster in Couchbase Capella using the Terraform resource data.
-func resourceCouchbaseCapellaVpcClusterUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	return diag.Errorf(VpcClusterUpdateNotSupported)
 }
 
 // resourceCouchbaseCapellaVpcClusterDelete is responsible for deleting a
