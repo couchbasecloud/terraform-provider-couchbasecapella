@@ -356,9 +356,9 @@ func resourceCouchbaseCapellaHostedClusterDelete(ctx context.Context, d *schema.
 		return diag.Errorf("Cluster is not ready to be deleted. Cluster Status: %s", statusResp.Status)
 	}
 
-	r, err2 := client.ClustersV3Api.ClustersV3delete(auth, clusterId).Execute()
+	_, err2 := client.ClustersV3Api.ClustersV3delete(auth, clusterId).Execute()
 	if err2 != nil {
-		return manageErrors(err2, *r, "Hosted Cluster Delete")
+		return diag.FromErr(err2)
 	}
 
 	// Wait for the cluster to be destroyed
