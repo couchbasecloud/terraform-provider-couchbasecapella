@@ -35,6 +35,7 @@ func resourceCouchbaseCapellaDatabaseUser() *schema.Resource {
 				Description:  "ID of the Cluster",
 				Type:         schema.TypeString,
 				Required:     true,
+				ForceNew:     true,
 				ValidateFunc: validation.IsUUID,
 			},
 			"username": {

@@ -9,7 +9,7 @@ Create, edit and delete Database Users for a Couchbase Capella Cluster.
 
 `couchbasecapella_database_user` allows Database Users to be created, edited and deleted for a Couchbase Capella In-VPC Cluster. This resource requires the Cluster ID of an In-VPC Cluster.
 
-~> **WARNING:** Changing the name and/or password of an existing Database User in your terraform configuration will result in the deletion and recreation of the database user with the new name/password in your Capella cluster. Before applying your changes, Terraform will inform you that it will destroy and recreate the resources. Make sure to review these changes before typing `yes` to apply them.
+~> **WARNING:** Changing the cluster ID, name and/or password of an existing Database User in your terraform configuration will result in the deletion and recreation of the database user with the new name/password in your Capella cluster. Before applying your changes, Terraform will inform you that it will destroy and recreate the resources. Make sure to review these changes before typing `yes` to apply them.
 
 ## Example Usage
 
