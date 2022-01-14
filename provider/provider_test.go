@@ -54,6 +54,9 @@ func testAccPreCheck(t *testing.T) {
 	if err := os.Getenv("CBC_CLUSTER_ID"); err == "" {
 		t.Fatal("CBC_CLUSTER_ID must be set for acceptance tests")
 	}
+	if err := os.Getenv("CBC_CLUSTER_CIDR"); err == "" {
+		t.Fatal("CBC_CLUSTER_CIDR must be set for acceptance tests")
+	}
 	if err := os.Getenv("CBC_BUCKET_NAME"); err == "" {
 		t.Fatal("CBC_BUCKET_NAME must be set for acceptance tests")
 	}
