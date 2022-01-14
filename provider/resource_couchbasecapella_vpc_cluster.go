@@ -20,7 +20,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
-	couchbasecapella "github.com/couchbaselabs/couchbase-cloud-go-client"
+	couchbasecapella "github.com/couchbasecloud/couchbase-capella-api-go-client"
 )
 
 func resourceCouchbaseCapellaVpcCluster() *schema.Resource {
@@ -239,7 +239,7 @@ func resourceCouchbaseCapellaVpcClusterDelete(ctx context.Context, d *schema.Res
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	if statusResp.Status != couchbasecapella.CLUSTER_READY {
+	if statusResp.Status != couchbasecapella.CLUSTERSTATUS_READY {
 		return diag.Errorf("VPC Cluster is not ready to be deleted. Cluster Status: %s", statusResp.Status)
 	}
 

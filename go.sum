@@ -111,8 +111,11 @@ github.com/cncf/udpa/go v0.0.0-20200629203442-efcf912fb354/go.mod h1:WmhPx2Nbnht
 github.com/cncf/udpa/go v0.0.0-20201120205902-5459f2c99403/go.mod h1:WmhPx2Nbnhtbo57+VJT5O0JRkEi1Wbu0z5j0R8u5Hbk=
 github.com/cncf/xds/go v0.0.0-20210312221358-fbca930ec8ed/go.mod h1:eXthEFrGJvWHgFFCl3hGmgk+/aYT6PnTQLykKQRLhEs=
 github.com/cncf/xds/go v0.0.0-20210805033703-aa0b78936158/go.mod h1:eXthEFrGJvWHgFFCl3hGmgk+/aYT6PnTQLykKQRLhEs=
+github.com/couchbasecloud/couchbase-capella-api-go-client v0.0.0-20220114092813-8323dc35022e h1:toacprcWmEkYi9UaErHsKQ3eSFWX4WhFnmTVqXwOs5w=
+github.com/couchbasecloud/couchbase-capella-api-go-client v0.0.0-20220114092813-8323dc35022e/go.mod h1:03u0LWYFTdpJ0aptWx3hR03fNJM0frsSUQN0Ez3ZXMc=
 github.com/couchbaselabs/couchbase-cloud-go-client v1.0.2-0.20211201143422-2b4d1f40f66d h1:4RjL4hKYnqvQHVLmzN4NwRR+2y1rnmyCWx/RkNtdqjw=
 github.com/couchbaselabs/couchbase-cloud-go-client v1.0.2-0.20211201143422-2b4d1f40f66d/go.mod h1:7BNRWBnJJpY+jkPsHSkV4+OGSDOWN5lxnQdPOYitmN8=
+github.com/couchbaselabs/couchbase-cloud-go-client v1.4.0/go.mod h1:7BNRWBnJJpY+jkPsHSkV4+OGSDOWN5lxnQdPOYitmN8=
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=

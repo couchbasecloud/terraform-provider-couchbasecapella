@@ -16,7 +16,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 
-	couchbasecapella "github.com/couchbaselabs/couchbase-cloud-go-client"
+	couchbasecapella "github.com/couchbasecloud/couchbase-capella-api-go-client"
 )
 
 func Has(list []string, a string) bool {

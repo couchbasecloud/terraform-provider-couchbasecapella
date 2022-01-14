@@ -19,7 +19,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
-	couchbasecapella "github.com/couchbaselabs/couchbase-cloud-go-client"
+	couchbasecapella "github.com/couchbasecloud/couchbase-capella-api-go-client"
 )
 
 func resourceCouchbaseCapellaHostedCluster() *schema.Resource {
@@ -199,7 +199,7 @@ func resourceCouchbaseCapellaHostedClusterCreate(ctx context.Context, d *schema.
 	place := expandHostedPlaceSet(d.Get("place").(*schema.Set))
 
 	// force Single AZ to true if support package is Basic
-	if supportPackage.Type == couchbasecapella.V3_BASIC {
+	if supportPackage.Type == couchbasecapella.V3SUPPORTPACKAGETYPE_BASIC {
 		place.SingleAZ = true
 	}
 
@@ -359,7 +359,7 @@ func resourceCouchbaseCapellaHostedClusterDelete(ctx context.Context, d *schema.
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	if statusResp.Status != couchbasecapella.V3_HEALTHY {
+	if statusResp.Status != couchbasecapella.V3CLUSTERSTATUS_HEALTHY {
 		return diag.Errorf("Cluster is not ready to be deleted. Cluster Status: %s", statusResp.Status)
 	}
 

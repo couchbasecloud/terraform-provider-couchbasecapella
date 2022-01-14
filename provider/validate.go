@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"regexp"
 
-	couchbasecapella "github.com/couchbaselabs/couchbase-cloud-go-client"
+	couchbasecapella "github.com/couchbasecloud/couchbase-capella-api-go-client"
 )
 
 func validateBucketName(val interface{}, key string) (warns []string, errs []error) {

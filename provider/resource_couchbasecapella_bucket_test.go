@@ -15,7 +15,7 @@ import (
 	"testing"
 	"time"
 
-	couchbasecapella "github.com/couchbaselabs/couchbase-cloud-go-client"
+	couchbasecapella "github.com/couchbasecloud/couchbase-capella-api-go-client"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
