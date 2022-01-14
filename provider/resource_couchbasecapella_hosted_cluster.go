@@ -264,7 +264,14 @@ func resourceCouchbaseCapellaHostedClusterRead(ctx context.Context, d *schema.Re
 		}
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("name", cluster.Name); err != nil {
+		return diag.FromErr(err)
+	}
+	if err := d.Set("project_id", cluster.ProjectId); err != nil {
+		return diag.FromErr(err)
+	}
+	if err := d.Set("servers", flattenServers(cluster.Servers)); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -478,4 +485,33 @@ func createHostedSupportPackage(v map[string]interface{}) couchbasecapella.V3Sup
 	}
 
 	return supportPackage
+}
+
+func flattenServers(servers []couchbasecapella.V3ClusterServers) []interface{} {
+	if servers != nil {
+		servs := make([]interface{}, len(servers))
+
+		for i, server := range servers {
+			s := make(map[string]interface{})
+
+			s["size"] = server.Size
+			s["compute"] = server.Compute
+			s["services"] = server.Services
+			s["storage"] = flattenStorage(server.Storage)
+			servs[i] = s
+		}
+
+		return servs
+	}
+
+	return make([]interface{}, 0)
+}
+
+func flattenStorage(storage couchbasecapella.V3ClusterStorage) []interface{} {
+	s := make(map[string]interface{})
+	s["storage_size"] = storage.Size
+	s["iops"] = storage.IOPS
+	s["storage_type"] = storage.Type
+
+	return []interface{}{s}
 }
