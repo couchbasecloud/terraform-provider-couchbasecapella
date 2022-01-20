@@ -1,0 +1,7 @@
+cloud_id        = "CLOUD_ID"
+vpc_cluster_name    = "VPC_CLUSTER_NAME"
+hosted_cluster_name    = "HOSTED_CLUSTER_NAME"
+project_name    = "PROJECT_NAME"
+bucket_name     = "BUCKET_NAME"
+dbuser          = "USERNAME"
+dbuser_password = "PASSWORD"
