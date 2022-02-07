@@ -44,10 +44,11 @@ $ git config user.email "your.name@email.com"
 
 Once we've discussed your proposed contribution, and you're ready to implement your changes, please follow the following steps:
 
-1. Get the latest changes from upstream `git checkout main` , `git pull`.
-2. Create a branch with a name that describes the issue you filed.
-3. Make sure your implementation adheres to [Terraform Best Practices](https://www.terraform.io/plugin/sdkv2/best-practices).
-4. Please familiarise yourself with the [Terraform testing documentation](https://www.terraform.io/plugin/sdkv2/testing).
-5. Commit and push your code to your branch. When writing your commit message keep the **first line of your commit message to 50 characters** or less, followed by a blank line, followed by an **explanation of the commit wrapped to 72 characters**.
-6. Create a pull request.
-7. We will then review your pull request, and may request additional changes or merge your pull request.
+1. Fork the repository on GitHub
+2. Get the latest changes from upstream `git checkout main` , `git pull`.
+3. Create a branch with a name that describes the issue you filed.
+4. Make sure your implementation adheres to [Terraform Best Practices](https://www.terraform.io/plugin/sdkv2/best-practices).
+5. Please familiarise yourself with the [Terraform testing documentation](https://www.terraform.io/plugin/sdkv2/testing).
+6. Commit and push your code to your branch. When writing your commit message keep the **first line of your commit message to 50 characters** or less, followed by a blank line, followed by an **explanation of the commit wrapped to 72 characters**.
+7. Create a pull request.
+8. We will then review your pull request, and may request additional changes or merge your pull request.
