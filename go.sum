@@ -113,6 +113,8 @@ github.com/cncf/xds/go v0.0.0-20210312221358-fbca930ec8ed/go.mod h1:eXthEFrGJvWH
 github.com/cncf/xds/go v0.0.0-20210805033703-aa0b78936158/go.mod h1:eXthEFrGJvWHgFFCl3hGmgk+/aYT6PnTQLykKQRLhEs=
 github.com/couchbasecloud/couchbase-capella-api-go-client v0.0.0-20220114092813-8323dc35022e h1:toacprcWmEkYi9UaErHsKQ3eSFWX4WhFnmTVqXwOs5w=
 github.com/couchbasecloud/couchbase-capella-api-go-client v0.0.0-20220114092813-8323dc35022e/go.mod h1:03u0LWYFTdpJ0aptWx3hR03fNJM0frsSUQN0Ez3ZXMc=
+github.com/couchbasecloud/couchbase-capella-api-go-client v0.0.0-20220222152544-72d8ea8d2fa7 h1:WkzNRlyJYeJtDLR3yldvhQhO/LLXiMaztIbSRYsX+8o=
+github.com/couchbasecloud/couchbase-capella-api-go-client v0.0.0-20220222152544-72d8ea8d2fa7/go.mod h1:QPVzXaeaBgzUID2BBafzxFZGs1i0YdG8l0J8iseTZaY=
 github.com/couchbaselabs/couchbase-cloud-go-client v1.0.2-0.20211201143422-2b4d1f40f66d h1:4RjL4hKYnqvQHVLmzN4NwRR+2y1rnmyCWx/RkNtdqjw=
 github.com/couchbaselabs/couchbase-cloud-go-client v1.0.2-0.20211201143422-2b4d1f40f66d/go.mod h1:7BNRWBnJJpY+jkPsHSkV4+OGSDOWN5lxnQdPOYitmN8=
 github.com/couchbaselabs/couchbase-cloud-go-client v1.4.0/go.mod h1:7BNRWBnJJpY+jkPsHSkV4+OGSDOWN5lxnQdPOYitmN8=

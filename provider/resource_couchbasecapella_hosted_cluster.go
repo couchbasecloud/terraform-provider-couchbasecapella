@@ -324,7 +324,7 @@ func resourceCouchbaseCapellaHostedClusterUpdate(ctx context.Context, d *schema.
 
 		// Wait for the cluster to deploy
 		updateStateConf := &resource.StateChangeConf{
-			Pending: []string{"deploying"},
+			Pending: []string{"deploying", "scaling"},
 			Target:  []string{"healthy"},
 			Refresh: func() (interface{}, string, error) {
 				statusResp, _, err := client.ClustersV3Api.ClustersV3status(auth, clusterId).Execute()
@@ -377,8 +377,8 @@ func resourceCouchbaseCapellaHostedClusterDelete(ctx context.Context, d *schema.
 			return statusResp, string(statusResp.Status), nil
 		},
 		Timeout:    d.Timeout(schema.TimeoutDelete),
-		Delay:      5 * time.Minute,
-		MinTimeout: 5 * time.Second,
+		Delay:      2 * time.Minute,
+		MinTimeout: 30 * time.Second,
 	}
 	_, err = deleteStateConf.WaitForStateContext(ctx)
 	if err != nil {
