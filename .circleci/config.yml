@@ -1,0 +1,40 @@
+# .circleci/config.yml
+version: 2.1
+workflows:
+  build-and-publish:
+    jobs:
+      - release:
+          # Only run this job on git tag pushes
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /v[0-9]+(\.[0-9]+)*(-.*)*/
+jobs:
+  release:
+    docker:
+      - image: cimg/go:1.17
+    steps:
+      - checkout
+      - install-goreleaser-cli
+
+
+
+commands:
+  install-goreleaser-cli:
+    description: Install GoReleaser tool
+    steps:
+      - run:
+          name: Install GoReleaser tool
+          command: |
+            VERSION=1.6.3
+            CHECKSUM=de0deb5518957e98cdd9134c450279e60773ab599a6dbf82179d4307a6603b08
+            ! command -v kustomize || exit 0
+            wget "https://github.com/goreleaser/goreleaser/releases/download/v${VERSION}/goreleaser_Linux_x86_64.tar.gz"
+            echo "${CHECKSUM}" "goreleaser_Linux_x86_64.tar.gz" | sha256sum -c -
+            tar xzf "goreleaser_Linux_x86_64.tar.gz"
+            chmod +x ./goreleaser
+            sudo mv ./goreleaser /usr/local/bin/goreleaser
+            OUTPUT=$(goreleaser -v)
+            echo "${OUTPUT}" | grep -q "${VERSION}"
+  
