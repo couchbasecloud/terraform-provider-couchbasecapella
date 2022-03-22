@@ -60,4 +60,4 @@ commands:
       - run:
           name: Create Artifacts
           command: |
-            goreleaser release --rm-dist
+            goreleaser release --rm-dist --snapshot
