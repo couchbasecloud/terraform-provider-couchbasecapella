@@ -19,8 +19,7 @@ jobs:
     steps:
       - checkout
       - install-goreleaser-cli
-      - import-gpg-key
-      - create-releases
+      - import-sign-and-release
 
 
 commands:
@@ -40,7 +39,7 @@ commands:
             sudo mv ./goreleaser /usr/local/bin/goreleaser
             OUTPUT=$(goreleaser -v)
             echo "${OUTPUT}" | grep -q "${VERSION}"
-  import-gpg-key:
+  import-sign-and-release:
     description: Imports the GPG key for signing
     steps:
       - run:
@@ -54,10 +53,4 @@ commands:
             | base64 --decode --ignore-garbage \
             | gpg --batch --allow-secret-key-import --import
             gpg --keyid-format LONG --list-secret-keys
-  create-releases:
-    description: Creates Signed Release Artifacts
-    steps:
-      - run:
-          name: Create Artifacts
-          command: |
             goreleaser release --rm-dist --snapshot --debug
