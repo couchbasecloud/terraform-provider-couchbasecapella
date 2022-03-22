@@ -53,4 +53,4 @@ commands:
             | base64 --decode --ignore-garbage \
             | gpg --batch --allow-secret-key-import --import
             gpg --keyid-format LONG --list-secret-keys
-            goreleaser release --rm-dist --snapshot --debug
+            goreleaser release --rm-dist
