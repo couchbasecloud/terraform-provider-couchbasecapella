@@ -5,11 +5,13 @@ workflows:
     jobs:
       - release:
           # Only run this job on git tag pushes
-          filters:
-            branches:
-              ignore: /.*/
-            tags:
-              only: /v[0-9]+(\.[0-9]+)*(-.*)*/
+#          filters:
+#            branches:
+#              ignore: /.*/
+#            tags:
+#              only: /v[0-9]+(\.[0-9]+)*(-.*)*/
+          context:
+            - hashicorp-terraform
 jobs:
   release:
     docker:
@@ -17,7 +19,8 @@ jobs:
     steps:
       - checkout
       - install-goreleaser-cli
-
+      - import-gpg-key
+      - create-releases
 
 
 commands:
@@ -29,7 +32,7 @@ commands:
           command: |
             VERSION=1.6.3
             CHECKSUM=de0deb5518957e98cdd9134c450279e60773ab599a6dbf82179d4307a6603b08
-            ! command -v kustomize || exit 0
+            ! command -v goreleaser || exit 0
             wget "https://github.com/goreleaser/goreleaser/releases/download/v${VERSION}/goreleaser_Linux_x86_64.tar.gz"
             echo "${CHECKSUM}" "goreleaser_Linux_x86_64.tar.gz" | sha256sum -c -
             tar xzf "goreleaser_Linux_x86_64.tar.gz"
@@ -37,4 +40,24 @@ commands:
             sudo mv ./goreleaser /usr/local/bin/goreleaser
             OUTPUT=$(goreleaser -v)
             echo "${OUTPUT}" | grep -q "${VERSION}"
-  
+  import-gpg-key:
+    description: Imports the GPG key for signing
+    steps:
+      - run:
+          name: Import GPG key
+          command: |
+            GNUPGHOME="$PWD/releaser-gpg"
+            export GNUPGHOME
+            mkdir -p "$GNUPGHOME"
+            chmod 0700 "$GNUPGHOME"
+            echo "$GPG_KEY" \
+            | base64 --decode --ignore-garbage \
+            | gpg --batch --allow-secret-key-import --import
+            gpg --keyid-format LONG --list-secret-keys
+  create-releases:
+    description: Creates Signed Release Artifacts
+    steps:
+      - run:
+          name: Create Artifacts
+          command: |
+            goreleaser release --rm-dist
