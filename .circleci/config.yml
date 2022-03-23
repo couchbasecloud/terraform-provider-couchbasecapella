@@ -34,7 +34,7 @@ commands:
             ! command -v goreleaser || exit 0
             wget "https://github.com/goreleaser/goreleaser/releases/download/v${VERSION}/goreleaser_Linux_x86_64.tar.gz"
             echo "${CHECKSUM}" "goreleaser_Linux_x86_64.tar.gz" | sha256sum -c -
-            tar xzf "goreleaser_Linux_x86_64.tar.gz"
+            tar zxvf "goreleaser_Linux_x86_64.tar.gz" goreleaser
             chmod +x ./goreleaser
             sudo mv ./goreleaser /usr/local/bin/goreleaser
             OUTPUT=$(goreleaser -v)
