@@ -70,12 +70,14 @@ func resourceCouchbaseCapellaVpcCluster() *schema.Resource {
 							Type:         schema.TypeInt,
 							Description:  "Number of nodes",
 							Required:     true,
+							ForceNew:     true,
 							ValidateFunc: validateSize,
 						},
 						"services": {
 							Type:        schema.TypeList,
 							Description: "Couchbase Services",
 							Required:    true,
+							ForceNew:    true,
 							MinItems:    1,
 							Elem: &schema.Schema{
 								Type:         schema.TypeString,
@@ -86,18 +88,21 @@ func resourceCouchbaseCapellaVpcCluster() *schema.Resource {
 							Description: "Aws configuration",
 							Type:        schema.TypeSet,
 							Optional:    true,
+							ForceNew:    true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"instance_size": {
 										Description:  "Aws instance",
 										Type:         schema.TypeString,
 										Required:     true,
+										ForceNew:     true,
 										ValidateFunc: validateAwsInstance,
 									},
 									"ebs_size_gib": {
 										Description:  "Aws volume size (Gb)",
 										Type:         schema.TypeInt,
 										Required:     true,
+										ForceNew:     true,
 										ValidateFunc: validateAwsVolumeSize,
 									},
 								},
@@ -107,18 +112,21 @@ func resourceCouchbaseCapellaVpcCluster() *schema.Resource {
 							Description: "Azure configuration",
 							Type:        schema.TypeSet,
 							Optional:    true,
+							ForceNew:    true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"instance_size": {
 										Description:  "Azure instance",
 										Type:         schema.TypeString,
 										Required:     true,
+										ForceNew:     true,
 										ValidateFunc: validateAzureInstance,
 									},
 									"volume_type": {
 										Description:  "Azure volume size (Gb)",
 										Type:         schema.TypeString,
 										Required:     true,
+										ForceNew:     true,
 										ValidateFunc: validateAzureVolume,
 									},
 								},
