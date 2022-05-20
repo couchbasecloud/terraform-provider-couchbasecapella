@@ -1,0 +1,56 @@
+# .circleci/config.yml
+version: 2.1
+workflows:
+  build-and-publish:
+    jobs:
+      - release:
+          # Only run this job on git tag pushes
+#          filters:
+#            branches:
+#              ignore: /.*/
+#            tags:
+#              only: /v[0-9]+(\.[0-9]+)*(-.*)*/
+          context:
+            - hashicorp-terraform
+jobs:
+  release:
+    docker:
+      - image: cimg/go:1.17
+    steps:
+      - checkout
+      - install-goreleaser-cli
+      - import-sign-and-release
+
+
+commands:
+  install-goreleaser-cli:
+    description: Install GoReleaser tool
+    steps:
+      - run:
+          name: Install GoReleaser tool
+          command: |
+            VERSION=1.6.3
+            CHECKSUM=de0deb5518957e98cdd9134c450279e60773ab599a6dbf82179d4307a6603b08
+            ! command -v goreleaser || exit 0
+            wget "https://github.com/goreleaser/goreleaser/releases/download/v${VERSION}/goreleaser_Linux_x86_64.tar.gz"
+            echo "${CHECKSUM}" "goreleaser_Linux_x86_64.tar.gz" | sha256sum -c -
+            tar zxvf "goreleaser_Linux_x86_64.tar.gz" goreleaser
+            chmod +x ./goreleaser
+            sudo mv ./goreleaser /usr/local/bin/goreleaser
+            OUTPUT=$(goreleaser -v)
+            echo "${OUTPUT}" | grep -q "${VERSION}"
+  import-sign-and-release:
+    description: Imports the GPG key for signing
+    steps:
+      - run:
+          name: Import GPG key
+          command: |
+            GNUPGHOME="$PWD/releaser-gpg"
+            export GNUPGHOME
+            mkdir -p "$GNUPGHOME"
+            chmod 0700 "$GNUPGHOME"
+            echo "$GPG_KEY" \
+            | base64 --decode --ignore-garbage \
+            | gpg --batch --allow-secret-key-import --import
+            gpg --keyid-format LONG --list-secret-keys
+            goreleaser release --rm-dist
