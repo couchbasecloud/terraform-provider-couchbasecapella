@@ -5,11 +5,11 @@ workflows:
     jobs:
       - release:
           # Only run this job on git tag pushes
-#          filters:
-#            branches:
-#              ignore: /.*/
-#            tags:
-#              only: /v[0-9]+(\.[0-9]+)*(-.*)*/
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: ^v\d+\.\d+\.\d+$
           context:
             - hashicorp-terraform
 jobs:
@@ -43,7 +43,7 @@ commands:
     description: Imports the GPG key for signing
     steps:
       - run:
-          name: Import GPG key
+          name: Import GPG, Sign and Release
           command: |
             GNUPGHOME="$PWD/releaser-gpg"
             export GNUPGHOME
