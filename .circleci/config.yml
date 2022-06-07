@@ -5,11 +5,11 @@ workflows:
     jobs:
       - release:
           # Only run this job on git tag pushes
-          filters:
-            branches:
-              ignore: /.*/
-            tags:
-              only: ^v\d+\.\d+\.\d+$
+          # filters:
+          #   branches:
+          #     ignore: /.*/
+          #   tags:
+          #     only: ^v\d+\.\d+\.\d+$
           context:
             - hashicorp-terraform
 jobs:
