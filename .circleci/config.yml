@@ -34,7 +34,7 @@ jobs:
       - checkout
       - run:
           name: lint
-          command: golangci lint
+          command: golangci-lint run
 
 commands:
   install-goreleaser-cli:
