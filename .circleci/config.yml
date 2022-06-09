@@ -1,15 +1,19 @@
 # .circleci/config.yml
 version: 2.1
 workflows:
+  pr-checks:
+    jobs:
+      - lint
+
   build-and-publish:
     jobs:
       - release:
           # Only run this job on git tag pushes
-          # filters:
-          #   branches:
-          #     ignore: /.*/
-          #   tags:
-          #     only: ^v\d+\.\d+\.\d+$
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: ^v\d+\.\d+\.\d+$
           context:
             - hashicorp-terraform
 jobs:
@@ -22,6 +26,15 @@ jobs:
       - install-goreleaser-cli
       - import-sign-and-release
 
+  lint:
+    docker:
+    # cimg/go 1.17.11
+      - image: cimg/go@sha256:59dc04ddc9782e566e5d1901c38ed4a7410ad4f724c42d17fa8b953d7c1fdfe6
+    steps:
+      - checkout
+      - run:
+          name: lint
+          command: golangci lint
 
 commands:
   install-goreleaser-cli:
