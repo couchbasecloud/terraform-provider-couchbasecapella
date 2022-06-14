@@ -478,8 +478,7 @@ func expandHostedSupportPackageSet(supportPackage *schema.Set) couchbasecapella.
 }
 
 func createHostedSupportPackage(v map[string]interface{}) couchbasecapella.V3SupportPackage {
-	var supportPackage couchbasecapella.V3SupportPackage
-	supportPackage = couchbasecapella.V3SupportPackage{
+	supportPackage := couchbasecapella.V3SupportPackage{
 		Timezone: couchbasecapella.V3SupportPackageTimezones((v["timezone"].(string))),
 		Type:     couchbasecapella.V3SupportPackageType((v["support_package_type"].(string))),
 	}
