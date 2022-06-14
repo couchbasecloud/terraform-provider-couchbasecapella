@@ -177,8 +177,12 @@ func resourceCouchbaseCapellaBucketUpdate(ctx context.Context, d *schema.Resourc
 	}
 	for _, bucket := range buckets {
 		if bucket.Name == bucketName {
-			d.Set("conflict_resolution", bucket.ConflictResolution)
-			d.Set("memory_quota", bucket.MemoryQuota)
+			if err := d.Set("conflict_resolution", bucket.ConflictResolution); err != nil {
+				return diag.FromErr(err)
+			}
+			if err := d.Set("memory_quota", bucket.MemoryQuota); err != nil {
+				return diag.FromErr(err)
+			}
 		}
 	}
 	return diag.FromErr(fmt.Errorf(BucketHostedNotSupported))

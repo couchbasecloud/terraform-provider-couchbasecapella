@@ -1,0 +1,69 @@
+# .circleci/config.yml
+version: 2.1
+workflows:
+  pr-checks:
+    jobs:
+      - lint
+
+  build-and-publish:
+    jobs:
+      - release:
+          # Only run this job on git tag pushes
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^v\d+\.\d+\.\d+$/
+          context:
+            - hashicorp-terraform
+jobs:
+  release:
+    docker:
+    # cimg/go 1.17.11
+      - image: cimg/go@sha256:59dc04ddc9782e566e5d1901c38ed4a7410ad4f724c42d17fa8b953d7c1fdfe6
+    steps:
+      - checkout
+      - install-goreleaser-cli
+      - import-sign-and-release
+
+  lint:
+    docker:
+    # cimg/go 1.17.11
+      - image: cimg/go@sha256:59dc04ddc9782e566e5d1901c38ed4a7410ad4f724c42d17fa8b953d7c1fdfe6
+    steps:
+      - checkout
+      - run:
+          name: lint
+          command: golangci-lint run
+
+commands:
+  install-goreleaser-cli:
+    description: Install GoReleaser tool
+    steps:
+      - run:
+          name: Install GoReleaser tool
+          command: |
+            VERSION=1.9.2
+            CHECKSUM=6089679e325a4cfc1d1374710dca99cd6f1f5ae4f351ceffa460d599432963d7
+            ! command -v goreleaser || exit 0
+            wget "https://github.com/goreleaser/goreleaser/releases/download/v${VERSION}/goreleaser_Linux_x86_64.tar.gz"
+            echo "${CHECKSUM}" "goreleaser_Linux_x86_64.tar.gz" | sha256sum -c -
+            tar zxvf "goreleaser_Linux_x86_64.tar.gz" goreleaser
+            chmod +x ./goreleaser
+            sudo mv ./goreleaser /usr/local/bin/goreleaser
+            OUTPUT=$(goreleaser -v)
+            echo "${OUTPUT}" | grep -q "${VERSION}"
+  import-sign-and-release:
+    description: Imports the GPG key for signing
+    steps:
+      - run:
+          name: Import GPG, Sign and Release
+          command: |
+            GNUPGHOME="$PWD/releaser-gpg"
+            export GNUPGHOME
+            mkdir -p "$GNUPGHOME"
+            chmod 0700 "$GNUPGHOME"
+            echo "$GPG_KEY" \
+            | base64 --decode --ignore-garbage \
+            | gpg --batch --allow-secret-key-import --import
+            goreleaser release --rm-dist
