@@ -10,6 +10,7 @@ package provider
 
 import (
 	"context"
+	"os"
 
 	couchbasecapella "github.com/couchbasecloud/couchbase-capella-api-go-client"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -55,6 +56,14 @@ func Provider() *schema.Provider {
 // providerConfigure is responsible for initializing the client
 func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 	configuration := couchbasecapella.NewConfiguration()
+	if baseUrl := os.Getenv("CBC_API_URL"); baseUrl != "" {
+		configuration.Servers = couchbasecapella.ServerConfigurations{
+			{
+				URL:         baseUrl,
+				Description: "No description provided",
+			},
+		}
+	}
 	apiClient := couchbasecapella.NewAPIClient(configuration)
 	return apiClient, nil
 }
