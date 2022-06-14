@@ -119,7 +119,7 @@ func validateSupportPackageType(val interface{}, key string) (warns []string, er
 
 func validateSize(val interface{}, key string) (warns []string, errs []error) {
 	size := val.(int)
-	sizeIsValid := size >= 3 && size < 28
+	sizeIsValid := size >= 2 && size < 28
 	if !sizeIsValid {
 		errs = append(errs, fmt.Errorf(ClusterInvalidSize, size))
 	}
