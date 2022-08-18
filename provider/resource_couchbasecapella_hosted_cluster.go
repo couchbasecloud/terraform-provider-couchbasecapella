@@ -159,10 +159,9 @@ func resourceCouchbaseCapellaHostedCluster() *schema.Resource {
 										ValidateFunc: validateStorageType,
 									},
 									"iops": {
-										Description:  "IOPS",
-										Type:         schema.TypeInt,
-										Required:     true,
-										ValidateFunc: validateIops,
+										Description: "IOPS",
+										Type:        schema.TypeInt,
+										Optional:    true,
 									},
 									"storage_size": {
 										Description:  "Storage size in Gb",
@@ -194,9 +193,9 @@ func resourceCouchbaseCapellaHostedClusterCreate(ctx context.Context, d *schema.
 	environment := "hosted"
 	clusterName := d.Get("name").(string)
 	projectId := d.Get("project_id").(string)
-	servers := expandHostedServersSet(d.Get("servers").(*schema.Set))
-	supportPackage := expandHostedSupportPackageSet((d.Get("support_package")).(*schema.Set))
 	place := expandHostedPlaceSet(d.Get("place").(*schema.Set))
+	supportPackage := expandHostedSupportPackageSet((d.Get("support_package")).(*schema.Set))
+	servers := expandHostedServersSet(d.Get("servers").(*schema.Set), place.Hosted.Provider)
 
 	// force Single AZ to true if support package is Basic
 	if supportPackage.Type == couchbasecapella.V3SUPPORTPACKAGETYPE_BASIC {
@@ -315,7 +314,9 @@ func resourceCouchbaseCapellaHostedClusterUpdate(ctx context.Context, d *schema.
 
 	// Servers Update
 	if d.HasChange("servers") {
-		servers := expandHostedServersSet(d.Get("servers").(*schema.Set))
+		place := expandHostedPlaceSet(d.Get("place").(*schema.Set))
+		provider := place.Hosted.Provider
+		servers := expandHostedServersSet(d.Get("servers").(*schema.Set), provider)
 		v3UpdateClusterServersRequest := *couchbasecapella.NewV3UpdateClusterServersRequest(servers) // V3UpdateClusterServersRequest |  (optional)
 		_, err := client.ClustersV3Api.ClustersV3updateServers(auth, clusterId).V3UpdateClusterServersRequest(v3UpdateClusterServersRequest).Execute()
 		if err != nil {
@@ -370,7 +371,7 @@ func resourceCouchbaseCapellaHostedClusterDelete(ctx context.Context, d *schema.
 
 	// Wait for the cluster to be destroyed
 	deleteStateConf := &resource.StateChangeConf{
-		Pending: []string{"destroying"},
+		Pending: []string{"rebalancing", "destroying"},
 		Target:  []string{""},
 		Refresh: func() (interface{}, string, error) {
 			statusResp, _, _ := client.ClustersV3Api.ClustersV3status(auth, clusterId).Execute()
@@ -390,12 +391,12 @@ func resourceCouchbaseCapellaHostedClusterDelete(ctx context.Context, d *schema.
 
 // expandHostedServersSet is responsible for converting the servers set into
 // a slice of type V3Servers
-func expandHostedServersSet(servers *schema.Set) []couchbasecapella.V3Servers {
+func expandHostedServersSet(servers *schema.Set, provider couchbasecapella.V3Provider) []couchbasecapella.V3Servers {
 	result := make([]couchbasecapella.V3Servers, servers.Len())
 
 	for i, value := range servers.List() {
 		v := value.(map[string]interface{})
-		result[i] = createHostedServer(v)
+		result[i] = createHostedServer(v, provider)
 	}
 
 	return result
@@ -411,18 +412,28 @@ func expandHostedServiceList(services []interface{}) (res []couchbasecapella.V3C
 	return res
 }
 
-func createHostedServer(v map[string]interface{}) couchbasecapella.V3Servers {
+func createHostedServer(v map[string]interface{}, provider couchbasecapella.V3Provider) couchbasecapella.V3Servers {
 	var server couchbasecapella.V3Servers
 	for _, storages := range v["storage"].(*schema.Set).List() {
 		storage, ok := storages.(map[string]interface{})
-		if ok {
+		if ok && provider != "gcp" {
 			server = couchbasecapella.V3Servers{
 				Size:     int32(v["size"].(int)),
 				Compute:  v["compute"].(string),
 				Services: expandHostedServiceList(v["services"].([]interface{})),
 				Storage: couchbasecapella.V3ServersStorage{
 					Type: couchbasecapella.V3StorageType((storage["storage_type"].(string))),
-					IOPS: int32(storage["iops"].(int)),
+					IOPS: Int32(int32(storage["iops"].(int))),
+					Size: int32(storage["storage_size"].(int)),
+				},
+			}
+		} else if ok && provider == "gcp" {
+			server = couchbasecapella.V3Servers{
+				Size:     int32(v["size"].(int)),
+				Compute:  v["compute"].(string),
+				Services: expandHostedServiceList(v["services"].([]interface{})),
+				Storage: couchbasecapella.V3ServersStorage{
+					Type: couchbasecapella.V3StorageType((storage["storage_type"].(string))),
 					Size: int32(storage["storage_size"].(int)),
 				},
 			}
@@ -513,4 +524,8 @@ func flattenStorage(storage couchbasecapella.V3ClusterStorage) []interface{} {
 	s["storage_type"] = storage.Type
 
 	return []interface{}{s}
+}
+
+func Int32(v int32) *int32 {
+	return &v
 }
