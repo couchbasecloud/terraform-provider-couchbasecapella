@@ -3,7 +3,7 @@ module github.com/couchbasecloud/terraform-provider-couchbasecapella
 go 1.15
 
 require (
-	github.com/couchbasecloud/couchbase-capella-api-go-client v0.0.0-20220222152544-72d8ea8d2fa7
+	github.com/couchbasecloud/couchbase-capella-api-go-client v0.0.0-20220805085932-0e6b314617ba
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.8.0
 )
 
