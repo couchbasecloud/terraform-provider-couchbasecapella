@@ -159,9 +159,10 @@ func resourceCouchbaseCapellaHostedCluster() *schema.Resource {
 										ValidateFunc: validateStorageType,
 									},
 									"iops": {
-										Description: "IOPS",
-										Type:        schema.TypeInt,
-										Optional:    true,
+										Description:  "IOPS",
+										Type:         schema.TypeInt,
+										Optional:     true,
+										ValidateFunc: validateIops,
 									},
 									"storage_size": {
 										Description:  "Storage size in Gb",
