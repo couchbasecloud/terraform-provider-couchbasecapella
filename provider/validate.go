@@ -76,10 +76,51 @@ func validateClusterName(val interface{}, key string) (warns []string, errs []er
 }
 
 func validateRegion(val interface{}, key string) (warns []string, errs []error) {
+	var allowedGcpRegionsEnumValues = []string{
+		"asia-east1",
+		"asia-east2",
+		"asia-northeast1",
+		"asia-northeast2",
+		"asia-northeast3",
+		"asia-south1",
+		"asia-south2",
+		"asia-southeast1",
+		"asia-southeast2",
+		"australia-southeast1",
+		"australia-southeast2",
+		"europe-central2",
+		"europe-north1",
+		"europe-west1",
+		"europe-west2",
+		"europe-west3",
+		"europe-west4",
+		"europe-west6",
+		"europe-west8",
+		"northamerica-northeast1",
+		"northamerica-northeast2",
+		"southamerica-east1",
+		"southamerica-west1",
+		"us-east1",
+		"us-east4",
+		"us-west1",
+		"us-west2",
+		"us-west3",
+		"us-west4",
+		"us-central1",
+		"us-central2",
+	}
+
 	region := val.(string)
 	awsRegionValidation := couchbasecapella.AwsRegions(region).IsValid()
 	azureRegionValidation := couchbasecapella.AzureRegions(region).IsValid()
-	if !awsRegionValidation && !azureRegionValidation {
+	gcpRegionValidation := false
+	for _, existing := range allowedGcpRegionsEnumValues {
+		if existing == region {
+			gcpRegionValidation = true
+		}
+	}
+
+	if !awsRegionValidation && !azureRegionValidation && !gcpRegionValidation {
 		errs = append(errs, fmt.Errorf(HostedClusterInvalidRegion, region))
 	}
 	return
@@ -88,11 +129,6 @@ func validateRegion(val interface{}, key string) (warns []string, errs []error) 
 func validateProvider(val interface{}, key string) (warns []string, errs []error) {
 	provider := val.(string)
 	providerValidation := couchbasecapella.V3Provider(provider).IsValid()
-	// Temporary check for gcp provider whilst it is not yet available in Capella
-	if provider == "gcp" {
-		errs = append(errs, fmt.Errorf("GCP is not yet available in Couchbase Capella"))
-		return nil, errs
-	}
 	if !providerValidation {
 		errs = append(errs, fmt.Errorf(HostedClusterInvalidProvider, provider))
 	}
@@ -127,10 +163,52 @@ func validateSize(val interface{}, key string) (warns []string, errs []error) {
 }
 
 func validateCompute(val interface{}, key string) (warns []string, errs []error) {
+	var allowedGcpComputeEnumValues = []string{
+		"n2-standard-2",
+		"n2-standard-4",
+		"n2-standard-8",
+		"n2-standard-16",
+		"n2-standard-32",
+		"n2-standard-48",
+		"n2-standard-64",
+		"n2-standard-80",
+		"n2-highmem-2",
+		"n2-highmem-4",
+		"n2-highmem-8",
+		"n2-highmem-16",
+		"n2-highmem-32",
+		"n2-highmem-48",
+		"n2-highmem-64",
+		"n2-highmem-80",
+		"n2-highcpu-2",
+		"n2-highcpu-4",
+		"n2-highcpu-8",
+		"n2-highcpu-16",
+		"n2-highcpu-32",
+		"n2-highcpu-48",
+		"n2-highcpu-64",
+		"n2-highcpu-80",
+		"n2-custom-2-4096",
+		"n2-custom-4-8192",
+		"n2-custom-8-16384",
+		"n2-custom-16-32768",
+		"n2-custom-32-65536",
+		"n2-custom-36-73728",
+		"n2-custom-48-98304",
+		"n2-custom-72-147456",
+	}
+
 	instance := val.(string)
 	awsInstanceValidation := couchbasecapella.AwsInstances(instance).IsValid()
 	azureInstanceValidation := couchbasecapella.AzureInstances(instance).IsValid()
-	if !awsInstanceValidation && !azureInstanceValidation {
+	gcpInstanceValidation := false
+	for _, existing := range allowedGcpComputeEnumValues {
+		if existing == instance {
+			gcpInstanceValidation = true
+		}
+	}
+
+	if !awsInstanceValidation && !azureInstanceValidation && !gcpInstanceValidation {
 		errs = append(errs, fmt.Errorf(HostedClusterInvalidCompute, instance))
 	}
 	return

@@ -20,17 +20,17 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-// Test to see if a hosted cluster is created, updated and deleted successfully.
+// Test to see if an AWS hosted cluster is created, updated and deleted successfully.
 // Once the cluster has been deployed, there will be tests to check that
 // the name, support packages and server services have updated correctly.
-func TestAccCouchbaseCapellaHostedCluster(t *testing.T) {
+func TestAccCouchbaseCapellaAWSHostedCluster(t *testing.T) {
 	var (
 		cluster couchbasecapella.V3Cluster
 	)
 
 	resourceName := "couchbasecapella_hosted_cluster.test"
-	clusterName := fmt.Sprintf("testacc-hosted-%s", acctest.RandString(5))
-	updatedClusterName := fmt.Sprintf("testacc-hosted-%s", acctest.RandString(4))
+	clusterName := fmt.Sprintf("testacc-aws-hosted-%s", acctest.RandString(5))
+	updatedClusterName := fmt.Sprintf("testacc-aws-hosted-%s", acctest.RandString(4))
 	projectId := os.Getenv("CBC_PROJECT_ID")
 	cidr := os.Getenv("CBC_CLUSTER_CIDR")
 	supportPackageType := "Basic"
@@ -42,7 +42,7 @@ func TestAccCouchbaseCapellaHostedCluster(t *testing.T) {
 		CheckDestroy: testAccCheckCouchbaseCapellaHostedClusterDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCouchbaseCapellaHostedClusterConfig(clusterName, projectId, cidr, supportPackageType),
+				Config: testAccCouchbaseCapellaAWSHostedClusterConfig(clusterName, projectId, cidr, supportPackageType),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCouchbaseCapellaHostedClusterExists(resourceName, &cluster),
 					resource.TestCheckResourceAttr(resourceName, "name", clusterName),
@@ -50,7 +50,7 @@ func TestAccCouchbaseCapellaHostedCluster(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccCouchbaseCapellaHostedClusterConfig(updatedClusterName, projectId, cidr, supportPackageType),
+				Config: testAccCouchbaseCapellaAWSHostedClusterConfig(updatedClusterName, projectId, cidr, supportPackageType),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCouchbaseCapellaHostedClusterExists(resourceName, &cluster),
 					resource.TestCheckResourceAttr(resourceName, "name", updatedClusterName),
@@ -58,7 +58,7 @@ func TestAccCouchbaseCapellaHostedCluster(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccCouchbaseCapellaHostedClusterConfig(updatedClusterName, projectId, cidr, updatedSupportPackageType),
+				Config: testAccCouchbaseCapellaAWSHostedClusterConfig(updatedClusterName, projectId, cidr, updatedSupportPackageType),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCouchbaseCapellaHostedClusterExists(resourceName, &cluster),
 					resource.TestCheckResourceAttr(resourceName, "name", updatedClusterName),
@@ -66,7 +66,7 @@ func TestAccCouchbaseCapellaHostedCluster(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccCouchbaseCapellaHostedClusterConfig_withUpdatedServices(updatedClusterName, projectId, cidr, updatedSupportPackageType),
+				Config: testAccCouchbaseCapellaAWSHostedClusterConfig_withUpdatedServices(updatedClusterName, projectId, cidr, updatedSupportPackageType),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCouchbaseCapellaHostedClusterExists(resourceName, &cluster),
 					resource.TestCheckResourceAttr(resourceName, "name", updatedClusterName),
@@ -74,7 +74,7 @@ func TestAccCouchbaseCapellaHostedCluster(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccCouchbaseCapellaHostedClusterConfig(updatedClusterName, projectId, cidr, updatedSupportPackageType),
+				Config: testAccCouchbaseCapellaAWSHostedClusterConfig(updatedClusterName, projectId, cidr, updatedSupportPackageType),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCouchbaseCapellaHostedClusterExists(resourceName, &cluster),
 					resource.TestCheckResourceAttr(resourceName, "name", updatedClusterName),
@@ -85,7 +85,72 @@ func TestAccCouchbaseCapellaHostedCluster(t *testing.T) {
 	})
 }
 
-// Test to see if hosted cluster has been destroyed after Terraform Destory has been executed
+// Test to see if a GCP hosted cluster is created, updated and deleted successfully.
+// Once the cluster has been deployed, there will be tests to check that
+// the name, support packages and server services have updated correctly.
+func TestAccCouchbaseCapellaGCPHostedCluster(t *testing.T) {
+	var (
+		cluster couchbasecapella.V3Cluster
+	)
+
+	resourceName := "couchbasecapella_hosted_cluster.test"
+	clusterName := fmt.Sprintf("testacc-gcp-hosted-%s", acctest.RandString(5))
+	updatedClusterName := fmt.Sprintf("testacc-gcp-hosted-%s", acctest.RandString(4))
+	projectId := os.Getenv("CBC_PROJECT_ID")
+	cidr := os.Getenv("CBC_CLUSTER_CIDR")
+	supportPackageType := "Basic"
+	updatedSupportPackageType := "DeveloperPro"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckCouchbaseCapellaHostedClusterDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCouchbaseCapellaGCPHostedClusterConfig(clusterName, projectId, cidr, supportPackageType),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckCouchbaseCapellaHostedClusterExists(resourceName, &cluster),
+					resource.TestCheckResourceAttr(resourceName, "name", clusterName),
+					resource.TestCheckResourceAttr(resourceName, "support_package.0.support_package_type", supportPackageType),
+				),
+			},
+			{
+				Config: testAccCouchbaseCapellaGCPHostedClusterConfig(updatedClusterName, projectId, cidr, supportPackageType),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckCouchbaseCapellaHostedClusterExists(resourceName, &cluster),
+					resource.TestCheckResourceAttr(resourceName, "name", updatedClusterName),
+					resource.TestCheckResourceAttr(resourceName, "support_package.0.support_package_type", supportPackageType),
+				),
+			},
+			{
+				Config: testAccCouchbaseCapellaGCPHostedClusterConfig(updatedClusterName, projectId, cidr, updatedSupportPackageType),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckCouchbaseCapellaHostedClusterExists(resourceName, &cluster),
+					resource.TestCheckResourceAttr(resourceName, "name", updatedClusterName),
+					resource.TestCheckResourceAttr(resourceName, "support_package.0.support_package_type", updatedSupportPackageType),
+				),
+			},
+			{
+				Config: testAccCouchbaseCapellaGCPHostedClusterConfig_withUpdatedServices(updatedClusterName, projectId, cidr, updatedSupportPackageType),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckCouchbaseCapellaHostedClusterExists(resourceName, &cluster),
+					resource.TestCheckResourceAttr(resourceName, "name", updatedClusterName),
+					resource.TestCheckResourceAttr(resourceName, "support_package.0.support_package_type", updatedSupportPackageType),
+				),
+			},
+			{
+				Config: testAccCouchbaseCapellaGCPHostedClusterConfig(updatedClusterName, projectId, cidr, updatedSupportPackageType),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckCouchbaseCapellaHostedClusterExists(resourceName, &cluster),
+					resource.TestCheckResourceAttr(resourceName, "name", updatedClusterName),
+					resource.TestCheckResourceAttr(resourceName, "support_package.0.support_package_type", updatedSupportPackageType),
+				),
+			},
+		},
+	})
+}
+
+// Test to see if hosted cluster has been destroyed after Terraform Destroy has been executed
 func testAccCheckCouchbaseCapellaHostedClusterDestroy(s *terraform.State) error {
 	client := testAccProvider.Meta().(*couchbasecapella.APIClient)
 	auth := context.WithValue(
@@ -150,8 +215,8 @@ func testAccCheckCouchbaseCapellaHostedClusterExists(resourceName string, cluste
 	}
 }
 
-// This is the Terraform Configuration that will be applied for testing a hosted cluster can be created and updated
-func testAccCouchbaseCapellaHostedClusterConfig(clusterName, projectId, cidr, supportPackageType string) string {
+// This is the Terraform Configuration that will be applied for testing an AWS hosted cluster can be created and updated
+func testAccCouchbaseCapellaAWSHostedClusterConfig(clusterName, projectId, cidr, supportPackageType string) string {
 	return fmt.Sprintf(`
 	resource "couchbasecapella_hosted_cluster" "test" {
 		name        = "%s"
@@ -182,8 +247,8 @@ func testAccCouchbaseCapellaHostedClusterConfig(clusterName, projectId, cidr, su
 	`, clusterName, projectId, cidr, supportPackageType)
 }
 
-// This is the Terraform Configuration that will be applied for testing updating a hosted cluster services
-func testAccCouchbaseCapellaHostedClusterConfig_withUpdatedServices(clusterName, projectId, cidr, supportPackageType string) string {
+// This is the Terraform Configuration that will be applied for testing updating an AWS hosted cluster services
+func testAccCouchbaseCapellaAWSHostedClusterConfig_withUpdatedServices(clusterName, projectId, cidr, supportPackageType string) string {
 	return fmt.Sprintf(`
 	resource "couchbasecapella_hosted_cluster" "test" {
 		name        = "%s"
@@ -207,6 +272,68 @@ func testAccCouchbaseCapellaHostedClusterConfig_withUpdatedServices(clusterName,
 			storage {
 				storage_type = "GP3"
 				iops = "3000"
+				storage_size = "50"
+			}
+		}
+	}	
+	`, clusterName, projectId, cidr, supportPackageType)
+}
+
+// This is the Terraform Configuration that will be applied for testing a GCP hosted cluster can be created and updated
+func testAccCouchbaseCapellaGCPHostedClusterConfig(clusterName, projectId, cidr, supportPackageType string) string {
+	return fmt.Sprintf(`
+	resource "couchbasecapella_hosted_cluster" "test" {
+		name        = "%s"
+		project_id  = "%s"
+		place {
+			single_az = true
+			hosted {
+				provider = "gcp"
+				region   = "us-east1"
+				cidr     = "%s"
+			}
+		}
+		support_package {
+			timezone = "GMT"
+			support_package_type     = "%s"
+		}
+		servers {
+			size     = 3
+			compute  = "n2-standard-4"
+			services = ["data"]
+			storage {
+				storage_type = "PD-SSD"
+				storage_size = "50"
+			}
+		}
+	}	
+	`, clusterName, projectId, cidr, supportPackageType)
+}
+
+// This is the Terraform Configuration that will be applied for testing updating a GCP hosted cluster services
+func testAccCouchbaseCapellaGCPHostedClusterConfig_withUpdatedServices(clusterName, projectId, cidr, supportPackageType string) string {
+	return fmt.Sprintf(`
+	resource "couchbasecapella_hosted_cluster" "test" {
+		name        = "%s"
+		project_id  = "%s"
+		place {
+			single_az = true
+			hosted {
+				provider = "gcp"
+				region   = "us-east1"
+				cidr     = "%s"
+			}
+		}
+		support_package {
+			timezone = "GMT"
+			support_package_type     = "%s"
+		}
+		servers {
+			size     = 3
+			compute  = "n2-standard-4"
+			services = ["data", "index", "query"]
+			storage {
+				storage_type = "PD-SSD"
 				storage_size = "50"
 			}
 		}

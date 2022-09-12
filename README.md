@@ -7,36 +7,6 @@ This is the repository for the Terraform Couchbase Capella Provider which allows
 - [Terraform](https://www.terraform.io/downloads.html) >= 0.14.x
 - [Go](https://golang.org/doc/install) >= 1.14
 
-## Building The Provider
-
-1. Clone the repository
-1. Enter the repository directory
-1. Build the provider using the Go `build` command:
-
-```sh
-$ go build
-```
-
-After the provider has been built locally it must be placed in the user plugins directory so it can be discovered by the
-Terraform CLI. Please execute the following command to move the provider binary to this directory:
-
-```sh
-$ mv terraform-provider-couchbasecapella ~/.terraform.d/plugins/terraform.couchbase.com/local/couchbasecapella/1.0.0/<OS_ARCH>
-```
-
-The terraform provider is installed and can now be discovered by Terraform through the following HCL block.
-
-```hcl
-terraform {
-  required_providers {
-    couchbasecapella = {
-      source  = "terraform.couchbase.com/local/couchbasecapella"
-      version = "1.0.0"
-    }
-  }
-}
-```
-
 ## Using the provider
 
 ### Configuring Programmatic Access
@@ -60,7 +30,16 @@ $ terraform plan
 ### Example Usage
 
 ```terraform
-#Configure the Couchbase Capella Provider
+# Pull Couchbase Capella Provider from Terraform Registry
+terraform {
+  required_providers {
+    couchbasecapella = {
+      source  = "registry.terraform.io/couchbasecloud/couchbasecapella"
+    }
+  }
+}
+
+# Configure the Couchbase Capella Provider
 provider "couchbasecapella" {}
 
 # Create example project resource
@@ -108,6 +87,36 @@ Please also visit the `get_started` directory for an example configuration for p
 ## Developing the Provider
 
 If you wish to work on the provider, you'll first need [Go](http://www.golang.org) installed on your machine (see [Requirements](#requirements) above). You will also need to have access to a [Couchbase Capella](https://www.couchbase.com/products/capella) account.
+
+## Building The Provider
+
+1. Clone the repository
+1. Enter the repository directory
+1. Build the provider using the Go `build` command:
+
+```sh
+$ go build
+```
+
+After the provider has been built locally it must be placed in the user plugins directory so it can be discovered by the Terraform CLI. Please execute the following command to move the provider binary to this directory:
+
+```sh
+$ mv terraform-provider-couchbasecapella ~/.terraform.d/plugins/github.com/local/couchbasecapella/<VERSION>/<OS_ARCH>
+```
+
+The terraform provider is installed and can now be discovered by Terraform through the following HCL block.
+
+```hcl
+terraform {
+  required_providers {
+    couchbasecapella = {
+      source  = "github.com/local/couchbasecapella"
+      version = "<VERSION>"
+    }
+  }
+}
+```
+
 
 ## Testing the Provider
 
