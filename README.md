@@ -101,7 +101,7 @@ $ go build
 After the provider has been built locally it must be placed in the user plugins directory so it can be discovered by the Terraform CLI. Please execute the following command to move the provider binary to this directory:
 
 ```sh
-$ mv terraform-provider-couchbasecapella ~/.terraform.d/plugins/local/couchbasecapella/<VERSION>/<OS_ARCH>
+$ mv terraform-provider-couchbasecapella ~/.terraform.d/plugins/github.com/local/couchbasecapella/<VERSION>/<OS_ARCH>
 ```
 
 The terraform provider is installed and can now be discovered by Terraform through the following HCL block.
@@ -110,7 +110,7 @@ The terraform provider is installed and can now be discovered by Terraform throu
 terraform {
   required_providers {
     couchbasecapella = {
-      source  = "local/couchbasecapella"
+      source  = "github.com/local/couchbasecapella"
       version = "<VERSION>"
     }
   }
