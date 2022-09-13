@@ -34,3 +34,6 @@ override.tf.json
 # Ignore Release components
 goreleaser*
 releaser*
+
+# Build files
+terraform-provider-*

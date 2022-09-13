@@ -24,7 +24,6 @@ Usage (prefix the export commands with a space to avoid the keys being recorded 
 ```shell
 $  export CBC_ACCESS_KEY="xxxx"
 $  export CBC_SECRET_KEY="xxxx"
-$ terraform plan
 ```
 
 ### Example Usage
@@ -34,7 +33,8 @@ $ terraform plan
 terraform {
   required_providers {
     couchbasecapella = {
-      source  = "registry.terraform.io/couchbasecloud/couchbasecapella"
+      source  = "couchbasecloud/couchbasecapella"
+      version = "<version>"
     }
   }
 }
@@ -95,13 +95,13 @@ If you wish to work on the provider, you'll first need [Go](http://www.golang.or
 1. Build the provider using the Go `build` command:
 
 ```sh
-$ go build
+$ make build
 ```
 
 After the provider has been built locally it must be placed in the user plugins directory so it can be discovered by the Terraform CLI. Please execute the following command to move the provider binary to this directory:
 
 ```sh
-$ mv terraform-provider-couchbasecapella ~/.terraform.d/plugins/github.com/local/couchbasecapella/<VERSION>/<OS_ARCH>
+$ make install
 ```
 
 The terraform provider is installed and can now be discovered by Terraform through the following HCL block.
@@ -110,13 +110,12 @@ The terraform provider is installed and can now be discovered by Terraform throu
 terraform {
   required_providers {
     couchbasecapella = {
-      source  = "github.com/local/couchbasecapella"
-      version = "<VERSION>"
+      source  = "github.com/couchbasecloud/couchbasecapella"
+      version = "0.1.0"
     }
   }
 }
 ```
-
 
 ## Testing the Provider
 
