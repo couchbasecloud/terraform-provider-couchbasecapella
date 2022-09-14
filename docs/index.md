@@ -19,27 +19,28 @@ for your access and secret API Key Pair respectively.
 Usage (prefix the export commands with a space to avoid the keys being recorded in OS history):
 
 ```shell
-$  export CBC_ACCESS_KEY="xxxx"
-$  export CBC_SECRET_KEY="xxxx"
+$ export CBC_ACCESS_KEY="xxxx"
+$ export CBC_SECRET_KEY="xxxx"
 $ terraform plan
 ```
 
 ## Example Usage
 
-```terraform
+```hcl
 terraform {
   required_providers {
     couchbasecapella = {
-      source  = "terraform.couchbase.com/local/couchbasecapella"
-      version = "1.0.0"
+      source  = "couchbasecloud/couchbasecapella"
+      version = "<version>"
     }
   }
 }
 
-#Configure the Couchbase Capella Provider
+# Configure the Couchbase Capella provider.
+# The authentication is done via the environment variables CBC_ACCESS_KEY and CBC_SECRET_KEY.
 provider "couchbasecapella" {}
 
-#Create a hosted cluster
+# Create a hosted cluster.
 resource "couchbasecapella_hosted_cluster" "test" {
   name        = "cluster_name"
   project_id  = "your_project_id"
