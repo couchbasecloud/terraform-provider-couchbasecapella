@@ -32,7 +32,7 @@ const (
 	VpcClusterServerDoesNotMatchProvider string = "cluster's server should be the same as the cloud provider"
 
 	ClusterInvalidName             string = "cluster name can include letters, numbers, spaces, periods (.), dashes (-), and underscores (_). Cluster name should be between 2 and 128 characters and must begin with a letter or a number"
-	ClusterInvalidSize             string = "expected a value between 3 and 27, got %v"
+	ClusterInvalidSize             string = "expected a value between 2 and 27, got %v"
 	ClusterInvalidCouchbaseService string = "expected a valid value for service {data, index, query, search, eventing, analytics}, got %s"
 	ClusterInvalidStorageType      string = "expected a valid value for storage type {GP3, IO2}, got %s"
 	ClusterProblemAccessing        string = "a problem occurred while accessing the cluster"
