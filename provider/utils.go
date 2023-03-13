@@ -10,6 +10,7 @@ package provider
 
 import (
 	"context"
+	"io"
 	"net/http"
 	"os"
 	"regexp"
@@ -52,6 +53,9 @@ func manageErrors(err error, r http.Response, functionality string) diag.Diagnos
 			return diag.Errorf("You don't have the required access to apply this function " + functionality)
 		case 401:
 			return diag.Errorf("Please verify the validity of your Access key and Secret key")
+		case 422:
+			body, _ := io.ReadAll(r.Body)
+			return diag.Errorf("Failed to create resource; API response: \n%s", body)
 		default:
 			return diag.FromErr(err)
 		}
