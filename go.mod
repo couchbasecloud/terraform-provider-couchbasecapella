@@ -8,7 +8,6 @@ require (
 )
 
 require (
-	cloud.google.com/go/storage v1.18.2 // indirect
 	github.com/agext/levenshtein v1.2.3 // indirect
 	github.com/apparentlymart/go-cidr v1.1.0 // indirect
 	github.com/aws/aws-sdk-go v1.41.10 // indirect
@@ -30,8 +29,5 @@ require (
 	github.com/mitchellh/mapstructure v1.4.2 // indirect
 	github.com/oklog/run v1.1.0 // indirect
 	github.com/ulikunitz/xz v0.5.10 // indirect
-	google.golang.org/api v0.59.0 // indirect
-	google.golang.org/genproto v0.0.0-20211021150943-2b146023228c // indirect
-	google.golang.org/grpc v1.41.0 // indirect
-	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
+	google.golang.org/grpc v1.53.0 // indirect
 )
