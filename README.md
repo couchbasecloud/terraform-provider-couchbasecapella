@@ -1,3 +1,7 @@
+## ⛔ [UNSUPPORTED]: This repository is no longer maintained by Couchbase.  Please refer to https://github.com/couchbasecloud/terraform-provider-couchbase-capella for latest supported version of Capella Terraform Provider
+
+---
+
 # Couchbase Capella Provider
 
 This is the repository for the Terraform Couchbase Capella Provider which allows you to use Terraform with Couchbase Capella.
