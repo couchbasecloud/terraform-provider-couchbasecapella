@@ -1,4 +1,4 @@
-## [DEPRECATED]: This repo has been deprecated and please refer to the latest repo: https://github.com/couchbasecloud/terraform-provider-couchbase-capella
+## ⛔ [DEPRECATED]: This repo has been deprecated and please refer to the latest repo: https://github.com/couchbasecloud/terraform-provider-couchbase-capella
 
 ---
 
