@@ -1,4 +1,4 @@
-## ⛔ [DEPRECATED]: This repo has been deprecated. Please refer to the latest repo: https://github.com/couchbasecloud/terraform-provider-couchbase-capella
+## ⛔ [UNSUPPORTED]: This repository is no longer maintained by Couchbase.  Please refer to https://github.com/couchbasecloud/terraform-provider-couchbase-capella for latest supported version of Capella Terraform Provider
 
 ---
 
