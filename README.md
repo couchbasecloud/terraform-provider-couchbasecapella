@@ -1,3 +1,7 @@
+## [DEPRECATED]: This repo has been deprecated and please refer to the latest repo: https://github.com/couchbasecloud/terraform-provider-couchbase-capella
+
+---
+
 # Couchbase Capella Provider
 
 This is the repository for the Terraform Couchbase Capella Provider which allows you to use Terraform with Couchbase Capella.
